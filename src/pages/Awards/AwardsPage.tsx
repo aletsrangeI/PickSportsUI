@@ -203,7 +203,20 @@ export const AwardsPage: React.FC = () => {
                       <>
                         <div className="awards-card__avatar">
                           {award.avatarUrl ? (
-                            <img src={award.avatarUrl} alt={award.memberAlias} />
+                            <>
+                              <img
+                                src={award.avatarUrl}
+                                alt={award.memberAlias}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                  const fallback = e.currentTarget.parentElement?.querySelector('.awards-card__avatar-fallback') as HTMLElement;
+                                  if (fallback) fallback.style.display = 'flex';
+                                }}
+                              />
+                              <span className="awards-card__avatar-fallback" style={{ display: 'none' }}>
+                                {award.memberAlias.slice(0, 2).toUpperCase()}
+                              </span>
+                            </>
                           ) : (
                             <span>{award.memberAlias.slice(0, 2).toUpperCase()}</span>
                           )}

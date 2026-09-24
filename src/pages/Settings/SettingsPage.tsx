@@ -479,11 +479,23 @@ export const SettingsPage: React.FC = () => {
                 {previewUrl ? (
                   <img src={previewUrl} alt="Vista previa" className="avatar-modal__preview-img" />
                 ) : user?.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.displayName || user.username}
-                    className="avatar-modal__preview-img"
-                  />
+                  <>
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.displayName || user.username}
+                      className="avatar-modal__preview-img"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.parentElement?.querySelector(
+                          '.avatar-modal__preview-fallback'
+                        ) as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <span className="avatar-modal__preview-fallback" style={{ display: 'none' }}>
+                      {userInitial}
+                    </span>
+                  </>
                 ) : (
                   <span className="avatar-modal__preview-fallback">{userInitial}</span>
                 )}

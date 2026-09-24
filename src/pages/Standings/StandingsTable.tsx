@@ -41,7 +41,20 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
             <div className="standings-table__member">
               <div className="standings-table__avatar">
                 {member.avatarUrl ? (
-                  <img src={member.avatarUrl} alt={member.alias} />
+                  <>
+                    <img
+                      src={member.avatarUrl}
+                      alt={member.alias}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.parentElement?.querySelector('.standings-table__avatar-fallback') as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    <span className="standings-table__avatar-fallback" style={{ display: 'none' }}>
+                      {member.alias.slice(0, 2).toUpperCase()}
+                    </span>
+                  </>
                 ) : (
                   <span>{member.alias.slice(0, 2).toUpperCase()}</span>
                 )}
