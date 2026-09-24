@@ -24,6 +24,11 @@ export const SettingsPage: React.FC = () => {
   const { data: quinielasResponse } = useGetQuinielasQuery();
   const activeQuiniela = quinielasResponse?.data?.find(q => q.id === activeQuinielaId);
 
+  const allQuinielas = quinielasResponse?.data || [];
+  const isOwner =
+    activeQuiniela?.userRole === 'OWNER' ||
+    user?.role?.toUpperCase() === 'OWNER' ||
+    allQuinielas.some(q => q.userRole === 'OWNER');
   const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
 
   const handleLogout = () => {
@@ -59,6 +64,12 @@ export const SettingsPage: React.FC = () => {
                   ADMIN
                 </span>
               )}
+              {!isAdmin && isOwner && (
+                <span className="badge badge--admin">
+                  <ShieldCheck size={13} />
+                  OWNER
+                </span>
+              )}
             </div>
             <p className="settings-profile__username">@{user?.username}</p>
             <p className="settings-profile__email">{user?.email}</p>
@@ -73,16 +84,15 @@ export const SettingsPage: React.FC = () => {
         )}
       </div>
 
-      {/* Sección exclusiva para Administradores */}
-      {isAdmin && (
-        <div className="settings-section">
-          <div className="settings-section__header">
-            <div className="settings-section__title-row">
-              <Sparkles size={18} className="text-primary" />
-              <h3 className="settings-section__title">Herramientas de Administración</h3>
-            </div>
-            <span className="settings-section__badge">Acceso Exclusivo</span>
+      {/* Sección para Administradores y Owners */}
+      <div className="settings-section">
+        <div className="settings-section__header">
+          <div className="settings-section__title-row">
+            <Sparkles size={18} className="text-primary" />
+            <h3 className="settings-section__title">Herramientas de Quiniela & Administración</h3>
           </div>
+          <span className="settings-section__badge">Owner / Admin</span>
+        </div>
 
           <div className="settings-grid">
             {/* Tarjeta de Migración XLSX */}
@@ -117,7 +127,6 @@ export const SettingsPage: React.FC = () => {
             </Link>
           </div>
         </div>
-      )}
 
       {/* Acciones de Cuenta */}
       <div className="settings-section">

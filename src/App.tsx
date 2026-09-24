@@ -22,10 +22,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const user = useSelector((state: RootState) => state.auth.user);
-  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
 };

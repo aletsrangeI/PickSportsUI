@@ -80,17 +80,15 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
               >
                 Premios
               </NavLink>
-              {user?.role?.toUpperCase() === 'ADMIN' && (
-                <NavLink
-                  to="/admin/migracion"
-                  className={({ isActive }) =>
-                    `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
-                  }
-                >
-                  <FileSpreadsheet size={15} />
-                  <span>Migración XLSX</span>
-                </NavLink>
-              )}
+              <NavLink
+                to="/admin/migracion"
+                className={({ isActive }) =>
+                  `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+                }
+              >
+                <FileSpreadsheet size={15} />
+                <span>Migración XLSX</span>
+              </NavLink>
             </nav>
           )}
         </div>
