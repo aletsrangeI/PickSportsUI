@@ -97,9 +97,35 @@ jobs:
           set -e
           cd /opt/picksports
           docker compose pull ui
-          echo ">> Liberando contenedor previo de ui..."
-          docker compose stop ui || true
-          docker compose rm -f ui || true
+          
+          echo ">> === DIAGNÓSTICO PREVIO DE PUERTO 8082 ==="
+          ss -tulpn | grep 8082 || echo ">> (ss) Ningún socket estándar detectado en 8082"
+          docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}\t{{.Status}}'
+
+          echo ">> Liberando puerto 8082 y removiendo contenedor ui previo..."
+          docker compose stop ui 2>/dev/null || true
+          docker rm -f picksports-ui 2>/dev/null || true
+          
+          # 1. Si cualquier otro contenedor Docker tiene mapeado el puerto 8082
+          CONTAINER_8082=$(docker ps -q --filter "publish=8082")
+          if [ -n "$CONTAINER_8082" ]; then
+            echo ">> Deteniendo contenedor que ocupa 8082: $CONTAINER_8082"
+            docker stop $CONTAINER_8082 2>/dev/null || true
+            docker rm -f $CONTAINER_8082 2>/dev/null || true
+          fi
+
+          # 2. Si un docker-proxy huérfano retiene el puerto 8082
+          pkill -9 -f "docker-proxy.*8082" 2>/dev/null || sudo pkill -9 -f "docker-proxy.*8082" 2>/dev/null || true
+
+          # 3. Si un proceso host o fuser está disponible
+          if command -v fuser >/dev/null 2>&1; then
+            fuser -k -9 8082/tcp 2>/dev/null || sudo fuser -k -9 8082/tcp 2>/dev/null || true
+          fi
+
+          sleep 2
+          echo ">> Estado del puerto 8082 tras limpieza:"
+          ss -tulpn | grep 8082 || echo ">> Puerto 8082 libre."
+
           docker compose up -d --no-deps --remove-orphans ui
           docker ps --filter "name=picksports"
           echo ">> Contenedor picksports-ui desplegado exitosamente."
