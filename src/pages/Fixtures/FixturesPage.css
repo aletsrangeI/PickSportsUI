@@ -77,6 +77,19 @@
   margin-left: auto;
 }
 
+.fixtures-spin {
+  animation: fixtures-spin 1s linear infinite;
+}
+
+@keyframes fixtures-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ─── Postponed alert ────────────────────────────────────────────────────── */
 .fixtures-page__postponed-alert {
   display: flex;

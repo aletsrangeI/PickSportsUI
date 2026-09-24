@@ -14,7 +14,7 @@ import {
 } from '../../services/api';
 import { MatchCard } from '../../components/matches/MatchCard';
 import { ApiHealthBadge } from '../../components/admin/ApiHealthBadge';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RotateCw, DownloadCloud, FileJson } from 'lucide-react';
 import './FixturesPage.css';
 
 type ToastType = 'success' | 'warning' | 'error';
@@ -28,10 +28,18 @@ export const FixturesPage: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
   // ─── Active Quiniela & Leagues ──────────────────────────────────────────────
+  const { user } = useSelector((state: RootState) => state.auth);
   const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
   const { data: quinielasResponse } = useGetQuinielasQuery();
   const quinielas = quinielasResponse?.data || [];
   const activeQuiniela = quinielas.find((q) => q.id === activeQuinielaId);
+
+  const isOwnerOrAdmin =
+    user?.role?.toUpperCase() === 'ADMIN' ||
+    user?.role?.toUpperCase() === 'OWNER' ||
+    activeQuiniela?.userRole === 'OWNER' ||
+    activeQuiniela?.userRole === 'ADMIN' ||
+    quinielas.some((q) => q.userRole === 'OWNER' || q.userRole === 'ADMIN');
 
   const { data: leaguesResponse } = useGetLeaguesQuery();
   const leagues = leaguesResponse?.data ?? [];
@@ -187,7 +195,9 @@ export const FixturesPage: React.FC = () => {
               : 'Selecciona una jornada'}
           </p>
         </div>
-        <ApiHealthBadge onContingencyClick={() => setShowImportModal(true)} />
+        {isOwnerOrAdmin && (
+          <ApiHealthBadge onContingencyClick={() => setShowImportModal(true)} />
+        )}
       </div>
 
       {/* Controles */}
@@ -223,7 +233,7 @@ export const FixturesPage: React.FC = () => {
         <div className="fixtures-page__selector-group">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
             <label className="fixtures-page__label">Temporada</label>
-            {isLigaMx && !hasApertura && (
+            {isOwnerOrAdmin && isLigaMx && !hasApertura && (
               <button
                 type="button"
                 className="btn btn--outline btn--sm"
@@ -241,7 +251,7 @@ export const FixturesPage: React.FC = () => {
             ) : (
               seasons.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name} {s.isFinished ? '— (Concluido)' : s.isCurrent ? '★ (En Curso)' : ''}
+                  {s.name} {s.isFinished ? '— (Concluido)' : s.isCurrent ? '(En Curso)' : ''}
                 </option>
               ))
             )}
@@ -249,7 +259,6 @@ export const FixturesPage: React.FC = () => {
         </div>
 
         {/* Selector de Jornada */}
-
         <div className="fixtures-page__selector-group">
           <label className="fixtures-page__label">Jornada</label>
           <select
@@ -259,40 +268,45 @@ export const FixturesPage: React.FC = () => {
           >
             {weeks.map((w) => (
               <option key={w.id} value={w.id}>
-                {w.name}{w.postponedCount > 0 ? ` ⚠ ${w.postponedCount}` : ''}
+                {w.name}{w.postponedCount > 0 ? ` (${w.postponedCount} pospuestos)` : ''}
               </option>
             ))}
           </select>
         </div>
 
-        <div className="fixtures-page__actions">
-          <button
-            type="button"
-            className="btn btn--outline btn--sm"
-            onClick={handleSyncWeek}
-            disabled={!selectedWeekId || syncingWeek}
-          >
-            {syncingWeek ? 'Sincronizando...' : '↻ Sync Jornada'}
-          </button>
+        {isOwnerOrAdmin && (
+          <div className="fixtures-page__actions">
+            <button
+              type="button"
+              className="btn btn--outline btn--sm"
+              onClick={handleSyncWeek}
+              disabled={!selectedWeekId || syncingWeek}
+            >
+              <RotateCw size={14} className={syncingWeek ? 'fixtures-spin' : ''} style={{ marginRight: '6px' }} />
+              {syncingWeek ? 'Sincronizando...' : 'Sync Jornada'}
+            </button>
 
-          <button
-            type="button"
-            className="btn btn--primary btn--sm"
-            onClick={handleSyncFull}
-            disabled={!selectedSeasonId || syncingFull}
-          >
-            {syncingFull ? 'Cargando temporada...' : '⬇ Cargar Temporada Completa'}
-          </button>
+            <button
+              type="button"
+              className="btn btn--primary btn--sm"
+              onClick={handleSyncFull}
+              disabled={!selectedSeasonId || syncingFull}
+            >
+              <DownloadCloud size={14} style={{ marginRight: '6px' }} />
+              {syncingFull ? 'Cargando temporada...' : 'Cargar Temporada Completa'}
+            </button>
 
-          <button
-            type="button"
-            className="btn btn--outline btn--sm"
-            onClick={() => setShowImportModal(true)}
-            title="Pegar JSON copiado del navegador"
-          >
-            📋 Importar JSON
-          </button>
-        </div>
+            <button
+              type="button"
+              className="btn btn--outline btn--sm"
+              onClick={() => setShowImportModal(true)}
+              title="Pegar JSON copiado del navegador"
+            >
+              <FileJson size={14} style={{ marginRight: '6px' }} />
+              Importar JSON
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Colchón de seguridad / Aviso de torneo concluido */}
@@ -338,7 +352,7 @@ export const FixturesPage: React.FC = () => {
       {/* Aviso de partidos pospuestos */}
       {hasPostponed && (
         <div className="fixtures-page__postponed-alert">
-          <span>⚠</span>
+          <AlertCircle size={18} color="#f59e0b" style={{ flexShrink: 0, marginTop: '2px' }} />
           <span>
             Esta jornada tiene <strong>{postponedCount} partido{postponedCount > 1 ? 's' : ''} pospuesto{postponedCount > 1 ? 's' : ''}</strong>.
             {' '}Estos partidos <strong>no cuentan como empate</strong> y serán evaluados cuando se jueguen.
@@ -352,10 +366,14 @@ export const FixturesPage: React.FC = () => {
       ) : matches.length === 0 ? (
         <div className="fixtures-page__empty">
           <p>No hay partidos en esta jornada.</p>
-          <p>
-            Usa <strong>↻ Sync Jornada</strong> o <strong>⬇ Cargar Temporada Completa</strong> para
-            obtener los partidos desde ESPN.
-          </p>
+          {isOwnerOrAdmin ? (
+            <p>
+              Usa <strong>Sync Jornada</strong> o <strong>Cargar Temporada Completa</strong> para
+              obtener los partidos desde ESPN.
+            </p>
+          ) : (
+            <p>Los partidos de esta jornada aún no han sido sincronizados.</p>
+          )}
         </div>
       ) : (
         <div className="fixtures-page__grid">

@@ -1,9 +1,25 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Calendar, Trophy, Award, Share2, Settings, CalendarDays } from 'lucide-react';
+import type { RootState } from '../../store';
+import { useGetQuinielasQuery } from '../../services/api';
 import './BottomNav.css';
 
 export const BottomNav: React.FC = () => {
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
+  const { data: quinielasResponse } = useGetQuinielasQuery(undefined, { skip: !isAuthenticated });
+  const quinielas = quinielasResponse?.data || [];
+  const activeQuiniela = quinielas.find((q) => q.id === activeQuinielaId);
+
+  const isOwnerOrAdmin =
+    user?.role?.toUpperCase() === 'ADMIN' ||
+    user?.role?.toUpperCase() === 'OWNER' ||
+    activeQuiniela?.userRole === 'OWNER' ||
+    activeQuiniela?.userRole === 'ADMIN' ||
+    quinielas.some((q) => q.userRole === 'OWNER' || q.userRole === 'ADMIN');
+
   return (
     <nav className="bottom-nav">
       <ul className="bottom-nav__list">
@@ -52,17 +68,19 @@ export const BottomNav: React.FC = () => {
             <span>Premios</span>
           </NavLink>
         </li>
-        <li className="bottom-nav__item">
-          <NavLink
-            to="/share"
-            className={({ isActive }) =>
-              `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
-            }
-          >
-            <Share2 size={20} />
-            <span>WhatsApp</span>
-          </NavLink>
-        </li>
+        {isOwnerOrAdmin && (
+          <li className="bottom-nav__item">
+            <NavLink
+              to="/share"
+              className={({ isActive }) =>
+                `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
+              }
+            >
+              <Share2 size={20} />
+              <span>WhatsApp</span>
+            </NavLink>
+          </li>
+        )}
         <li className="bottom-nav__item">
           <NavLink
             to="/settings"

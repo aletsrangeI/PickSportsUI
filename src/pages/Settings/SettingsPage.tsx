@@ -33,6 +33,11 @@ export const SettingsPage: React.FC = () => {
     user?.role?.toUpperCase() === 'OWNER' ||
     allQuinielas.some(q => q.userRole === 'OWNER');
   const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
+  const isOwnerOrAdmin =
+    isAdmin ||
+    isOwner ||
+    activeQuiniela?.userRole === 'ADMIN' ||
+    allQuinielas.some(q => q.userRole === 'ADMIN');
 
   const handleLogout = () => {
     dispatch(logout());
@@ -88,14 +93,15 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Sección para Administradores y Owners */}
-      <div className="settings-section">
-        <div className="settings-section__header">
-          <div className="settings-section__title-row">
-            <Sparkles size={18} className="text-primary" />
-            <h3 className="settings-section__title">Herramientas de Quiniela & Administración</h3>
+      {isOwnerOrAdmin && (
+        <div className="settings-section">
+          <div className="settings-section__header">
+            <div className="settings-section__title-row">
+              <Sparkles size={18} className="text-primary" />
+              <h3 className="settings-section__title">Herramientas de Quiniela & Administración</h3>
+            </div>
+            <span className="settings-section__badge">Owner / Admin</span>
           </div>
-          <span className="settings-section__badge">Owner / Admin</span>
-        </div>
 
           <div className="settings-grid">
             {/* Tarjeta de Migración XLSX */}
@@ -156,6 +162,7 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
 
       {/* Acciones de Cuenta */}
       <div className="settings-section">

@@ -4,6 +4,7 @@ import { useNavigate, Link, NavLink } from 'react-router-dom';
 import { Flame, LogOut, Plus, UserPlus, CalendarDays, FileSpreadsheet } from 'lucide-react';
 import type { RootState } from '../../store';
 import { logout } from '../../store/authSlice';
+import { useGetQuinielasQuery } from '../../services/api';
 import { QuinielaSelector } from '../quiniela/QuinielaSelector';
 import './Header.css';
 
@@ -16,6 +17,17 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
+  const { data: quinielasResponse } = useGetQuinielasQuery(undefined, { skip: !isAuthenticated });
+  const quinielas = quinielasResponse?.data || [];
+  const activeQuiniela = quinielas.find((q) => q.id === activeQuinielaId);
+
+  const isOwnerOrAdmin =
+    user?.role?.toUpperCase() === 'ADMIN' ||
+    user?.role?.toUpperCase() === 'OWNER' ||
+    activeQuiniela?.userRole === 'OWNER' ||
+    activeQuiniela?.userRole === 'ADMIN' ||
+    quinielas.some((q) => q.userRole === 'OWNER' || q.userRole === 'ADMIN');
 
   const handleLogout = () => {
     dispatch(logout());
@@ -62,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
                 }
               >
                 <CalendarDays size={15} />
-                <span>Partidos / Sync</span>
+                <span>Partidos</span>
               </NavLink>
               <NavLink
                 to="/standings"
@@ -80,15 +92,17 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
               >
                 Premios
               </NavLink>
-              <NavLink
-                to="/admin/migracion"
-                className={({ isActive }) =>
-                  `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
-                }
-              >
-                <FileSpreadsheet size={15} />
-                <span>Migración XLSX</span>
-              </NavLink>
+              {isOwnerOrAdmin && (
+                <NavLink
+                  to="/admin/migracion"
+                  className={({ isActive }) =>
+                    `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+                  }
+                >
+                  <FileSpreadsheet size={15} />
+                  <span>Migración XLSX</span>
+                </NavLink>
+              )}
             </nav>
           )}
         </div>

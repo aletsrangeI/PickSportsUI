@@ -14,6 +14,8 @@ import { MigrationPage } from './pages/Admin/MigrationPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 import { ActivatePage } from './pages/Auth/ActivatePage';
 
+import { useGetQuinielasQuery } from './services/api';
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   if (!isAuthenticated) {
@@ -22,11 +24,28 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
-const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+const OwnerOrAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
+  const { data: quinielasResponse } = useGetQuinielasQuery(undefined, { skip: !isAuthenticated });
+  const quinielas = quinielasResponse?.data || [];
+  const activeQuiniela = quinielas.find((q) => q.id === activeQuinielaId);
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+
+  const isOwnerOrAdmin =
+    user?.role?.toUpperCase() === 'ADMIN' ||
+    user?.role?.toUpperCase() === 'OWNER' ||
+    activeQuiniela?.userRole === 'OWNER' ||
+    activeQuiniela?.userRole === 'ADMIN' ||
+    quinielas.some((q) => q.userRole === 'OWNER' || q.userRole === 'ADMIN');
+
+  if (!isOwnerOrAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
   return <>{children}</>;
 };
 
@@ -74,15 +93,22 @@ export const App: React.FC = () => {
           <Route index element={<DashboardPage />} />
           <Route path="standings" element={<StandingsPage />} />
           <Route path="awards" element={<AwardsPage />} />
-          <Route path="share" element={<WhatsAppPage />} />
+          <Route
+            path="share"
+            element={
+              <OwnerOrAdminRoute>
+                <WhatsAppPage />
+              </OwnerOrAdminRoute>
+            }
+          />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="fixtures" element={<FixturesPage />} />
           <Route
             path="admin/migracion"
             element={
-              <AdminRoute>
+              <OwnerOrAdminRoute>
                 <MigrationPage />
-              </AdminRoute>
+              </OwnerOrAdminRoute>
             }
           />
         </Route>
