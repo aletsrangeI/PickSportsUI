@@ -110,6 +110,23 @@ export const api = createApi({
       invalidatesTags: ['Auth', 'Quinielas', 'QuinielaDetail', 'Standings'],
     }),
 
+    uploadAvatar: builder.mutation<ApiResponse<UserProfile>, FormData>({
+      query: (formData) => ({
+        url: '/auth/avatar',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: ['Auth', 'QuinielaDetail', 'Standings', 'Awards', 'Picks'],
+    }),
+
+    removeAvatar: builder.mutation<ApiResponse<UserProfile>, void>({
+      query: () => ({
+        url: '/auth/avatar',
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Auth', 'QuinielaDetail', 'Standings', 'Awards', 'Picks'],
+    }),
+
     // ─── Quinielas ───────────────────────────────────────────────────────────
     getQuinielas: builder.query<ApiResponse<Quiniela[]>, void>({
       query: () => '/quinielas',
@@ -407,6 +424,8 @@ export const {
   useGetUnclaimedMembersQuery,
   useLazyGetUnclaimedMembersQuery,
   useLinkCurrentUserMutation,
+  useUploadAvatarMutation,
+  useRemoveAvatarMutation,
   useGetLeaguesQuery,
   useGetQuinielasQuery,
   useGetQuinielaByIdQuery,

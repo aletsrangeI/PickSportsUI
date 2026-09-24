@@ -71,15 +71,39 @@ export const PicksMatrix: React.FC<PicksMatrixProps> = ({
                 <tr key={member.memberId} className={rowClass}>
                   <td className="picks-matrix__td picks-matrix__td--member">
                     <div className="picks-matrix__member-info">
-                      <span className="picks-matrix__member-alias">
-                        {member.alias}
-                        {isCurrentUser && <span className="picks-matrix__you-tag">(Tú)</span>}
-                      </span>
-                      {member.role === 'OWNER' && (
-                        <span className="badge badge--accent picks-matrix__role-badge">
-                          <Shield size={10} /> Creador
+                      <div className="picks-matrix__member-avatar">
+                        {member.avatarUrl ? (
+                          <img
+                            src={member.avatarUrl}
+                            alt={member.alias}
+                            className="picks-matrix__member-avatar-img"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              const fallback = e.currentTarget.parentElement?.querySelector(
+                                '.picks-matrix__member-avatar-fallback'
+                              ) as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <span
+                          className="picks-matrix__member-avatar-fallback"
+                          style={{ display: member.avatarUrl ? 'none' : 'flex' }}
+                        >
+                          {member.alias.slice(0, 2).toUpperCase()}
                         </span>
-                      )}
+                      </div>
+                      <div className="picks-matrix__member-details">
+                        <span className="picks-matrix__member-alias">
+                          {member.alias}
+                          {isCurrentUser && <span className="picks-matrix__you-tag">(Tú)</span>}
+                        </span>
+                        {member.role === 'OWNER' && (
+                          <span className="badge badge--accent picks-matrix__role-badge">
+                            <Shield size={10} /> Creador
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="picks-matrix__td picks-matrix__td--hits">

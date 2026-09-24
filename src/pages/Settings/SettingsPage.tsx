@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import {
@@ -11,21 +11,43 @@ import {
   Sparkles,
   Trophy,
   Share2,
+  Camera,
+  Upload,
+  Trash2,
+  X,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import type { RootState } from '../../store';
-import { logout } from '../../store/authSlice';
-import { useGetQuinielasQuery } from '../../services/api';
+import { logout, updateUser } from '../../store/authSlice';
+import {
+  useGetQuinielasQuery,
+  useUploadAvatarMutation,
+  useRemoveAvatarMutation,
+} from '../../services/api';
 import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
 import './SettingsPage.css';
 
 export const SettingsPage: React.FC = () => {
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [avatarSuccess, setAvatarSuccess] = useState<string | null>(null);
+
+  const avatarDialogRef = useRef<HTMLDialogElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
   const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
   const { data: quinielasResponse } = useGetQuinielasQuery();
   const activeQuiniela = quinielasResponse?.data?.find(q => q.id === activeQuinielaId);
+
+  const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
+  const [removeAvatar, { isLoading: isDeleting }] = useRemoveAvatarMutation();
 
   const allQuinielas = quinielasResponse?.data || [];
   const isOwner =
@@ -46,6 +68,97 @@ export const SettingsPage: React.FC = () => {
 
   const userInitial = (user?.displayName || user?.username || 'U').charAt(0).toUpperCase();
 
+  const handleOpenAvatarModal = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setAvatarError(null);
+    setAvatarSuccess(null);
+    avatarDialogRef.current?.showModal();
+  };
+
+  const handleCloseAvatarModal = () => {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setAvatarError(null);
+    setAvatarSuccess(null);
+    avatarDialogRef.current?.close();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAvatarError(null);
+    setAvatarSuccess(null);
+
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      setAvatarError('Formato de imagen no permitido. Se aceptan: JPG, PNG, WEBP o GIF.');
+      return;
+    }
+
+    const maxSizeBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      setAvatarError('El tamaño del archivo excede el límite máximo de 5 MB.');
+      return;
+    }
+
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleSaveAvatar = async () => {
+    if (!selectedFile) return;
+
+    setAvatarError(null);
+    setAvatarSuccess(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      const res = await uploadAvatar(formData).unwrap();
+      if (res.isSuccess && res.data) {
+        dispatch(updateUser(res.data));
+        setAvatarSuccess('¡Foto de perfil actualizada exitosamente!');
+        setTimeout(() => {
+          handleCloseAvatarModal();
+        }, 1200);
+      } else {
+        setAvatarError(res.message || 'No se pudo actualizar la foto de perfil.');
+      }
+    } catch (err: any) {
+      setAvatarError(err?.data?.message || err?.message || 'Error al subir la imagen.');
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    setAvatarError(null);
+    setAvatarSuccess(null);
+
+    try {
+      const res = await removeAvatar().unwrap();
+      if (res.isSuccess && res.data) {
+        dispatch(updateUser(res.data));
+        setAvatarSuccess('Foto de perfil eliminada.');
+        setTimeout(() => {
+          handleCloseAvatarModal();
+        }, 1200);
+      } else {
+        setAvatarError(res.message || 'No se pudo eliminar la foto de perfil.');
+      }
+    } catch (err: any) {
+      setAvatarError(err?.data?.message || err?.message || 'Error al eliminar la foto.');
+    }
+  };
+
   return (
     <div className="settings-page">
       <div className="settings-page__header">
@@ -58,9 +171,41 @@ export const SettingsPage: React.FC = () => {
       {/* Tarjeta de Perfil de Usuario */}
       <div className="settings-card settings-card--profile">
         <div className="settings-profile">
-          <div className="settings-profile__avatar">
-            {userInitial}
+          <div className="settings-profile__avatar-container">
+            <div className="settings-profile__avatar">
+              {user?.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.displayName || user.username}
+                  className="settings-profile__avatar-img"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.parentElement?.querySelector(
+                      '.settings-profile__avatar-fallback'
+                    ) as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <span
+                className="settings-profile__avatar-fallback"
+                style={{ display: user?.avatarUrl ? 'none' : 'flex' }}
+              >
+                {userInitial}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              className="settings-profile__avatar-btn"
+              onClick={handleOpenAvatarModal}
+              title="Cambiar foto de perfil"
+              aria-label="Cambiar foto de perfil"
+            >
+              <Camera size={14} />
+            </button>
           </div>
+
           <div className="settings-profile__info">
             <div className="settings-profile__name-row">
               <h2 className="settings-profile__name">
@@ -81,6 +226,15 @@ export const SettingsPage: React.FC = () => {
             </div>
             <p className="settings-profile__username">@{user?.username}</p>
             <p className="settings-profile__email">{user?.email}</p>
+
+            <button
+              type="button"
+              className="settings-profile__photo-action-btn"
+              onClick={handleOpenAvatarModal}
+            >
+              <Camera size={13} />
+              <span>{user?.avatarUrl ? 'Cambiar foto de perfil' : 'Subir foto de perfil'}</span>
+            </button>
           </div>
         </div>
 
@@ -185,6 +339,168 @@ export const SettingsPage: React.FC = () => {
         isOpen={isClaimModalOpen}
         onClose={() => setIsClaimModalOpen(false)}
       />
+
+      {/* Modal Nativo de Subida y Gestión de Avatar */}
+      <dialog
+        ref={avatarDialogRef}
+        className="avatar-modal"
+        onClick={(e) => {
+          if (e.target === avatarDialogRef.current) handleCloseAvatarModal();
+        }}
+      >
+        <div className="avatar-modal__content">
+          <div className="avatar-modal__header">
+            <div className="avatar-modal__title-row">
+              <Camera size={18} className="text-primary" />
+              <h3 className="avatar-modal__title">Foto de Perfil</h3>
+            </div>
+            <button
+              type="button"
+              className="btn btn--icon avatar-modal__close-btn"
+              onClick={handleCloseAvatarModal}
+              title="Cerrar"
+              aria-label="Cerrar"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="avatar-modal__body">
+            {/* Input de archivo oculto */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              style={{ display: 'none' }}
+            />
+
+            {/* Mensajes de Alerta */}
+            {avatarError && (
+              <div className="avatar-modal__alert avatar-modal__alert--error">
+                <AlertCircle size={16} />
+                <span>{avatarError}</span>
+              </div>
+            )}
+            {avatarSuccess && (
+              <div className="avatar-modal__alert avatar-modal__alert--success">
+                <CheckCircle2 size={16} />
+                <span>{avatarSuccess}</span>
+              </div>
+            )}
+
+            {/* Vista Previa Circular */}
+            <div className="avatar-modal__preview-wrapper">
+              <div className="avatar-modal__preview">
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Vista previa" className="avatar-modal__preview-img" />
+                ) : user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.displayName || user.username}
+                    className="avatar-modal__preview-img"
+                  />
+                ) : (
+                  <span className="avatar-modal__preview-fallback">{userInitial}</span>
+                )}
+              </div>
+            </div>
+
+            {selectedFile ? (
+              <div className="avatar-modal__file-info">
+                <p className="avatar-modal__file-name">{selectedFile.name}</p>
+                <p className="avatar-modal__file-size">
+                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                </p>
+                <button
+                  type="button"
+                  className="btn btn--outline btn--xs"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  Elegir otra imagen
+                </button>
+              </div>
+            ) : (
+              <div className="avatar-modal__guidelines">
+                <p>Formatos permitidos: <strong>JPG, PNG, WEBP o GIF</strong></p>
+                <p>Tamaño máximo recomendado: <strong>5 MB</strong></p>
+                <button
+                  type="button"
+                  className="btn btn--primary avatar-modal__choose-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload size={16} />
+                  <span>Seleccionar imagen</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="avatar-modal__footer">
+            {selectedFile ? (
+              <>
+                <button
+                  type="button"
+                  className="btn btn--primary btn--full"
+                  onClick={handleSaveAvatar}
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={16} className="spin" />
+                      <span>Guardando foto...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={16} />
+                      <span>Guardar como foto de perfil</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--outline btn--full"
+                  onClick={handleCloseAvatarModal}
+                  disabled={isUploading}
+                >
+                  Cancelar
+                </button>
+              </>
+            ) : (
+              <>
+                {user?.avatarUrl && (
+                  <button
+                    type="button"
+                    className="btn btn--outline btn--danger-outline btn--full"
+                    onClick={handleDeleteAvatar}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? (
+                      <>
+                        <Loader2 size={16} className="spin" />
+                        <span>Eliminando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 size={16} />
+                        <span>Eliminar foto actual</span>
+                      </>
+                    )}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn btn--outline btn--full"
+                  onClick={handleCloseAvatarModal}
+                >
+                  Cerrar
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 };

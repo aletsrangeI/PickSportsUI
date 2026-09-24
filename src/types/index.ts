@@ -243,6 +243,7 @@ export interface QuinielaMemberPickInfo {
   role: string;
   totalHits: number;
   currentStreak: number;
+  avatarUrl?: string;
 }
 
 export interface QuinielaPicksData {

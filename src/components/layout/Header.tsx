@@ -130,12 +130,33 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
               </div>
 
               <div className="header__user-menu">
-                <div className="header__user-avatar" title={user?.displayName || user?.username}>
-                  {userInitial}
-                </div>
-                <span className="header__user-name">
-                  {user?.displayName || user?.username}
-                </span>
+                <Link to="/settings" className="header__user-avatar-link" title="Ajustes y Perfil">
+                  <div className="header__user-avatar" title={user?.displayName || user?.username}>
+                    {user?.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={user?.displayName || user?.username}
+                        className="header__user-avatar-img"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.parentElement?.querySelector('.header__user-avatar-initial') as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <span
+                      className="header__user-avatar-initial"
+                      style={{ display: user?.avatarUrl ? 'none' : 'flex' }}
+                    >
+                      {userInitial}
+                    </span>
+                  </div>
+                </Link>
+                <Link to="/settings" className="header__user-name-link">
+                  <span className="header__user-name">
+                    {user?.displayName || user?.username}
+                  </span>
+                </Link>
                 <button
                   type="button"
                   className="btn btn--icon header__logout-btn"
