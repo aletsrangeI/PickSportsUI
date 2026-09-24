@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Calendar, Trophy, Award, Share2, Settings, CalendarDays } from 'lucide-react';
+import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import type { RootState } from '../../store';
 import { useGetQuinielasQuery } from '../../services/api';
 import './BottomNav.css';
@@ -22,7 +23,12 @@ export const BottomNav: React.FC = () => {
 
   return (
     <nav className="bottom-nav" aria-label="Navegación principal">
-      <ul className="bottom-nav__list">
+      <LiquidGlass
+        variant="clear"
+        className="bottom-nav__glass"
+        contentClassName="bottom-nav__content"
+      >
+        <ul className="bottom-nav__list">
         <li className="bottom-nav__item">
           <NavLink
             to="/"
@@ -111,6 +117,7 @@ export const BottomNav: React.FC = () => {
           </NavLink>
         </li>
       </ul>
+      </LiquidGlass>
     </nav>
   );
 };

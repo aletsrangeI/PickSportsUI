@@ -131,15 +131,15 @@ jobs:
           echo ">> Contenedor picksports-ui desplegado exitosamente."
           DEPLOY_SCRIPT_EOF
           
-          MAX_RETRIES=3
+          MAX_RETRIES=5
           COUNT=0
           until [ "$COUNT" -ge "$MAX_RETRIES" ]
           do
             ssh -v -o KexAlgorithms=curve25519-sha256 -o IPQoS=throughput -o StrictHostKeyChecking=no -o ConnectTimeout=30 -i ~/.ssh/id_ed25519 "$SSH_USER@$HOMELAB_HOST" "bash -s" < deploy_remote.sh && break
             COUNT=$((COUNT+1))
             if [ "$COUNT" -lt "$MAX_RETRIES" ]; then
-              echo ">> Falló conexión SSH. Reintentando en 5 segundos (intento $((COUNT+1))/$MAX_RETRIES)..."
-              sleep 5
+              echo ">> Falló conexión SSH. Reintentando en 10 segundos (intento $((COUNT+1))/$MAX_RETRIES)..."
+              sleep 10
             else
               echo ">> Error crítico: Se agotaron los reintentos de SSH."
               exit 1
