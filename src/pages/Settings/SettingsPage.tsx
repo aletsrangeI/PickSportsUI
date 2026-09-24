@@ -27,6 +27,8 @@ import {
   useRemoveAvatarMutation,
 } from '../../services/api';
 import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
+import './SettingsPage.css';
+
 const processImageToSquareBlob = (file: File, size = 512, quality = 0.88): Promise<Blob> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
