@@ -1,0 +1,211 @@
+/* Header Styles - Mobile First & Desktop */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba(22, 27, 34, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
+  width: 100%;
+}
+
+.header__main {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-lg);
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.header__logo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--color-primary);
+}
+
+.header__logo-text {
+  font-family: var(--font-family-heading);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.header__selector-wrapper {
+  display: block;
+}
+
+.header__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: var(--space-sm);
+}
+
+.header__nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.header__nav-link:hover {
+  color: var(--text-main);
+  background-color: var(--bg-surface);
+  text-decoration: none;
+}
+
+.header__nav-link--active {
+  color: var(--color-primary);
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.header__actions-desktop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header__user-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 6px;
+  background-color: var(--bg-elevated);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+
+.header__user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), #047857);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header__user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header__logout-btn {
+  color: var(--text-secondary);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.header__logout-btn:hover {
+  color: var(--color-danger);
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+.header__auth-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .header__main {
+    height: 54px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .header__left {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header__logo-text {
+    font-size: 1.0625rem;
+  }
+
+  .header__selector-wrapper {
+    flex: 1;
+    min-width: 0;
+    max-width: 165px;
+  }
+
+  .header__nav {
+    display: none;
+  }
+
+  .header__actions-desktop {
+    display: none;
+  }
+
+  .header__user-menu {
+    padding: 2px;
+    background-color: transparent;
+    border: none;
+    gap: 4px;
+  }
+
+  .header__user-name {
+    display: none;
+  }
+
+  .header__user-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8125rem;
+  }
+}

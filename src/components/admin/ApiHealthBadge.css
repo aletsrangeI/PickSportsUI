@@ -1,0 +1,64 @@
+.api-health-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.api-health-badge--green {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.api-health-badge--yellow {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.api-health-badge--red {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.api-health-badge--loading {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border-color: var(--border-subtle);
+}
+
+.api-health-badge__indicator {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.api-health-badge__latency {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.api-health-badge__time {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.api-health-badge__contingency {
+  margin-top: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.api-health-badge__contingency:hover {
+  background: rgba(239, 68, 68, 0.18);
+}

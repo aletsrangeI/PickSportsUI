@@ -1,0 +1,121 @@
+name: CI/CD - PickSportsUI (Docker)
+
+on:
+  push:
+    branches:
+      - Development
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-picksports-ui-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    name: Build Docker Image & Deploy to Homelab
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Obtener nombre de usuario en minúsculas
+        run: |
+          echo "IMAGE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construir y publicar imagen Docker en GHCR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.IMAGE_OWNER }}/picksports-ui:latest
+            ghcr.io/${{ env.IMAGE_OWNER }}/picksports-ui:${{ github.sha }}
+
+      # Conectar a Tailscale
+      - name: Conectar a Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          args: --accept-routes --hostname=gha-deploy-picksports-ui
+
+      # Esperar a que el túnel Tailscale hacia Homelab esté caliente y listo
+      - name: Verificar conectividad Tailscale hacia Homelab
+        run: |
+          echo "Verificando ruta Tailscale hacia ${{ secrets.HOMELAB_HOST }}..."
+          for i in $(seq 1 12); do
+            if tailscale ping -c 1 ${{ secrets.HOMELAB_HOST }} >/dev/null 2>&1; then
+              echo ">> Túnel Tailscale activo y listo."
+              break
+            fi
+            echo "Esperando ruta WireGuard (intento $i/12)..."
+            sleep 2
+          done
+
+      # Configurar clave SSH sanitizando posibles saltos de línea y forzando algoritmo KEX compatible con MTU de Tailscale
+      - name: Configurar SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s\n" "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          cat << 'EOF' > ~/.ssh/config
+          Host *
+            KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256
+            IPQoS throughput
+            ServerAliveInterval 15
+            ServerAliveCountMax 3
+            StrictHostKeyChecking no
+            ConnectTimeout 30
+          EOF
+          chmod 600 ~/.ssh/config
+          ssh-keyscan -H ${{ secrets.HOMELAB_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      # Despliegue con Docker Compose en Homelab
+      - name: Desplegar en Homelab con Docker Compose
+        run: |
+          SSH_USER=$(echo "${{ secrets.SSH_USER }}" | tr -d '\r\n[:space:]')
+          HOMELAB_HOST=$(echo "${{ secrets.HOMELAB_HOST }}" | tr -d '\r\n[:space:]')
+          
+          cat << 'DEPLOY_SCRIPT_EOF' > deploy_remote.sh
+          set -e
+          cd /opt/picksports
+          docker compose pull ui
+          echo ">> Liberando contenedor previo de ui..."
+          docker compose stop ui || true
+          docker compose rm -f ui || true
+          docker compose up -d --no-deps --remove-orphans ui
+          docker ps --filter "name=picksports"
+          echo ">> Contenedor picksports-ui desplegado exitosamente."
+          DEPLOY_SCRIPT_EOF
+          
+          MAX_RETRIES=3
+          COUNT=0
+          until [ "$COUNT" -ge "$MAX_RETRIES" ]
+          do
+            ssh -v -o KexAlgorithms=curve25519-sha256 -o IPQoS=throughput -o StrictHostKeyChecking=no -o ConnectTimeout=30 -i ~/.ssh/id_ed25519 "$SSH_USER@$HOMELAB_HOST" "bash -s" < deploy_remote.sh && break
+            COUNT=$((COUNT+1))
+            if [ "$COUNT" -lt "$MAX_RETRIES" ]; then
+              echo ">> Falló conexión SSH. Reintentando en 5 segundos (intento $((COUNT+1))/$MAX_RETRIES)..."
+              sleep 5
+            else
+              echo ">> Error crítico: Se agotaron los reintentos de SSH."
+              exit 1
+            fi
+          done

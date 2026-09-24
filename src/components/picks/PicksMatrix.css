@@ -1,0 +1,186 @@
+.picks-matrix-wrapper {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.picks-matrix-container {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.picks-matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+.picks-matrix__th {
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.picks-matrix__th--member {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--bg-surface);
+  min-width: 140px;
+}
+
+.picks-matrix__th--hits {
+  min-width: 70px;
+}
+
+.picks-matrix__th--match {
+  min-width: 90px;
+}
+
+.picks-matrix__match-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.picks-matrix__match-vs {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.picks-matrix__match-score {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-top: 2px;
+}
+
+.picks-matrix__live-dot {
+  font-size: 0.625rem;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* Rows & Cells */
+.picks-matrix__row {
+  transition: background-color var(--transition-fast);
+}
+
+.picks-matrix__row:hover {
+  background-color: var(--bg-hover);
+}
+
+.picks-matrix__row--current {
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.picks-matrix__td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.picks-matrix__td--member {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: var(--bg-card);
+  font-weight: 600;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.picks-matrix__row--current .picks-matrix__td--member {
+  background-color: var(--bg-surface);
+}
+
+.picks-matrix__member-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.picks-matrix__member-alias {
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.picks-matrix__you-tag {
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.picks-matrix__role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 4px;
+  font-size: 0.625rem;
+}
+
+.picks-matrix__hits-num {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 0.9375rem;
+}
+
+/* Pick Badge in Matrix */
+.picks-matrix__pick-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--text-main);
+}
+
+.picks-matrix__autofill-icon {
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+}
+
+.picks-matrix__no-pick {
+  color: var(--text-muted);
+}
+
+/* Hits & Misses */
+.picks-matrix__cell--hit .picks-matrix__pick-badge {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: var(--color-primary);
+}
+
+.picks-matrix__cell--miss .picks-matrix__pick-badge {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.picks-matrix__hit-icon {
+  display: flex;
+  align-items: center;
+}
+
+.picks-matrix__empty {
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--text-secondary);
+}
