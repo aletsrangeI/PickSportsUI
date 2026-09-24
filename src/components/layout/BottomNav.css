@@ -1,86 +1,221 @@
-/* Bottom Navigation for Mobile */
+/* Floating Liquid Glass Navigation Bar */
 .bottom-nav {
   display: none;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background-color: rgba(22, 27, 34, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border-subtle);
+  bottom: calc(var(--bottom-nav-floating-gap, 16px) + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 480px;
+  height: var(--bottom-nav-height, 60px);
+  padding: 5px 6px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
   z-index: 1000;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+
+  /* Tempered Liquid Glass Multi-Layer Surface */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(18, 24, 34, 0.72) 75%,
+    rgba(13, 17, 23, 0.86) 100%
+  );
+  backdrop-filter: blur(24px) saturate(190%) contrast(105%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(105%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 20px 42px -8px rgba(0, 0, 0, 0.75),
+    0 8px 18px -4px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.5),
+    inset 0 0 16px 0 rgba(255, 255, 255, 0.03);
+  transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+/* Curved Specular Reflection Flare across upper half */
+.bottom-nav::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 14px;
+  right: 14px;
+  height: 48%;
+  border-radius: 9999px 9999px 0 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.05) 55%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .bottom-nav__list {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-between;
   height: 100%;
   list-style: none;
   margin: 0;
   padding: 0;
+  gap: 3px;
 }
 
 .bottom-nav__item {
   flex: 1;
   height: 100%;
   display: flex;
+  min-width: 0;
 }
 
 .bottom-nav__link {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  gap: 3px;
-  color: var(--text-muted);
+  padding: 4px 2px;
+  border-radius: var(--radius-full);
+  color: rgba(240, 246, 252, 0.65);
   font-size: 0.6875rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-decoration: none;
-  position: relative;
+  border: 1px solid transparent;
   transition: all var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .bottom-nav__icon {
-  transition: transform var(--transition-fast), color var(--transition-fast);
+  transition: transform var(--transition-fast), color var(--transition-fast), filter var(--transition-fast);
+  flex-shrink: 0;
 }
 
-.bottom-nav__link:hover {
-  color: var(--text-main);
+.bottom-nav__label {
+  font-size: 0.6875rem;
+  line-height: 1.1;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: color var(--transition-fast);
+}
+
+.bottom-nav__link:hover:not(.bottom-nav__link--active) {
+  color: #f0f6fc;
+  background: rgba(255, 255, 255, 0.06);
   text-decoration: none;
 }
 
+.bottom-nav__link:active {
+  transform: scale(0.94);
+}
+
+/* Active Pill Capsule with Liquid Glass Interior */
 .bottom-nav__link--active {
-  color: var(--color-primary);
+  color: #ffffff;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.07) 60%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow:
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35),
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    0 0 14px var(--color-primary-glow);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .bottom-nav__link--active .bottom-nav__icon {
-  transform: translateY(-2px);
   color: var(--color-primary);
+  filter: drop-shadow(0 0 6px var(--color-primary-glow));
+  transform: translateY(-1px) scale(1.06);
 }
 
-.bottom-nav__link--active::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  width: 24px;
-  height: 3px;
-  border-radius: 0 0 3px 3px;
-  background-color: var(--color-primary);
-  box-shadow: 0 2px 8px var(--color-primary-glow);
+.bottom-nav__link--active .bottom-nav__label {
+  color: #ffffff;
+  font-weight: 700;
 }
 
+/* Responsive Display */
 @media (max-width: 768px) {
   .bottom-nav {
     display: flex;
     flex-direction: column;
+    justify-content: center;
   }
+}
+
+/* Extra small mobile viewport optimizations */
+@media (max-width: 380px) {
+  .bottom-nav {
+    width: calc(100% - 16px);
+    padding: 3px 4px;
+    height: 56px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .bottom-nav__label {
+    font-size: 0.625rem;
+  }
+
+  .bottom-nav__link {
+    padding: 2px 1px;
+  }
+}
+
+/* Light Theme Support */
+[data-theme="light"] .bottom-nav {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.90) 0%,
+    rgba(240, 243, 248, 0.80) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 16px 36px -6px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.98);
+}
+
+[data-theme="light"] .bottom-nav::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+[data-theme="light"] .bottom-nav__link {
+  color: #59636e;
+}
+
+[data-theme="light"] .bottom-nav__link:hover:not(.bottom-nav__link--active) {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1f2328;
+}
+
+[data-theme="light"] .bottom-nav__link--active {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(240, 242, 245, 0.85) 100%
+  );
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #1f2328;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px #ffffff;
 }

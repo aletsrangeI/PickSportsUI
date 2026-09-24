@@ -339,18 +339,26 @@
 }
 
 /* Modal de Avatar de Usuario */
-.avatar-modal {
+dialog.avatar-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   background-color: var(--bg-card);
   color: var(--text-main);
   padding: 0;
   max-width: 440px;
-  width: 90vw;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  width: min(90vw, 440px);
+  max-height: 90vh;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  overflow: hidden;
 }
 
-.avatar-modal::backdrop {
+dialog.avatar-modal::backdrop {
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(4px);
 }

@@ -21,7 +21,7 @@ export const BottomNav: React.FC = () => {
     quinielas.some((q) => q.userRole === 'OWNER' || q.userRole === 'ADMIN');
 
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav" aria-label="Navegación principal">
       <ul className="bottom-nav__list">
         <li className="bottom-nav__item">
           <NavLink
@@ -31,7 +31,7 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <Calendar size={20} className="bottom-nav__icon" />
+            <Calendar size={19} className="bottom-nav__icon" />
             <span className="bottom-nav__label">Picks</span>
           </NavLink>
         </li>
@@ -42,7 +42,7 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <CalendarDays size={20} className="bottom-nav__icon" />
+            <CalendarDays size={19} className="bottom-nav__icon" />
             <span className="bottom-nav__label">Partidos</span>
           </NavLink>
         </li>
@@ -53,8 +53,8 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <Trophy size={20} />
-            <span>Posiciones</span>
+            <Trophy size={19} className="bottom-nav__icon" />
+            <span className="bottom-nav__label">Posiciones</span>
           </NavLink>
         </li>
         <li className="bottom-nav__item">
@@ -64,8 +64,8 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <Award size={20} />
-            <span>Premios</span>
+            <Award size={19} className="bottom-nav__icon" />
+            <span className="bottom-nav__label">Premios</span>
           </NavLink>
         </li>
         {isOwnerOrAdmin && (
@@ -76,8 +76,8 @@ export const BottomNav: React.FC = () => {
                 `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
               }
             >
-              <Share2 size={20} />
-              <span>WhatsApp</span>
+              <Share2 size={19} className="bottom-nav__icon" />
+              <span className="bottom-nav__label">WhatsApp</span>
             </NavLink>
           </li>
         )}
@@ -88,8 +88,8 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <Settings size={20} />
-            <span>Ajustes</span>
+            <Settings size={19} className="bottom-nav__icon" />
+            <span className="bottom-nav__label">Ajustes</span>
           </NavLink>
         </li>
       </ul>

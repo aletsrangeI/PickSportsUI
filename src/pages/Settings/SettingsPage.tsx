@@ -27,7 +27,51 @@ import {
   useRemoveAvatarMutation,
 } from '../../services/api';
 import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
-import './SettingsPage.css';
+const processImageToSquareBlob = (file: File, size = 512, quality = 0.88): Promise<Blob> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(file);
+            return;
+          }
+
+          // Recorte centrado 1:1 (cuadrado)
+          const minDim = Math.min(img.width, img.height);
+          const sx = (img.width - minDim) / 2;
+          const sy = (img.height - minDim) / 2;
+
+          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                resolve(file);
+              }
+            },
+            'image/jpeg',
+            quality
+          );
+        } catch {
+          resolve(file);
+        }
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+};
 
 export const SettingsPage: React.FC = () => {
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
@@ -35,6 +79,7 @@ export const SettingsPage: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [avatarSuccess, setAvatarSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const avatarDialogRef = useRef<HTMLDialogElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,6 +93,8 @@ export const SettingsPage: React.FC = () => {
 
   const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
   const [removeAvatar, { isLoading: isDeleting }] = useRemoveAvatarMutation();
+
+  const isProcessing = isUploading || isDeleting || isSubmitting;
 
   const allQuinielas = quinielasResponse?.data || [];
   const isOwner =
@@ -73,6 +120,7 @@ export const SettingsPage: React.FC = () => {
     setPreviewUrl(null);
     setAvatarError(null);
     setAvatarSuccess(null);
+    setIsSubmitting(false);
     avatarDialogRef.current?.showModal();
   };
 
@@ -84,6 +132,7 @@ export const SettingsPage: React.FC = () => {
     setPreviewUrl(null);
     setAvatarError(null);
     setAvatarSuccess(null);
+    setIsSubmitting(false);
     avatarDialogRef.current?.close();
   };
 
@@ -94,15 +143,28 @@ export const SettingsPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const isHeic =
+      file.name.toLowerCase().endsWith('.heic') ||
+      file.name.toLowerCase().endsWith('.heif') ||
+      file.type === 'image/heic' ||
+      file.type === 'image/heif';
+
+    if (isHeic) {
+      setAvatarError(
+        'El formato HEIC no es compatible directamente en navegadores web. Si estás en tu iPhone, selecciona la imagen desde tu "Fototeca" (se convertirá a JPG automáticamente) o cámbiala a JPG/PNG.'
+      );
+      return;
+    }
+
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
       setAvatarError('Formato de imagen no permitido. Se aceptan: JPG, PNG, WEBP o GIF.');
       return;
     }
 
-    const maxSizeBytes = 5 * 1024 * 1024;
+    const maxSizeBytes = 10 * 1024 * 1024;
     if (file.size > maxSizeBytes) {
-      setAvatarError('El tamaño del archivo excede el límite máximo de 5 MB.');
+      setAvatarError('El tamaño del archivo excede el límite máximo de 10 MB.');
       return;
     }
 
@@ -115,14 +177,19 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleSaveAvatar = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || isProcessing) return;
 
     setAvatarError(null);
     setAvatarSuccess(null);
+    setIsSubmitting(true);
 
     try {
+      // Optimizar y recortar a cuadrado 512x512 en el cliente (evita lentitud y problemas de red)
+      const squareBlob = await processImageToSquareBlob(selectedFile, 512, 0.88);
+
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      const safeName = (selectedFile.name.replace(/\.[^/.]+$/, '') || 'avatar') + '.jpg';
+      formData.append('file', squareBlob, safeName);
 
       const res = await uploadAvatar(formData).unwrap();
       if (res.isSuccess && res.data) {
@@ -135,13 +202,24 @@ export const SettingsPage: React.FC = () => {
         setAvatarError(res.message || 'No se pudo actualizar la foto de perfil.');
       }
     } catch (err: any) {
-      setAvatarError(err?.data?.message || err?.message || 'Error al subir la imagen.');
+      console.error('Error al subir avatar:', err);
+      const msg =
+        err?.data?.message ||
+        (typeof err?.data === 'string' && !err?.data.includes('<html') ? err.data : null) ||
+        err?.message ||
+        'Error al conectar con el servidor para guardar la foto.';
+      setAvatarError(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteAvatar = async () => {
+    if (isProcessing) return;
+
     setAvatarError(null);
     setAvatarSuccess(null);
+    setIsSubmitting(true);
 
     try {
       const res = await removeAvatar().unwrap();
@@ -155,7 +233,10 @@ export const SettingsPage: React.FC = () => {
         setAvatarError(res.message || 'No se pudo eliminar la foto de perfil.');
       }
     } catch (err: any) {
+      console.error('Error al eliminar foto:', err);
       setAvatarError(err?.data?.message || err?.message || 'Error al eliminar la foto.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -358,6 +439,7 @@ export const SettingsPage: React.FC = () => {
               type="button"
               className="btn btn--icon avatar-modal__close-btn"
               onClick={handleCloseAvatarModal}
+              disabled={isProcessing}
               title="Cerrar"
               aria-label="Cerrar"
             >
@@ -416,7 +498,7 @@ export const SettingsPage: React.FC = () => {
                   type="button"
                   className="btn btn--outline btn--xs"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
+                  disabled={isProcessing}
                 >
                   Elegir otra imagen
                 </button>
@@ -429,6 +511,7 @@ export const SettingsPage: React.FC = () => {
                   type="button"
                   className="btn btn--primary avatar-modal__choose-btn"
                   onClick={() => fileInputRef.current?.click()}
+                  disabled={isProcessing}
                 >
                   <Upload size={16} />
                   <span>Seleccionar imagen</span>
@@ -444,9 +527,9 @@ export const SettingsPage: React.FC = () => {
                   type="button"
                   className="btn btn--primary btn--full"
                   onClick={handleSaveAvatar}
-                  disabled={isUploading}
+                  disabled={isProcessing}
                 >
-                  {isUploading ? (
+                  {isProcessing ? (
                     <>
                       <Loader2 size={16} className="spin" />
                       <span>Guardando foto...</span>
@@ -462,7 +545,7 @@ export const SettingsPage: React.FC = () => {
                   type="button"
                   className="btn btn--outline btn--full"
                   onClick={handleCloseAvatarModal}
-                  disabled={isUploading}
+                  disabled={isProcessing}
                 >
                   Cancelar
                 </button>
@@ -474,9 +557,9 @@ export const SettingsPage: React.FC = () => {
                     type="button"
                     className="btn btn--outline btn--danger-outline btn--full"
                     onClick={handleDeleteAvatar}
-                    disabled={isDeleting}
+                    disabled={isProcessing}
                   >
-                    {isDeleting ? (
+                    {isProcessing ? (
                       <>
                         <Loader2 size={16} className="spin" />
                         <span>Eliminando...</span>
@@ -493,6 +576,7 @@ export const SettingsPage: React.FC = () => {
                   type="button"
                   className="btn btn--outline btn--full"
                   onClick={handleCloseAvatarModal}
+                  disabled={isProcessing}
                 >
                   Cerrar
                 </button>
