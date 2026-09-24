@@ -56,7 +56,11 @@ export const WhatsAppPage: React.FC = () => {
 
   useEffect(() => {
     if (seasons.length > 0 && selectedSeasonId === null) {
-      setSelectedSeasonId(seasons[0].id);
+      const current =
+        seasons.find((s) => s.isCurrent && !s.isFinished) ??
+        seasons.find((s) => s.isCurrent) ??
+        seasons[0];
+      setSelectedSeasonId(current.id);
     }
   }, [seasons, selectedSeasonId]);
 
@@ -66,8 +70,12 @@ export const WhatsAppPage: React.FC = () => {
   const weeks = weeksData?.data ?? [];
 
   useEffect(() => {
-    if (weeks.length > 0 && selectedWeekId === null) {
-      const activeWeek = weeks.find((w) => w.status === 'PUBLISHED' || w.status === 'LOCKED' || w.status === 'SCORED') || weeks[0];
+    if (weeks.length > 0 && (selectedWeekId === null || !weeks.some(w => w.id === selectedWeekId))) {
+      const activeWeek =
+        weeks.find((w) => w.status === 'PUBLISHED') ??
+        weeks.find((w) => w.status === 'LOCKED') ??
+        weeks.find((w) => w.status === 'SCORED') ??
+        weeks[0];
       setSelectedWeekId(activeWeek.id);
     }
   }, [weeks, selectedWeekId]);

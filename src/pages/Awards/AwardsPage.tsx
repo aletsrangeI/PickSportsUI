@@ -75,7 +75,11 @@ export const AwardsPage: React.FC = () => {
 
   useEffect(() => {
     if (seasons.length > 0 && selectedSeasonId === null) {
-      setSelectedSeasonId(seasons[0].id);
+      const current =
+        seasons.find((s) => s.isCurrent && !s.isFinished) ??
+        seasons.find((s) => s.isCurrent) ??
+        seasons[0];
+      setSelectedSeasonId(current.id);
     }
   }, [seasons, selectedSeasonId]);
 
@@ -85,7 +89,7 @@ export const AwardsPage: React.FC = () => {
   const weeks = weeksData?.data ?? [];
 
   useEffect(() => {
-    if (weeks.length > 0 && selectedWeekId === null) {
+    if (weeks.length > 0 && (selectedWeekId === null || !weeks.some(w => w.id === selectedWeekId))) {
       const activeWeek = weeks.find((w) => w.status === 'SCORED') || weeks[0];
       setSelectedWeekId(activeWeek.id);
     }
@@ -120,21 +124,43 @@ export const AwardsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Filtro de Jornada */}
-        <div className="awards-page__filter">
-          <label className="awards-page__label">Filtrar por jornada</label>
-          <select
-            value={selectedWeekId || ''}
-            onChange={(e) => setSelectedWeekId(e.target.value ? Number(e.target.value) : null)}
-            className="awards-page__select"
-          >
-            <option value="">🏆 Toda la Temporada (Vitrina Completa)</option>
-            {weeks.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name} {w.status === 'SCORED' ? '✓' : ''}
-              </option>
-            ))}
-          </select>
+        {/* Filtros de Temporada y Jornada */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          {seasons.length > 1 && (
+            <div className="awards-page__filter">
+              <label className="awards-page__label">Temporada</label>
+              <select
+                value={selectedSeasonId || ''}
+                onChange={(e) => {
+                  setSelectedSeasonId(Number(e.target.value));
+                  setSelectedWeekId(null);
+                }}
+                className="awards-page__select"
+              >
+                {seasons.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} {s.isCurrent ? '★ (En Curso)' : s.isFinished ? '— (Concluido)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="awards-page__filter">
+            <label className="awards-page__label">Filtrar por jornada</label>
+            <select
+              value={selectedWeekId || ''}
+              onChange={(e) => setSelectedWeekId(e.target.value ? Number(e.target.value) : null)}
+              className="awards-page__select"
+            >
+              <option value="">🏆 Toda la Temporada (Vitrina Completa)</option>
+              {weeks.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name} {w.status === 'SCORED' ? '✓' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

@@ -36,7 +36,11 @@ export const StandingsPage: React.FC = () => {
 
   useEffect(() => {
     if (seasons.length > 0 && selectedSeasonId === null) {
-      setSelectedSeasonId(seasons[0].id);
+      const current =
+        seasons.find((s) => s.isCurrent && !s.isFinished) ??
+        seasons.find((s) => s.isCurrent) ??
+        seasons[0];
+      setSelectedSeasonId(current.id);
     }
   }, [seasons, selectedSeasonId]);
 
@@ -46,8 +50,12 @@ export const StandingsPage: React.FC = () => {
   const weeks = weeksData?.data ?? [];
 
   useEffect(() => {
-    if (weeks.length > 0 && selectedWeekId === null) {
-      const activeWeek = weeks.find((w) => w.status === 'PUBLISHED' || w.status === 'LOCKED' || w.status === 'SCORED') || weeks[0];
+    if (weeks.length > 0 && (selectedWeekId === null || !weeks.some(w => w.id === selectedWeekId))) {
+      const activeWeek =
+        weeks.find((w) => w.status === 'PUBLISHED') ??
+        weeks.find((w) => w.status === 'LOCKED') ??
+        weeks.find((w) => w.status === 'SCORED') ??
+        weeks[0];
       setSelectedWeekId(activeWeek.id);
     }
   }, [weeks, selectedWeekId]);
@@ -130,8 +138,28 @@ export const StandingsPage: React.FC = () => {
         )}
       </div>
 
-      {/* Selectores de Jornada */}
+      {/* Selectores de Temporada y Jornada */}
       <div className="standings-page__controls">
+        {seasons.length > 1 && (
+          <div className="standings-page__selector-group">
+            <label className="standings-page__label">Temporada</label>
+            <select
+              value={selectedSeasonId || ''}
+              onChange={(e) => {
+                setSelectedSeasonId(Number(e.target.value));
+                setSelectedWeekId(null);
+              }}
+              className="standings-page__select"
+            >
+              {seasons.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} {s.isCurrent ? '★ (En Curso)' : s.isFinished ? '— (Concluido)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="standings-page__selector-group">
           <label className="standings-page__label">Jornada</label>
           <select
