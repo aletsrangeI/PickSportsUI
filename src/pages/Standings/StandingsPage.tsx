@@ -9,7 +9,8 @@ import {
   useScoreWeekMutation,
 } from '../../services/api';
 import { StandingsTable } from './StandingsTable';
-import { Trophy, Award, Flame, Info, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Trophy, Award, Flame, Info, CheckCircle2, AlertCircle, RefreshCw, Share2 } from 'lucide-react';
+import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
 import './StandingsPage.css';
 
 export const StandingsPage: React.FC = () => {
@@ -17,6 +18,7 @@ export const StandingsPage: React.FC = () => {
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
   const [selectedWeekId, setSelectedWeekId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
   const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
@@ -126,15 +128,35 @@ export const StandingsPage: React.FC = () => {
         </div>
 
         {isOwnerOrAdmin && (
-          <button
-            onClick={handleScoreWeek}
-            disabled={scoringWeek || !selectedWeekId}
-            className="standings-page__score-btn"
-            title="Evalúa partidos, asigna aciertos, galardones y actualiza la tabla"
-          >
-            <RefreshCw size={16} className={scoringWeek ? 'standings-page__spin' : ''} />
-            {scoringWeek ? 'Calificando...' : 'Calificar Jornada'}
-          </button>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setIsClaimModalOpen(true)}
+              className="btn btn--outline"
+              style={{
+                borderColor: '#25d366',
+                color: '#25d366',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.8125rem',
+                fontWeight: 700,
+              }}
+              title="Copiar y enviar enlaces personalizados para WhatsApp a participantes migrados"
+            >
+              <Share2 size={15} />
+              <span>Activar Cuentas (WhatsApp)</span>
+            </button>
+
+            <button
+              onClick={handleScoreWeek}
+              disabled={scoringWeek || !selectedWeekId}
+              className="standings-page__score-btn"
+              title="Evalúa partidos, asigna aciertos, galardones y actualiza la tabla"
+            >
+              <RefreshCw size={16} className={scoringWeek ? 'standings-page__spin' : ''} />
+              {scoringWeek ? 'Calificando...' : 'Calificar Jornada'}
+            </button>
+          </div>
         )}
       </div>
 
@@ -218,6 +240,13 @@ export const StandingsPage: React.FC = () => {
           isWeeklyView={activeTab === 'weekly'}
         />
       )}
+
+      <ClaimLinksModal
+        quinielaId={quinielaId}
+        quinielaName={activeQuiniela?.name}
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+      />
     </div>
   );
 };

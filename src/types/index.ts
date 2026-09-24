@@ -88,6 +88,37 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface ClaimInfo {
+  alias: string;
+  quinielaName: string;
+  quinielaId: number;
+  totalHits: number;
+  totalUpsets: number;
+  currentStreak: number;
+  emailPlaceholder: string;
+  isAlreadyClaimed: boolean;
+}
+
+export interface ClaimAccountRequest {
+  token: string;
+  email: string;
+  password: string;
+  displayName?: string;
+  username?: string;
+}
+
+export interface MigratedMemberClaimLink {
+  memberId: number;
+  userId: number;
+  alias: string;
+  email: string;
+  totalHits: number;
+  isClaimed: boolean;
+  claimToken?: string;
+  claimUrl?: string;
+  shareMessage?: string;
+}
+
 export interface League {
   id: number;
   sportId?: number;

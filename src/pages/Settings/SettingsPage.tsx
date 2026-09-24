@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import {
@@ -9,14 +9,17 @@ import {
   LogOut,
   ChevronRight,
   Sparkles,
-  Trophy
+  Trophy,
+  Share2,
 } from 'lucide-react';
 import type { RootState } from '../../store';
 import { logout } from '../../store/authSlice';
 import { useGetQuinielasQuery } from '../../services/api';
+import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
 import './SettingsPage.css';
 
 export const SettingsPage: React.FC = () => {
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -125,6 +128,32 @@ export const SettingsPage: React.FC = () => {
               </div>
               <ChevronRight size={20} className="settings-tool-card__arrow" />
             </Link>
+
+            {/* Tarjeta de Activación de Participantes Migrados */}
+            <div
+              className="settings-tool-card"
+              style={{ cursor: 'pointer' }}
+              onClick={() => setIsClaimModalOpen(true)}
+            >
+              <div
+                className="settings-tool-card__icon"
+                style={{ backgroundColor: 'rgba(37, 211, 102, 0.15)', color: '#25d366' }}
+              >
+                <Share2 size={24} />
+              </div>
+              <div className="settings-tool-card__content">
+                <div className="settings-tool-card__heading">
+                  <h4 className="settings-tool-card__title">Activar Cuentas de Amigos</h4>
+                  <span className="badge badge--success" style={{ backgroundColor: '#25d366', color: '#073315' }}>
+                    WhatsApp
+                  </span>
+                </div>
+                <p className="settings-tool-card__desc">
+                  Comparte a cada participante su enlace personalizado para activar su cuenta y ligar sus puntos acumulados.
+                </p>
+              </div>
+              <ChevronRight size={20} className="settings-tool-card__arrow" />
+            </div>
           </div>
         </div>
 
@@ -142,6 +171,13 @@ export const SettingsPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <ClaimLinksModal
+        quinielaId={activeQuinielaId || activeQuiniela?.id || 0}
+        quinielaName={activeQuiniela?.name}
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+      />
     </div>
   );
 };

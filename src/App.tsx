@@ -12,6 +12,7 @@ import { AwardsPage } from './pages/Awards/AwardsPage';
 import { WhatsAppPage } from './pages/WhatsApp/WhatsAppPage';
 import { MigrationPage } from './pages/Admin/MigrationPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
+import { ActivatePage } from './pages/Auth/ActivatePage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -58,6 +59,8 @@ export const App: React.FC = () => {
             </PublicOnlyRoute>
           }
         />
+        <Route path="/activar" element={<ActivatePage />} />
+        <Route path="/claim" element={<ActivatePage />} />
 
         {/* Layout Principal Autenticado */}
         <Route

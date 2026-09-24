@@ -30,6 +30,9 @@ import type {
   VapidPublicKeyResponse,
   MigrationPreviewData,
   MigrationResultData,
+  ClaimInfo,
+  ClaimAccountRequest,
+  MigratedMemberClaimLink,
 } from '../types';
 
 export const api = createApi({
@@ -77,6 +80,19 @@ export const api = createApi({
       providesTags: ['Auth'],
     }),
 
+    getClaimInfo: builder.query<ApiResponse<ClaimInfo>, string>({
+      query: (token) => `/auth/claim-info?token=${encodeURIComponent(token)}`,
+    }),
+
+    claimAccount: builder.mutation<ApiResponse<AuthResponse>, ClaimAccountRequest>({
+      query: (body) => ({
+        url: '/auth/claim',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Auth', 'Quinielas', 'QuinielaDetail', 'Standings'],
+    }),
+
     // ─── Quinielas ───────────────────────────────────────────────────────────
     getQuinielas: builder.query<ApiResponse<Quiniela[]>, void>({
       query: () => '/quinielas',
@@ -85,6 +101,11 @@ export const api = createApi({
 
     getQuinielaById: builder.query<ApiResponse<QuinielaDetail>, number>({
       query: (id) => `/quinielas/${id}`,
+      providesTags: (_result, _error, id) => [{ type: 'QuinielaDetail', id }],
+    }),
+
+    getClaimLinks: builder.query<ApiResponse<MigratedMemberClaimLink[]>, number>({
+      query: (id) => `/quinielas/${id}/claim-links`,
       providesTags: (_result, _error, id) => [{ type: 'QuinielaDetail', id }],
     }),
 
@@ -364,9 +385,13 @@ export const {
   useLoginMutation,
   useRegisterMutation,
   useGetMeQuery,
+  useGetClaimInfoQuery,
+  useClaimAccountMutation,
   useGetLeaguesQuery,
   useGetQuinielasQuery,
   useGetQuinielaByIdQuery,
+  useGetClaimLinksQuery,
+  useLazyGetClaimLinksQuery,
   useCreateQuinielaMutation,
   useJoinQuinielaMutation,
   useUpdateMemberPaymentMutation,
