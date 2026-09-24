@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../store';
+import { setActiveQuinielaId } from '../store/quinielaSlice';
 import {
   useGetQuinielaByIdQuery,
   useUpdateMemberPaymentMutation,
@@ -9,6 +10,7 @@ import {
 
 export const useDashboard = () => {
   const [copiedCode, setCopiedCode] = useState(false);
+  const dispatch = useDispatch();
   const activeQuinielaId = useSelector(
     (state: RootState) => state.quiniela.activeQuinielaId
   );
@@ -16,14 +18,27 @@ export const useDashboard = () => {
 
   const { data: quinielasData, isLoading: isQuinielasListLoading } =
     useGetQuinielasQuery();
-  const hasQuinielas = (quinielasData?.data?.length || 0) > 0;
+  const quinielas = quinielasData?.data || [];
+  const hasQuinielas = quinielas.length > 0;
+
+  // Si no hay quiniela activa en Redux o no pertenece a la lista actual, usar la primera por defecto
+  const effectiveActiveId =
+    activeQuinielaId && quinielas.some((q) => q.id === activeQuinielaId)
+      ? activeQuinielaId
+      : quinielas[0]?.id ?? null;
+
+  useEffect(() => {
+    if (effectiveActiveId && effectiveActiveId !== activeQuinielaId) {
+      dispatch(setActiveQuinielaId(effectiveActiveId));
+    }
+  }, [effectiveActiveId, activeQuinielaId, dispatch]);
 
   const {
     data: quinielaDetailResponse,
     isLoading: isDetailLoading,
     error: detailError,
-  } = useGetQuinielaByIdQuery(activeQuinielaId!, {
-    skip: !activeQuinielaId,
+  } = useGetQuinielaByIdQuery(effectiveActiveId!, {
+    skip: !effectiveActiveId,
   });
 
   const [updatePaymentMutation] = useUpdateMemberPaymentMutation();

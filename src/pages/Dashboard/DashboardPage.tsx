@@ -151,15 +151,55 @@ export const DashboardPage: React.FC = () => {
             <span>Unirme con código de invitación</span>
           </button>
         </div>
+
+        {/* CTA Directo para Participantes Migrados */}
+        <div style={{ marginTop: '2rem', width: '100%', maxWidth: '520px' }}>
+          <div
+            className="card"
+            style={{
+              padding: '1.5rem',
+              border: '1px dashed rgba(16, 185, 129, 0.4)',
+              backgroundColor: 'rgba(16, 185, 129, 0.05)',
+              textAlign: 'center',
+            }}
+          >
+            <h4
+              style={{
+                margin: '0 0 0.5rem 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                color: 'var(--text-main)',
+              }}
+            >
+              <Trophy size={18} className="text-warning" />
+              ¿Ya participabas en la Quiniela Apertura 2026?
+            </h4>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+              Si tienes aciertos y puntos de las jornadas 1 a la 9, selecciona tu apodo para ligarlo a tu cuenta de inmediato.
+            </p>
+            <Link
+              to="/activar"
+              className="btn btn--primary"
+              style={{ width: '100%', display: 'inline-flex', justifyContent: 'center' }}
+            >
+              👤 Seleccionar mi nombre y ligar mis puntos
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!quiniela) {
     return (
-      <div className="card" style={{ textAlign: 'center', padding: 'var(--space-xl)' }}>
-        <p style={{ color: 'var(--text-secondary)' }}>
-          Selecciona una quiniela en la barra superior para ver su información.
+      <div className="card" style={{ textAlign: 'center', padding: 'var(--space-2xl) var(--space-md)' }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+          Cargando información de tu quiniela...
+        </p>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+          Si tarda en cargar, selecciona tu quiniela en el selector de la barra superior.
         </p>
       </div>
     );

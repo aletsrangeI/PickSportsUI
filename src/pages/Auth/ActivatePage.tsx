@@ -21,6 +21,7 @@ import {
   useLinkCurrentUserMutation,
 } from '../../services/api';
 import { setCredentials } from '../../store/authSlice';
+import { setActiveQuinielaId } from '../../store/quinielaSlice';
 import './ActivatePage.css';
 
 export const ActivatePage: React.FC = () => {
@@ -94,6 +95,8 @@ export const ActivatePage: React.FC = () => {
       const response = await linkCurrentUser({ token: selectedToken }).unwrap();
       if (response.isSuccess && response.data) {
         dispatch(setCredentials(response.data));
+        const targetQId = claimInfo?.quinielaId || unclaimedData?.quinielaId || 4;
+        dispatch(setActiveQuinielaId(targetQId));
         navigate('/', { replace: true });
       } else {
         setSubmitError(response.message || 'Error al vincular el historial.');
@@ -133,6 +136,8 @@ export const ActivatePage: React.FC = () => {
 
       if (response.isSuccess && response.data) {
         dispatch(setCredentials(response.data));
+        const targetQId = claimInfo?.quinielaId || unclaimedData?.quinielaId || 4;
+        dispatch(setActiveQuinielaId(targetQId));
         navigate('/', { replace: true });
       } else {
         setSubmitError(response.message || 'Error al activar la cuenta.');
