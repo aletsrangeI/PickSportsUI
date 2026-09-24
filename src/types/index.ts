@@ -119,6 +119,22 @@ export interface MigratedMemberClaimLink {
   shareMessage?: string;
 }
 
+export interface UnclaimedMemberItem {
+  memberId: number;
+  userId: number;
+  alias: string;
+  totalHits: number;
+  totalUpsets: number;
+  currentStreak: number;
+  claimToken: string;
+}
+
+export interface UnclaimedQuinielaMembersData {
+  quinielaId: number;
+  quinielaName: string;
+  members: UnclaimedMemberItem[];
+}
+
 export interface League {
   id: number;
   sportId?: number;

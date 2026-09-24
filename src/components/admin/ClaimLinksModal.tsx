@@ -121,12 +121,78 @@ export const ClaimLinksModal: React.FC<ClaimLinksModalProps> = ({
             </div>
           )}
 
-          {/* Participantes pendientes de activación */}
+          {/* BANNER RECOMENDADO: ENLACE GENÉRICO PARA LA COMUNIDAD / GRUPO */}
+          <div className="claim-modal__community-banner">
+            <div className="claim-modal__community-header">
+              <div className="claim-modal__community-title-row">
+                <Sparkles size={18} className="text-primary" />
+                <h4 className="claim-modal__community-title">Enlace Único para el Grupo de WhatsApp</h4>
+                <span className="badge badge--success" style={{ backgroundColor: '#25d366', color: '#073315' }}>
+                  Más Fácil
+                </span>
+              </div>
+              <p className="claim-modal__community-desc">
+                Pega este mensaje en tu grupo. Cada amigo entrará, seleccionará su nombre de una lista desplegable y activará su cuenta en 1 minuto.
+              </p>
+            </div>
+
+            <div className="claim-modal__community-box">
+              <span className="claim-modal__community-box-label">Mensaje listo para enviar:</span>
+              <p className="claim-modal__community-box-text">
+                "¡Muchachos! Ya tenemos la app lista para meter los pronósticos de la Jornada 10 ⚽🔥{"\n\n"}
+                Para activar su cuenta y que se les pasen en automático todos sus puntos acumulados, solo entren a este enlace y seleccionen su nombre:{"\n\n"}
+                👉 {window.location.origin}/activar{"\n\n"}
+                ¡No olviden meter sus picks antes de que arranquen los partidos! 🏆"
+              </p>
+            </div>
+
+            <div className="claim-modal__community-actions">
+              <button
+                type="button"
+                className="btn btn--primary claim-card__btn-wa"
+                style={{ flex: '1 1 200px' }}
+                onClick={() =>
+                  handleOpenWhatsApp(
+                    `¡Muchachos! Ya tenemos la app lista para meter los pronósticos de la Jornada 10 ⚽🔥\n\nPara activar su cuenta y que se les pasen en automático todos sus puntos y aciertos acumulados, solo entren a este enlace y seleccionen su nombre:\n\n👉 ${window.location.origin}/activar\n\n¡No olviden meter sus picks antes de que arranquen los partidos! 🏆`
+                  )
+                }
+              >
+                <MessageCircle size={17} />
+                <span>Enviar al Grupo de WhatsApp</span>
+                <ExternalLink size={13} />
+              </button>
+
+              <button
+                type="button"
+                className="btn btn--outline"
+                onClick={() =>
+                  handleCopyMessage(
+                    99999,
+                    `¡Muchachos! Ya tenemos la app lista para meter los pronósticos de la Jornada 10 ⚽🔥\n\nPara activar su cuenta y que se les pasen en automático todos sus puntos y aciertos acumulados, solo entren a este enlace y seleccionen su nombre:\n\n👉 ${window.location.origin}/activar\n\n¡No olviden meter sus picks antes de que arranquen los partidos! 🏆`
+                  )
+                }
+              >
+                {copiedId === 'msg-99999' ? <Check size={16} className="text-primary" /> : <Copy size={16} />}
+                <span>{copiedId === 'msg-99999' ? '¡Mensaje Copiado!' : 'Copiar Mensaje'}</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn btn--outline"
+                onClick={() => handleCopyLink(99999, `${window.location.origin}/activar`)}
+              >
+                {copiedId === 'link-99999' ? <Check size={16} className="text-primary" /> : <Share2 size={16} />}
+                <span>{copiedId === 'link-99999' ? '¡Link Copiado!' : 'Copiar Link'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Participantes pendientes de activación individual */}
           {pendingMembers.length > 0 && (
-            <div className="claim-modal__section">
+            <div className="claim-modal__section" style={{ marginTop: '1.75rem' }}>
               <h4 className="claim-modal__section-title">
                 <Clock size={16} className="text-warning" />
-                Por Activar ({pendingMembers.length})
+                Enlaces Individuales por Persona ({pendingMembers.length})
               </h4>
 
               <div className="claim-modal__list">

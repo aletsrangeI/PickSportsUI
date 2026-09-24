@@ -194,3 +194,47 @@
     transform: rotate(360deg);
   }
 }
+
+/* Selector estilizado para link genérico */
+.activate-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.activate-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.5rem !important;
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  background-color: var(--bg-surface) !important;
+  cursor: pointer;
+}
+
+.activate-select-arrow {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+/* Caja de usuario ya logueado */
+.activate-logged-in-box {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  margin-top: var(--space-sm);
+}
+
+.activate-logged-in-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+}

@@ -33,6 +33,8 @@ import type {
   ClaimInfo,
   ClaimAccountRequest,
   MigratedMemberClaimLink,
+  UnclaimedMemberItem,
+  UnclaimedQuinielaMembersData,
 } from '../types';
 
 export const api = createApi({
@@ -87,6 +89,21 @@ export const api = createApi({
     claimAccount: builder.mutation<ApiResponse<AuthResponse>, ClaimAccountRequest>({
       query: (body) => ({
         url: '/auth/claim',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Auth', 'Quinielas', 'QuinielaDetail', 'Standings'],
+    }),
+
+    getUnclaimedMembers: builder.query<ApiResponse<UnclaimedQuinielaMembersData>, number | void>({
+      query: (quinielaId) =>
+        quinielaId ? `/auth/unclaimed-members?quinielaId=${quinielaId}` : '/auth/unclaimed-members',
+      providesTags: ['QuinielaDetail', 'Auth'],
+    }),
+
+    linkCurrentUser: builder.mutation<ApiResponse<AuthResponse>, { token: string }>({
+      query: (body) => ({
+        url: '/auth/link-current-user',
         method: 'POST',
         body,
       }),
@@ -387,6 +404,9 @@ export const {
   useGetMeQuery,
   useGetClaimInfoQuery,
   useClaimAccountMutation,
+  useGetUnclaimedMembersQuery,
+  useLazyGetUnclaimedMembersQuery,
+  useLinkCurrentUserMutation,
   useGetLeaguesQuery,
   useGetQuinielasQuery,
   useGetQuinielaByIdQuery,
