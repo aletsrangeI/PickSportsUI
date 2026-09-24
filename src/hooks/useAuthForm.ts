@@ -10,6 +10,10 @@ export const useAuthForm = (defaultEmail: string = '') => {
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [unclaimedAccount, setUnclaimedAccount] = useState<{
+    token: string;
+    alias: string;
+  } | null>(null);
   const [isSuccessRegistered, setIsSuccessRegistered] = useState(false);
   const [registeredUser, setRegisteredUser] = useState<{
     username: string;
@@ -25,6 +29,7 @@ export const useAuthForm = (defaultEmail: string = '') => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setUnclaimedAccount(null);
 
     try {
       const response = await loginMutation({ email, password }).unwrap();
@@ -35,9 +40,21 @@ export const useAuthForm = (defaultEmail: string = '') => {
         setErrorMessage(response.message || 'Error al iniciar sesión.');
       }
     } catch (err: any) {
-      setErrorMessage(
-        err?.data?.message || 'Credenciales incorrectas o error en el servidor.'
+      const unclaimedError = err?.data?.errors?.find(
+        (e: any) => e.propertyName === 'UNCLAIMED_ACCOUNT'
       );
+      if (unclaimedError) {
+        const aliasError = err?.data?.errors?.find((e: any) => e.propertyName === 'Alias');
+        setUnclaimedAccount({
+          token: unclaimedError.errorMessage,
+          alias: aliasError?.errorMessage || email,
+        });
+        setErrorMessage(err.data.message);
+      } else {
+        setErrorMessage(
+          err?.data?.message || 'Credenciales incorrectas o error en el servidor.'
+        );
+      }
     }
   };
 
@@ -80,6 +97,7 @@ export const useAuthForm = (defaultEmail: string = '') => {
     displayName,
     setDisplayName,
     errorMessage,
+    unclaimedAccount,
     isSuccessRegistered,
     registeredUser,
     isLoading: isLoginLoading || isRegisterLoading,
