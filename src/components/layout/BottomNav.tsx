@@ -31,8 +31,11 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <Calendar size={19} className="bottom-nav__icon" />
+            <div className="bottom-nav__icon-box">
+              <Calendar size={18} strokeWidth={1.75} className="bottom-nav__icon" />
+            </div>
             <span className="bottom-nav__label">Picks</span>
+            <span className="bottom-nav__pip" aria-hidden="true" />
           </NavLink>
         </li>
         <li className="bottom-nav__item">
@@ -42,8 +45,11 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <CalendarDays size={19} className="bottom-nav__icon" />
+            <div className="bottom-nav__icon-box">
+              <CalendarDays size={18} strokeWidth={1.75} className="bottom-nav__icon" />
+            </div>
             <span className="bottom-nav__label">Partidos</span>
+            <span className="bottom-nav__pip" aria-hidden="true" />
           </NavLink>
         </li>
         <li className="bottom-nav__item">
@@ -53,8 +59,11 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <Trophy size={19} className="bottom-nav__icon" />
+            <div className="bottom-nav__icon-box">
+              <Trophy size={18} strokeWidth={1.75} className="bottom-nav__icon" />
+            </div>
             <span className="bottom-nav__label">Posiciones</span>
+            <span className="bottom-nav__pip" aria-hidden="true" />
           </NavLink>
         </li>
         <li className="bottom-nav__item">
@@ -64,8 +73,11 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <Award size={19} className="bottom-nav__icon" />
+            <div className="bottom-nav__icon-box">
+              <Award size={18} strokeWidth={1.75} className="bottom-nav__icon" />
+            </div>
             <span className="bottom-nav__label">Premios</span>
+            <span className="bottom-nav__pip" aria-hidden="true" />
           </NavLink>
         </li>
         {isOwnerOrAdmin && (
@@ -76,8 +88,11 @@ export const BottomNav: React.FC = () => {
                 `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
               }
             >
-              <Share2 size={19} className="bottom-nav__icon" />
+              <div className="bottom-nav__icon-box">
+                <Share2 size={18} strokeWidth={1.75} className="bottom-nav__icon" />
+              </div>
               <span className="bottom-nav__label">WhatsApp</span>
+              <span className="bottom-nav__pip" aria-hidden="true" />
             </NavLink>
           </li>
         )}
@@ -88,8 +103,11 @@ export const BottomNav: React.FC = () => {
               `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
             }
           >
-            <Settings size={19} className="bottom-nav__icon" />
+            <div className="bottom-nav__icon-box">
+              <Settings size={18} strokeWidth={1.75} className="bottom-nav__icon" />
+            </div>
             <span className="bottom-nav__label">Ajustes</span>
+            <span className="bottom-nav__pip" aria-hidden="true" />
           </NavLink>
         </li>
       </ul>

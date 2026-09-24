@@ -1,4 +1,4 @@
-/* Floating Liquid Glass Navigation Bar */
+/* Floating Liquid Glass Navigation Bar - High-End Luxury Edition */
 .bottom-nav {
   display: none;
   position: fixed;
@@ -6,47 +6,45 @@
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 24px);
-  max-width: 480px;
-  height: var(--bottom-nav-height, 60px);
-  padding: 5px 6px;
+  max-width: 450px;
+  height: var(--bottom-nav-height, 62px);
+  padding: 4px 4px;
   box-sizing: border-box;
   border-radius: var(--radius-full);
   z-index: 1000;
   overflow: hidden;
 
-  /* Tempered Liquid Glass Multi-Layer Surface */
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.16) 0%,
-    rgba(255, 255, 255, 0.05) 20%,
-    rgba(18, 24, 34, 0.72) 75%,
-    rgba(13, 17, 23, 0.86) 100%
-  );
-  backdrop-filter: blur(24px) saturate(190%) contrast(105%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(105%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  /* Optical Liquid Glass Multi-Layer Surface with Cylindrical Mineral Sheen */
+  background:
+    radial-gradient(120% 100% at 82% 0%, rgba(147, 197, 253, 0.14) 0%, transparent 55%),
+    radial-gradient(100% 80% at 18% 0%, rgba(255, 255, 255, 0.18) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(28, 35, 48, 0.72) 0%, rgba(14, 18, 26, 0.88) 100%);
+  backdrop-filter: blur(28px) saturate(200%) contrast(106%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) contrast(106%);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(255, 255, 255, 0.40);
   box-shadow:
-    0 20px 42px -8px rgba(0, 0, 0, 0.75),
-    0 8px 18px -4px rgba(0, 0, 0, 0.45),
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.5),
-    inset 0 0 16px 0 rgba(255, 255, 255, 0.03);
+    0 24px 50px -10px rgba(0, 0, 0, 0.82),
+    0 8px 18px -4px rgba(0, 0, 0, 0.50),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.65),
+    inset 0 0 18px 0 rgba(255, 255, 255, 0.02);
   transition: transform var(--transition-normal), opacity var(--transition-normal);
 }
 
-/* Curved Specular Reflection Flare across upper half */
+/* Curved Specular Reflection Flare across upper half (Optical Lens Curvature) */
 .bottom-nav::before {
   content: '';
   position: absolute;
   top: 1px;
-  left: 14px;
-  right: 14px;
-  height: 48%;
+  left: 18px;
+  right: 18px;
+  height: 44%;
   border-radius: 9999px 9999px 0 0;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.22) 0%,
-    rgba(255, 255, 255, 0.05) 55%,
+    rgba(255, 255, 255, 0.20) 0%,
+    rgba(255, 255, 255, 0.04) 60%,
     rgba(255, 255, 255, 0) 100%
   );
   pointer-events: none;
@@ -58,12 +56,12 @@
   z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
   height: 100%;
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 3px;
+  gap: 0;
 }
 
 .bottom-nav__item {
@@ -73,80 +71,125 @@
   min-width: 0;
 }
 
-.bottom-nav__link {
-  position: relative;
+/* Individual Link Container - Strictly no text decoration */
+.bottom-nav__link,
+.bottom-nav__link:hover,
+.bottom-nav__link:focus,
+.bottom-nav__link:active,
+.bottom-nav__link--active {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  padding: 4px 2px;
+  padding: 2px 1px;
   border-radius: var(--radius-full);
-  color: rgba(240, 246, 252, 0.65);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  text-decoration: none;
-  border: 1px solid transparent;
+  color: rgba(240, 246, 252, 0.60);
+  text-decoration: none !important;
   transition: all var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  position: relative;
+  gap: 1px;
+}
+
+.bottom-nav__link:hover {
+  color: #ffffff;
+  text-decoration: none !important;
+}
+
+.bottom-nav__link:active {
+  transform: scale(0.93);
+}
+
+/* Liquid Glass Lens for Icon (Embossed Glass Capsule) */
+.bottom-nav__icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.bottom-nav__link:hover:not(.bottom-nav__link--active) .bottom-nav__icon-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Active State: Sophisticated Tempered Glass Lens with Specular Highlight */
+.bottom-nav__link--active .bottom-nav__icon-box {
+  background: radial-gradient(
+    100% 100% at 50% 15%,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.10) 55%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-top: 1px solid rgba(255, 255, 255, 0.68);
+  box-shadow:
+    inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.70),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.45),
+    0 3px 10px rgba(0, 0, 0, 0.40),
+    0 0 14px rgba(16, 185, 129, 0.30);
 }
 
 .bottom-nav__icon {
   transition: transform var(--transition-fast), color var(--transition-fast), filter var(--transition-fast);
+  color: currentColor;
   flex-shrink: 0;
-}
-
-.bottom-nav__label {
-  font-size: 0.6875rem;
-  line-height: 1.1;
-  margin-top: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  transition: color var(--transition-fast);
-}
-
-.bottom-nav__link:hover:not(.bottom-nav__link--active) {
-  color: #f0f6fc;
-  background: rgba(255, 255, 255, 0.06);
-  text-decoration: none;
-}
-
-.bottom-nav__link:active {
-  transform: scale(0.94);
-}
-
-/* Active Pill Capsule with Liquid Glass Interior */
-.bottom-nav__link--active {
-  color: #ffffff;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.24) 0%,
-    rgba(255, 255, 255, 0.07) 60%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  box-shadow:
-    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35),
-    0 2px 10px rgba(0, 0, 0, 0.3),
-    0 0 14px var(--color-primary-glow);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .bottom-nav__link--active .bottom-nav__icon {
   color: var(--color-primary);
-  filter: drop-shadow(0 0 6px var(--color-primary-glow));
-  transform: translateY(-1px) scale(1.06);
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.70));
+  transform: translateY(-0.5px);
+}
+
+/* Micro-Typography */
+.bottom-nav__label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 1;
+  margin-top: 2px;
+  color: rgba(240, 246, 252, 0.52);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: color var(--transition-fast), font-weight var(--transition-fast);
+  text-decoration: none !important;
+  letter-spacing: 0.01em;
+}
+
+.bottom-nav__link:hover .bottom-nav__label {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none !important;
 }
 
 .bottom-nav__link--active .bottom-nav__label {
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 600;
+  text-decoration: none !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+/* Luminous Micro-Pip Indicator */
+.bottom-nav__pip {
+  width: 3px;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background-color: transparent;
+  transition: all var(--transition-fast);
+  margin-top: 1px;
+}
+
+.bottom-nav__link--active .bottom-nav__pip {
+  background-color: var(--color-primary);
+  box-shadow: 0 0 6px var(--color-primary);
 }
 
 /* Responsive Display */
@@ -158,34 +201,38 @@
   }
 }
 
-/* Extra small mobile viewport optimizations */
-@media (max-width: 380px) {
+/* Extra small mobile viewports (< 370px) */
+@media (max-width: 370px) {
   .bottom-nav {
     width: calc(100% - 16px);
-    padding: 3px 4px;
-    height: 56px;
+    padding: 3px 2px;
+    height: 58px;
     bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   }
 
-  .bottom-nav__label {
-    font-size: 0.625rem;
+  .bottom-nav__icon-box {
+    width: 34px;
+    height: 26px;
   }
 
-  .bottom-nav__link {
-    padding: 2px 1px;
+  .bottom-nav__label {
+    font-size: 0.5625rem;
+    margin-top: 1px;
+  }
+
+  .bottom-nav__pip {
+    display: none;
   }
 }
 
 /* Light Theme Support */
 [data-theme="light"] .bottom-nav {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.90) 0%,
-    rgba(240, 243, 248, 0.80) 100%
-  );
+  background:
+    radial-gradient(120% 100% at 80% 0%, rgba(200, 220, 255, 0.35) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.90) 0%, rgba(240, 243, 248, 0.82) 100%);
   border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow:
-    0 16px 36px -6px rgba(0, 0, 0, 0.15),
+    0 18px 40px -8px rgba(0, 0, 0, 0.16),
     0 4px 12px rgba(0, 0, 0, 0.08),
     inset 0 1px 2px 0 rgba(255, 255, 255, 0.98);
 }
@@ -203,19 +250,32 @@
 }
 
 [data-theme="light"] .bottom-nav__link:hover:not(.bottom-nav__link--active) {
-  background: rgba(0, 0, 0, 0.04);
   color: #1f2328;
 }
 
-[data-theme="light"] .bottom-nav__link--active {
-  background: linear-gradient(
-    180deg,
+[data-theme="light"] .bottom-nav__link:hover:not(.bottom-nav__link--active) .bottom-nav__icon-box {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .bottom-nav__link--active .bottom-nav__icon-box {
+  background: radial-gradient(
+    100% 100% at 50% 15%,
     rgba(255, 255, 255, 0.95) 0%,
-    rgba(240, 242, 245, 0.85) 100%
+    rgba(240, 244, 248, 0.85) 100%
   );
-  border-color: rgba(16, 185, 129, 0.4);
-  color: #1f2328;
+  border: 1px solid rgba(16, 185, 129, 0.35);
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.08),
     inset 0 1px 1px #ffffff;
+}
+
+[data-theme="light"] .bottom-nav__link--active .bottom-nav__icon {
+  color: var(--color-primary);
+  filter: none;
+}
+
+[data-theme="light"] .bottom-nav__link--active .bottom-nav__label {
+  color: #1f2328;
+  font-weight: 600;
+  text-shadow: none;
 }
