@@ -11,6 +11,7 @@ import { StandingsPage } from './pages/Standings/StandingsPage';
 import { AwardsPage } from './pages/Awards/AwardsPage';
 import { WhatsAppPage } from './pages/WhatsApp/WhatsAppPage';
 import { MigrationPage } from './pages/Admin/MigrationPage';
+import { SettingsPage } from './pages/Settings/SettingsPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -72,7 +73,7 @@ export const App: React.FC = () => {
           <Route path="standings" element={<StandingsPage />} />
           <Route path="awards" element={<AwardsPage />} />
           <Route path="share" element={<WhatsAppPage />} />
-          <Route path="settings" element={<DashboardPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="fixtures" element={<FixturesPage />} />
           <Route
             path="admin/migracion"
