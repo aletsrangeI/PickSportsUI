@@ -10,6 +10,7 @@ import {
   useLockAndAutofillMutation,
 } from '../services/api';
 import type { PickItem, Match } from '../types';
+import { formatDeadline } from '../utils/dateUtils';
 
 export interface UsePicksReturn {
   activeQuinielaId: number | null;
@@ -28,11 +29,14 @@ export interface UsePicksReturn {
   firstGameUtc?: string | null;
   completedPicksCount: number;
   totalMatchesCount: number;
+  isComplete: boolean;
+  deadlineFormatted: string;
+  recentlyModifiedMatchId: number | null;
   isOwnerOrAdmin: boolean;
   isLoading: boolean;
   isSubmitting: boolean;
   isLocking: boolean;
-  toast: { message: string; type: 'success' | 'warning' | 'error' } | null;
+  toast: { message: string; type: 'success' | 'warning' | 'error'; isModification?: boolean } | null;
   clearToast: () => void;
   handleVote: (matchId: number, pickAbbr: string) => Promise<boolean>;
   handleLockAndAutofill: () => Promise<void>;
@@ -43,9 +47,11 @@ export const usePicks = (): UsePicksReturn => {
   const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const [selectedWeekId, setSelectedWeekId] = useState<number | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'warning' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'warning' | 'error'; isModification?: boolean } | null>(null);
+  const [recentlyModifiedMatchId, setRecentlyModifiedMatchId] = useState<number | null>(null);
 
   const clearToast = () => setToast(null);
+
 
   // 1. Cargar detalle de la quiniela activa
   const { data: quinielaDetailResp } = useGetQuinielaByIdQuery(activeQuinielaId!, {
@@ -132,6 +138,19 @@ export const usePicks = (): UsePicksReturn => {
 
   const totalMatchesCount = matches.length;
   const completedPicksCount = Object.keys(userPicks).length;
+  const isComplete = totalMatchesCount > 0 && completedPicksCount >= totalMatchesCount;
+
+  // Fecha límite efectiva: firstGameUtc de la jornada o el partido más próximo
+  const earliestMatchDateUtc = useMemo(() => {
+    if (matches.length === 0) return null;
+    const sorted = [...matches].sort(
+      (a, b) => new Date(a.dateUtc).getTime() - new Date(b.dateUtc).getTime()
+    );
+    return sorted[0]?.dateUtc ?? null;
+  }, [matches]);
+
+  const effectiveDeadlineUtc = firstGameUtc || earliestMatchDateUtc;
+  const deadlineFormatted = useMemo(() => formatDeadline(effectiveDeadlineUtc), [effectiveDeadlineUtc]);
 
   // Manejo de votación táctil (1-tap)
   const handleVote = async (matchId: number, pickAbbr: string): Promise<boolean> => {
@@ -140,6 +159,9 @@ export const usePicks = (): UsePicksReturn => {
       setToast({ message: 'La jornada ya está bloqueada para votación.', type: 'warning' });
       return false;
     }
+
+    const previousPick = userPicks[matchId];
+    const isModification = Boolean(previousPick && previousPick.pickAbbr && previousPick.pickAbbr !== pickAbbr);
 
     try {
       const response = await submitPickMutation({
@@ -150,8 +172,25 @@ export const usePicks = (): UsePicksReturn => {
       }).unwrap();
 
       if (response.isSuccess) {
-        setToast({ message: 'Pronóstico registrado con éxito', type: 'success' });
-        setTimeout(() => setToast(null), 1800);
+        setRecentlyModifiedMatchId(matchId);
+        setTimeout(() => {
+          setRecentlyModifiedMatchId((curr) => (curr === matchId ? null : curr));
+        }, 3500);
+
+        if (isModification) {
+          setToast({
+            message: `Pronóstico modificado a ${pickAbbr}. Recuerda que puedes seguir cambiándolo antes de la fecha límite.`,
+            type: 'success',
+            isModification: true,
+          });
+        } else {
+          setToast({
+            message: `Pronóstico registrado: ${pickAbbr}. Guardado automáticamente.`,
+            type: 'success',
+            isModification: false,
+          });
+        }
+        setTimeout(() => setToast(null), 3200);
         return true;
       } else {
         setToast({ message: response.message || 'Error al guardar pronóstico', type: 'error' });
@@ -205,6 +244,9 @@ export const usePicks = (): UsePicksReturn => {
     firstGameUtc,
     completedPicksCount,
     totalMatchesCount,
+    isComplete,
+    deadlineFormatted,
+    recentlyModifiedMatchId,
     isOwnerOrAdmin,
     isLoading: isLoadingPicks,
     isSubmitting,

@@ -32,3 +32,22 @@ export function formatMatchTime(dateStr: string | null | undefined): string {
   if (!d) return '';
   return d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 }
+
+/**
+ * Formatea la fecha y hora límite de forma legible: ej. "vie, 26 de sep • 19:00 hrs"
+ */
+export function formatDeadline(dateStr: string | null | undefined): string {
+  const d = parseUtcDate(dateStr);
+  if (!d) return 'Antes del silbatazo inicial';
+  const dateFormatted = d.toLocaleDateString('es-MX', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+  const timeFormatted = d.toLocaleTimeString('es-MX', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${dateFormatted} • ${timeFormatted} hrs`;
+}
+

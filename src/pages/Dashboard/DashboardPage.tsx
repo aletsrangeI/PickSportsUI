@@ -4,6 +4,11 @@ import {
   Trophy,
   Copy,
   Check,
+  CheckCircle2,
+  Clock,
+  Edit3,
+  Info,
+  X,
   Users,
   DollarSign,
   Plus,
@@ -58,6 +63,9 @@ export const DashboardPage: React.FC = () => {
     weekName,
     completedPicksCount,
     totalMatchesCount,
+    isComplete,
+    deadlineFormatted,
+    recentlyModifiedMatchId,
     isOwnerOrAdmin: isPicksAdmin,
     isSubmitting: isSubmittingPick,
     isLocking: isLockingWeek,
@@ -342,7 +350,10 @@ export const DashboardPage: React.FC = () => {
               <div className="dashboard-picks-progress">
                 <div className="dashboard-picks-progress__label">
                   <span>Tus Pronósticos:</span>
-                  <strong>{completedPicksCount} de {totalMatchesCount} ({progressPct}%)</strong>
+                  <strong>
+                    {completedPicksCount} de {totalMatchesCount} ({progressPct}%)
+                    {isComplete ? ' ✓' : ''}
+                  </strong>
                 </div>
                 <div className="dashboard-picks-progress__bar">
                   <div
@@ -369,15 +380,61 @@ export const DashboardPage: React.FC = () => {
             )}
           </div>
 
-          {/* Toast Alert Feedback */}
-          {picksToast && (
-            <div
-              className={`dashboard-toast-alert dashboard-toast-alert--${picksToast.type}`}
-              onClick={clearPicksToast}
-              style={{ cursor: 'pointer' }}
-            >
-              {picksToast.type === 'success' ? <Check size={16} /> : <AlertCircle size={16} />}
-              <span>{picksToast.message}</span>
+          {/* Banner de Confirmación: Quiniela Completa */}
+          {isComplete && (
+            <div className="dashboard-completion-card">
+              <div className="dashboard-completion-card__icon-box">
+                <CheckCircle2 size={28} />
+              </div>
+              <div className="dashboard-completion-card__content">
+                <div className="dashboard-completion-card__header">
+                  <h3 className="dashboard-completion-card__title">
+                    ¡Quiniela Completa! Pronósticos Registrados
+                  </h3>
+                  <span className="badge badge--primary">
+                    ✓ {completedPicksCount} de {totalMatchesCount} Listos
+                  </span>
+                </div>
+                <p className="dashboard-completion-card__desc">
+                  Has llenado todos los partidos de {weekName}. Tu participación está asegurada y tus selecciones están guardadas en el sistema.
+                </p>
+                <div className="dashboard-completion-card__footer">
+                  <div className="dashboard-completion-card__deadline">
+                    <Clock size={15} />
+                    <span>
+                      Fecha límite: <strong>{deadlineFormatted}</strong>
+                    </span>
+                  </div>
+                  {!isWeekLocked && (
+                    <div className="dashboard-completion-card__modifiable-badge">
+                      <Edit3 size={14} />
+                      <span>Puedes modificar cualquier pick libremente antes de la fecha límite</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tarjeta Informativa: Quiniela Incompleta */}
+          {!isComplete && totalMatchesCount > 0 && !isWeekLocked && (
+            <div className="dashboard-pending-card">
+              <div className="dashboard-pending-card__header">
+                <span className="dashboard-pending-card__title">
+                  <Info size={16} style={{ color: 'var(--color-accent)' }} />
+                  Te faltan {totalMatchesCount - completedPicksCount} partido{totalMatchesCount - completedPicksCount > 1 ? 's' : ''} por pronosticar
+                </span>
+                <span className="dashboard-pending-card__deadline">
+                  <Clock size={13} />
+                  Límite: <strong>{deadlineFormatted}</strong>
+                </span>
+              </div>
+              <div className="dashboard-pending-card__meta">
+                <span className="dashboard-pending-card__hint">
+                  <Edit3 size={13} />
+                  Tus picks se guardan al hacer clic y puedes modificarlos en cualquier momento antes de la fecha límite.
+                </span>
+              </div>
             </div>
           )}
 
@@ -398,6 +455,7 @@ export const DashboardPage: React.FC = () => {
                     allowsDraw={allowsDraw}
                     isWeekLocked={isWeekLocked}
                     isSubmitting={isSubmittingPick}
+                    isRecentlyModified={recentlyModifiedMatchId === match.id}
                     onSelectPick={handleVote}
                   />
                 </MatchCard>
@@ -688,6 +746,40 @@ export const DashboardPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Notificación flotante de confirmación (siempre visible con scroll) */}
+      {picksToast && (
+        <div
+          className={`dashboard-toast-floating dashboard-toast-floating--${
+            picksToast.isModification ? 'modification' : picksToast.type
+          }`}
+          onClick={clearPicksToast}
+          role="alert"
+        >
+          <div className="dashboard-toast-floating__content">
+            {picksToast.isModification ? (
+              <Edit3 size={18} />
+            ) : picksToast.type === 'success' ? (
+              <CheckCircle2 size={18} />
+            ) : (
+              <AlertCircle size={18} />
+            )}
+            <span>{picksToast.message}</span>
+          </div>
+          <button
+            type="button"
+            className="dashboard-toast-floating__close"
+            onClick={(e) => {
+              e.stopPropagation();
+              clearPicksToast();
+            }}
+            aria-label="Cerrar notificación"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
+

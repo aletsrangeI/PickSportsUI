@@ -9,6 +9,7 @@ interface MatchPickerProps {
   allowsDraw?: boolean;
   isWeekLocked?: boolean;
   isSubmitting?: boolean;
+  isRecentlyModified?: boolean;
   onSelectPick: (matchId: number, pickAbbr: string) => void;
 }
 
@@ -18,6 +19,7 @@ export const MatchPicker: React.FC<MatchPickerProps> = ({
   allowsDraw = true,
   isWeekLocked = false,
   isSubmitting = false,
+  isRecentlyModified = false,
   onSelectPick,
 }) => {
   const isMatchStarted = match.statusState !== 'pre';
@@ -196,6 +198,40 @@ export const MatchPicker: React.FC<MatchPickerProps> = ({
           <span className="match-picker__result-text">
             Tu pronóstico registrado: <strong>{selectedAbbr}</strong>
           </span>
+        </div>
+      )}
+
+      {/* Estado abierto / modificable antes de que inicie el partido */}
+      {!isMatchFinished && !isMatchLive && !isLocked && hasPick && (
+        <div
+          className={`match-picker__status-info ${
+            isRecentlyModified ? 'match-picker__status-info--highlight' : ''
+          }`}
+        >
+          <div className="match-picker__status-left">
+            <span
+              className={`match-picker__status-dot ${
+                isRecentlyModified ? 'match-picker__status-dot--pulse' : ''
+              }`}
+            />
+            <span className="match-picker__status-label">
+              {isRecentlyModified
+                ? '¡Selección modificada!'
+                : currentPick?.lastModified
+                ? 'Modificado'
+                : 'Pronóstico guardado'}
+              : <strong>{selectedAbbr}</strong>
+            </span>
+          </div>
+          <span className="match-picker__status-hint">
+            Puedes cambiarlo antes del partido
+          </span>
+        </div>
+      )}
+
+      {!isMatchFinished && !isMatchLive && !isLocked && !hasPick && (
+        <div className="match-picker__status-empty">
+          <span>Selecciona un equipo o empate para registrar tu pick</span>
         </div>
       )}
     </div>
