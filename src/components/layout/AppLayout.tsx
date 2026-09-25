@@ -8,15 +8,36 @@ import { PushNotificationPrompt } from '../notifications/PushNotificationPrompt'
 import { UpdateNotificationBanner } from '../common/UpdateNotificationBanner';
 import { ForceUpdateModal } from '../common/ForceUpdateModal';
 import { useAppVersionMonitor } from '../../hooks/useAppVersionMonitor';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../store';
+import { updateUser } from '../../store/authSlice';
+import { useGetMeQuery } from '../../services/api';
 
 import './AppLayout.css';
 
 export const AppLayout: React.FC = () => {
   const createModalRef = useRef<HTMLDialogElement>(null);
   const joinModalRef = useRef<HTMLDialogElement>(null);
+  const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+
+  // Sincronizar silenciosamente el perfil del usuario activo (incluyendo avatarUrl)
+  const { data: meResponse } = useGetMeQuery(undefined, { skip: !isAuthenticated });
+
+  React.useEffect(() => {
+    if (meResponse?.isSuccess && meResponse.data) {
+      const serverUser = meResponse.data;
+      if (
+        !currentUser ||
+        currentUser.avatarUrl !== serverUser.avatarUrl ||
+        currentUser.displayName !== serverUser.displayName ||
+        currentUser.role !== serverUser.role
+      ) {
+        dispatch(updateUser(serverUser));
+      }
+    }
+  }, [meResponse, currentUser, dispatch]);
 
   const {
     localVersion,

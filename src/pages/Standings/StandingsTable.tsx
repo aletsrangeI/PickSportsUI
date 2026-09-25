@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-table';
 import type { MemberStanding } from '../../types';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { UserAvatar } from '../../components/common/UserAvatar';
 import './StandingsTable.css';
 
 interface StandingsTableProps {
@@ -39,26 +40,11 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
           const member = info.row.original;
           return (
             <div className="standings-table__member">
-              <div className="standings-table__avatar">
-                {member.avatarUrl ? (
-                  <>
-                    <img
-                      src={member.avatarUrl}
-                      alt={member.alias}
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const fallback = e.currentTarget.parentElement?.querySelector('.standings-table__avatar-fallback') as HTMLElement;
-                        if (fallback) fallback.style.display = 'flex';
-                      }}
-                    />
-                    <span className="standings-table__avatar-fallback" style={{ display: 'none' }}>
-                      {member.alias.slice(0, 2).toUpperCase()}
-                    </span>
-                  </>
-                ) : (
-                  <span>{member.alias.slice(0, 2).toUpperCase()}</span>
-                )}
-              </div>
+              <UserAvatar
+                src={member.avatarUrl}
+                alt={member.alias}
+                size="sm"
+              />
               <div className="standings-table__name-col">
                 <span className="standings-table__alias">{member.alias}</span>
                 {member.displayName && member.displayName !== member.alias && (

@@ -6,6 +6,7 @@ import type { RootState } from '../../store';
 import { logout } from '../../store/authSlice';
 import { useGetQuinielasQuery } from '../../services/api';
 import { QuinielaSelector } from '../quiniela/QuinielaSelector';
+import { UserAvatar } from '../common/UserAvatar';
 import './Header.css';
 
 interface HeaderProps {
@@ -134,26 +135,12 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
 
               <div className="header__user-menu">
                 <Link to="/settings" className="header__user-avatar-link" title="Ajustes y Perfil">
-                  <div className="header__user-avatar" title={user?.displayName || user?.username}>
-                    {user?.avatarUrl ? (
-                      <img
-                        src={user.avatarUrl}
-                        alt={user?.displayName || user?.username}
-                        className="header__user-avatar-img"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const fallback = e.currentTarget.parentElement?.querySelector('.header__user-avatar-initial') as HTMLElement;
-                          if (fallback) fallback.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <span
-                      className="header__user-avatar-initial"
-                      style={{ display: user?.avatarUrl ? 'none' : 'flex' }}
-                    >
-                      {userInitial}
-                    </span>
-                  </div>
+                  <UserAvatar
+                    src={user?.avatarUrl}
+                    alt={user?.displayName || user?.username || 'Usuario'}
+                    size="sm"
+                    fallbackText={userInitial}
+                  />
                 </Link>
                 <Link to="/settings" className="header__user-name-link">
                   <span className="header__user-name">

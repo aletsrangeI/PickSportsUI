@@ -1,0 +1,555 @@
+/* SPEC-012 · El Periódico / Boletín Semanal — estética "The Monday Paper" */
+
+.bulletin-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-xl);
+}
+
+/* ─── Controles / Selector de ediciones ─────────────────────────────── */
+
+.bulletin-page__controls {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.bulletin-page__filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.bulletin-page__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.bulletin-page__select {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.9rem;
+  min-width: 220px;
+}
+
+.bulletin-page__loading {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: var(--space-2xl) 0;
+}
+
+.bulletin-page__empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  text-align: center;
+  color: var(--text-secondary);
+  padding: var(--space-2xl) var(--space-md);
+}
+
+.bulletin-page__empty-state h2 {
+  color: var(--text-main);
+  margin: 0;
+}
+
+/* ─── Papel del periódico ───────────────────────────────────────────── */
+
+.bulletin-paper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.bulletin-paper__masthead {
+  text-align: center;
+  border-bottom: 3px double var(--border-medium);
+  padding-bottom: var(--space-md);
+}
+
+.bulletin-paper__kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.bulletin-paper__title {
+  margin: var(--space-2xs) 0 var(--space-sm);
+  font-family: var(--font-family-heading);
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-main);
+}
+
+.bulletin-paper__meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.bulletin-paper__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bulletin-paper__badge--official {
+  background: rgba(var(--color-primary-rgb), 0.15);
+  color: var(--color-primary);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+}
+
+.bulletin-paper__badge--draft {
+  background: rgba(234, 179, 8, 0.12);
+  color: var(--color-warning);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.bulletin-paper__date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.bulletin-paper__section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-family-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-xs);
+}
+
+.bulletin-paper__empty-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* ─── Tablón del Administrador ──────────────────────────────────────── */
+
+.bulletin-banner {
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.08), rgba(59, 130, 246, 0.06));
+  border: 1px solid rgba(var(--color-primary-rgb), 0.35);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.bulletin-banner__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.bulletin-banner__icon {
+  color: var(--color-primary);
+}
+
+.bulletin-banner__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-main);
+  flex: 1;
+}
+
+.bulletin-banner__edit,
+.bulletin-banner__save,
+.bulletin-banner__cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.bulletin-banner__edit:hover,
+.bulletin-banner__cancel:hover {
+  background: var(--bg-card-hover);
+}
+
+.bulletin-banner__save {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--text-on-primary);
+}
+
+.bulletin-banner__save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bulletin-banner__text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-main);
+  white-space: pre-wrap;
+}
+
+.bulletin-banner__empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.bulletin-banner__editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.bulletin-banner__textarea {
+  width: 100%;
+  background: var(--bg-app);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: var(--space-xs);
+  resize: vertical;
+}
+
+.bulletin-banner__textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.bulletin-banner__actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.bulletin-banner__next {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: var(--space-xs);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.bulletin-banner__countdown {
+  margin-left: auto;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-full);
+  padding: 3px 12px;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Podio ─────────────────────────────────────────────────────────── */
+
+.bulletin-podium {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-md);
+}
+
+.podium-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.podium-card--gold {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.1), transparent 55%), var(--bg-card);
+}
+
+.podium-card--gold .podium-card__medal { color: #f59e0b; }
+
+.podium-card--silver {
+  border-color: rgba(148, 163, 184, 0.5);
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.08), transparent 55%), var(--bg-card);
+}
+
+.podium-card--silver .podium-card__medal { color: #94a3b8; }
+
+.podium-card--bronze {
+  border-color: rgba(180, 122, 76, 0.5);
+  background: linear-gradient(180deg, rgba(180, 122, 76, 0.1), transparent 55%), var(--bg-card);
+}
+
+.podium-card--bronze .podium-card__medal { color: #b47a4c; }
+
+.podium-card--default .podium-card__medal { color: var(--text-secondary); }
+
+.podium-card__medal {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.podium-card__position {
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.podium-card__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border-medium);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  margin: var(--space-2xs) 0;
+}
+
+.podium-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.podium-card__avatar span {
+  font-weight: 800;
+  color: var(--text-secondary);
+}
+
+.podium-card__alias {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.podium-card__stats {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.podium-card__extra {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 20px;
+}
+
+.podium-card__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.podium-card__chip--upset {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+}
+
+.podium-card__chip--infamy {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--color-danger);
+}
+
+/* ─── Salón de la Gloria / Sala de la Infamia ───────────────────────── */
+
+.bulletin-awards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-md);
+}
+
+.bulletin-award {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.bulletin-award__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.bulletin-award--mvp { border-top: 3px solid var(--color-accent); }
+.bulletin-award--mvp .bulletin-award__title { color: var(--color-accent); }
+
+.bulletin-award--surprise { border-top: 3px solid #8b5cf6; }
+.bulletin-award--surprise .bulletin-award__title { color: #a78bfa; }
+
+.bulletin-award--breaker { border-top: 3px solid #f97316; }
+.bulletin-award--breaker .bulletin-award__title { color: #fb923c; }
+
+.bulletin-awards-grid--infamy .bulletin-award {
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.06), transparent 45%), #14101a;
+  border-color: rgba(190, 24, 93, 0.35);
+}
+
+.bulletin-award--humillado .bulletin-award__title { color: var(--color-danger); }
+.bulletin-award--somnifero .bulletin-award__title { color: #60a5fa; }
+.bulletin-award--empate .bulletin-award__title { color: var(--color-warning); }
+
+[data-theme="light"] .bulletin-awards-grid--infamy .bulletin-award {
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.05), transparent 45%), var(--bg-card);
+}
+
+/* ─── Ganadores ─────────────────────────────────────────────────────── */
+
+.bulletin-winner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.bulletin-winner__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+}
+
+.bulletin-winner__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bulletin-winner__avatar span {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+}
+
+.bulletin-winner__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.bulletin-winner__alias {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bulletin-winner__notes {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bulletin-winner__value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ─── Rompe-Quinielas ───────────────────────────────────────────────── */
+
+.bulletin-breaker {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bulletin-breaker__match {
+  font-family: var(--font-family-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 0.03em;
+}
+
+.bulletin-breaker__accuracy {
+  font-size: 0.78rem;
+  color: #fb923c;
+}
+
+@media (max-width: 640px) {
+  .bulletin-paper {
+    padding: var(--space-md);
+    gap: var(--space-lg);
+  }
+
+  .bulletin-page__select {
+    min-width: 160px;
+  }
+}

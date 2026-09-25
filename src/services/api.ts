@@ -35,6 +35,7 @@ import type {
   MigratedMemberClaimLink,
   UnclaimedMemberItem,
   UnclaimedQuinielaMembersData,
+  WeeklyBulletinData,
 } from '../types';
 
 export const api = createApi({
@@ -50,7 +51,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards'],
+  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
     getLeagues: builder.query<ApiResponse<League[]>, void>({
@@ -338,6 +339,35 @@ export const api = createApi({
       providesTags: (_result, _error, { quinielaId }) => [{ type: 'Awards', id: quinielaId }],
     }),
 
+    // ─── SPEC-012 Boletín Semanal (El Periódico) ─────────────────────────────
+    getBulletin: builder.query<
+      ApiResponse<WeeklyBulletinData>,
+      { quinielaId: number; weekId?: number }
+    >({
+      query: ({ quinielaId, weekId }) =>
+        weekId
+          ? `/quinielas/${quinielaId}/bulletin?weekId=${weekId}`
+          : `/quinielas/${quinielaId}/bulletin`,
+      providesTags: (_result, _error, { quinielaId, weekId }) => [
+        { type: 'Bulletin', id: `${quinielaId}-${weekId ?? 'latest'}` },
+        { type: 'Bulletin', id: quinielaId },
+      ],
+    }),
+
+    updateBulletinAnnouncement: builder.mutation<
+      ApiResponse<WeeklyBulletinData>,
+      { quinielaId: number; weekId: number; announcement: string | null }
+    >({
+      query: ({ quinielaId, weekId, announcement }) => ({
+        url: `/quinielas/${quinielaId}/bulletin/${weekId}/announcement`,
+        method: 'PUT',
+        body: { announcement },
+      }),
+      invalidatesTags: (_result, _error, { quinielaId }) => [
+        { type: 'Bulletin', id: quinielaId },
+      ],
+    }),
+
     // ─── WhatsApp Reports ─────────────────────────────────────────────────────
     getWhatsAppReminder: builder.query<
       ApiResponse<WhatsAppReport>,
@@ -458,6 +488,9 @@ export const {
   useGetStandingsQuery,
   useScoreWeekMutation,
   useGetAwardsQuery,
+  // SPEC-012 Boletín Semanal
+  useGetBulletinQuery,
+  useUpdateBulletinAnnouncementMutation,
   // WhatsApp
   useGetWhatsAppReminderQuery,
   useGetWhatsAppSummaryQuery,

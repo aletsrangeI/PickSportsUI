@@ -10,6 +10,7 @@ import { FixturesPage } from './pages/Fixtures/FixturesPage';
 import { StandingsPage } from './pages/Standings/StandingsPage';
 import { AwardsPage } from './pages/Awards/AwardsPage';
 import { WhatsAppPage } from './pages/WhatsApp/WhatsAppPage';
+import { BulletinPage } from './pages/Bulletin/BulletinPage';
 import { MigrationPage } from './pages/Admin/MigrationPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 import { ActivatePage } from './pages/Auth/ActivatePage';
@@ -93,6 +94,7 @@ export const App: React.FC = () => {
           <Route index element={<DashboardPage />} />
           <Route path="standings" element={<StandingsPage />} />
           <Route path="awards" element={<AwardsPage />} />
+          <Route path="bulletin" element={<BulletinPage />} />
           <Route
             path="share"
             element={

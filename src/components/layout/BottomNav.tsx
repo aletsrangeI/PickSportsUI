@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Calendar, Trophy, Award, Share2, Settings, CalendarDays } from 'lucide-react';
+import { Calendar, Trophy, Award, Share2, Settings, CalendarDays, Newspaper } from 'lucide-react';
 import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import type { RootState } from '../../store';
 import { useGetQuinielasQuery } from '../../services/api';
@@ -83,6 +83,20 @@ export const BottomNav: React.FC = () => {
               <Award size={18} strokeWidth={1.75} className="bottom-nav__icon" />
             </div>
             <span className="bottom-nav__label">Premios</span>
+            <span className="bottom-nav__pip" aria-hidden="true" />
+          </NavLink>
+        </li>
+        <li className="bottom-nav__item">
+          <NavLink
+            to="/bulletin"
+            className={({ isActive }) =>
+              `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
+            }
+          >
+            <div className="bottom-nav__icon-box">
+              <Newspaper size={18} strokeWidth={1.75} className="bottom-nav__icon" />
+            </div>
+            <span className="bottom-nav__label">Boletín</span>
             <span className="bottom-nav__pip" aria-hidden="true" />
           </NavLink>
         </li>

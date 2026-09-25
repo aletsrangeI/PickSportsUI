@@ -9,7 +9,7 @@ import {
   useSubmitPickMutation,
   useLockAndAutofillMutation,
 } from '../services/api';
-import type { PickItem, Match } from '../types';
+import type { PickItem, Match, QuinielaMemberPickInfo } from '../types';
 import { formatDeadline } from '../utils/dateUtils';
 
 export interface UsePicksReturn {
@@ -20,7 +20,7 @@ export interface UsePicksReturn {
   matches: Match[];
   userPicks: Record<number, PickItem>;
   allPicks: PickItem[];
-  members: Array<{ memberId: number; alias: string; displayName?: string; role: string; totalHits: number; currentStreak: number }>;
+  members: QuinielaMemberPickInfo[];
   currentUserMemberId?: number;
   isLocked: boolean;
   isRevealed: boolean;

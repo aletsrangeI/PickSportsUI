@@ -356,6 +356,75 @@ export interface VapidPublicKeyResponse {
   publicKey: string;
 }
 
+export interface PodiumMember {
+  position: number;
+  memberId: number;
+  userId: number;
+  alias: string;
+  displayName?: string;
+  avatarUrl?: string;
+  hits: number;
+  totalPicks: number;
+  accuracyPct: number;
+  upsetHits: number;
+  humillaciones: number;
+}
+
+export interface BulletinWinner {
+  memberId: number;
+  alias: string;
+  displayName?: string;
+  avatarUrl?: string;
+  value: string;
+  secondaryValue?: string;
+  notes?: string;
+}
+
+export interface BulletinMatchAward {
+  matchLabel: string;
+  winnerAbbr?: string;
+  accuracyPct: number;
+  correctPicks: number;
+  totalPicks: number;
+  notes?: string;
+}
+
+export interface BulletinAwards {
+  mvp: BulletinWinner[];
+  surpriseKing: BulletinWinner[];
+  humillado: BulletinWinner[];
+  somnifero: BulletinWinner[];
+  empateFallido: BulletinWinner[];
+  rompeQuinielas?: BulletinMatchAward | null;
+}
+
+export interface NextWeekInfo {
+  weekId: number;
+  weekNumber: number;
+  weekName: string;
+  status: string;
+  firstGameUtc?: string | null;
+}
+
+export interface WeeklyBulletinData {
+  quinielaId: number;
+  weekId: number;
+  weekNumber: number;
+  weekName: string;
+  weekStatus: 'DRAFT' | 'PUBLISHED' | 'LOCKED' | 'SCORED';
+  isOfficial: boolean;
+  weekEndDate: string;
+  publishedAtUtc?: string | null;
+  adminAnnouncement?: string | null;
+  podium: PodiumMember[];
+  awards: BulletinAwards;
+  nextWeekInfo?: NextWeekInfo | null;
+}
+
+export interface UpdateAnnouncementRequest {
+  announcement: string | null;
+}
+
 export interface MigrationPlayerPreview {
   alias: string;
   expectedHits: number;
