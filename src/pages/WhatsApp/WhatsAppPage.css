@@ -189,6 +189,29 @@
   background: rgba(37, 211, 102, 0.1);
 }
 
+.whatsapp-page__push-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm, 6px);
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.whatsapp-page__push-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.whatsapp-page__push-btn--sent {
+  background: #10b981;
+}
+
 .whatsapp-page__bubble-container {
   padding: 24px;
   background: #0b141a; /* WhatsApp Dark Mode Background */

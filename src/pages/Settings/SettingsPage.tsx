@@ -18,6 +18,9 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Bell,
+  Send,
+  RefreshCw,
 } from 'lucide-react';
 import type { RootState } from '../../store';
 import { logout, updateUser } from '../../store/authSlice';
@@ -25,8 +28,11 @@ import {
   useGetQuinielasQuery,
   useUploadAvatarMutation,
   useRemoveAvatarMutation,
+  useSendTestNotificationMutation,
+  useTriggerRemindersMutation,
 } from '../../services/api';
 import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
+import { PushNotificationPrompt } from '../../components/notifications/PushNotificationPrompt';
 import './SettingsPage.css';
 
 const processImageToSquareBlob = (file: File, size = 512, quality = 0.88): Promise<Blob> => {
@@ -95,8 +101,47 @@ export const SettingsPage: React.FC = () => {
 
   const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
   const [removeAvatar, { isLoading: isDeleting }] = useRemoveAvatarMutation();
+  const [sendTestNotification, { isLoading: isSendingPush }] = useSendTestNotificationMutation();
+  const [triggerReminders, { isLoading: isTriggeringReminders }] = useTriggerRemindersMutation();
+  const [pushActionSuccess, setPushActionSuccess] = useState<string | null>(null);
+  const [pushActionError, setPushActionError] = useState<string | null>(null);
 
   const isProcessing = isUploading || isDeleting || isSubmitting;
+
+  const handleSendQuinielaBroadcast = async () => {
+    const targetId = activeQuinielaId || activeQuiniela?.id || allQuinielas[0]?.id;
+    if (!targetId) {
+      setPushActionError('No se encontró una quiniela activa seleccionada.');
+      return;
+    }
+    setPushActionSuccess(null);
+    setPushActionError(null);
+    try {
+      const res = await sendTestNotification({ quinielaId: targetId }).unwrap();
+      if (res.isSuccess) {
+        setPushActionSuccess(res.message || '¡Notificación push enviada a todos los miembros de la quiniela!');
+        setTimeout(() => setPushActionSuccess(null), 6000);
+      } else {
+        setPushActionError(res.message || 'No se pudo enviar la notificación.');
+      }
+    } catch (err: any) {
+      setPushActionError(err?.data?.message || err?.message || 'Error al enviar notificación push.');
+    }
+  };
+
+  const handleTriggerRemindersCycle = async () => {
+    setPushActionSuccess(null);
+    setPushActionError(null);
+    try {
+      const res = await triggerReminders().unwrap();
+      if (res.isSuccess) {
+        setPushActionSuccess(res.message || `Ciclo ejecutado exitosamente (${res.sentCount} notificaciones).`);
+        setTimeout(() => setPushActionSuccess(null), 6000);
+      }
+    } catch (err: any) {
+      setPushActionError(err?.data?.message || err?.message || 'Error al ejecutar ciclo de recordatorios.');
+    }
+  };
 
   const allQuinielas = quinielasResponse?.data || [];
   const isOwner =
@@ -397,9 +442,76 @@ export const SettingsPage: React.FC = () => {
               </div>
               <ChevronRight size={20} className="settings-tool-card__arrow" />
             </div>
+
+            {/* Tarjeta de Gestión de Notificaciones Push (Owner / Admin) */}
+            <div className="settings-tool-card settings-tool-card--featured" style={{ cursor: 'default' }}>
+              <div
+                className="settings-tool-card__icon"
+                style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6' }}
+              >
+                <Bell size={24} />
+              </div>
+              <div className="settings-tool-card__content" style={{ width: '100%' }}>
+                <div className="settings-tool-card__heading">
+                  <h4 className="settings-tool-card__title">Notificaciones Push & Recordatorios</h4>
+                  <span className="badge badge--admin">Owner</span>
+                </div>
+                <p className="settings-tool-card__desc">
+                  Envía la notificación de bienvenida a los miembros de tu quiniela o ejecuta la comprobación de recordatorios de jornada.
+                </p>
+
+                {pushActionSuccess && (
+                  <div className="avatar-modal__alert avatar-modal__alert--success" style={{ marginTop: '8px', padding: '8px 12px' }}>
+                    <CheckCircle2 size={15} />
+                    <span>{pushActionSuccess}</span>
+                  </div>
+                )}
+                {pushActionError && (
+                  <div className="avatar-modal__alert avatar-modal__alert--error" style={{ marginTop: '8px', padding: '8px 12px' }}>
+                    <AlertCircle size={15} />
+                    <span>{pushActionError}</span>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="btn btn--primary btn--sm"
+                    onClick={handleSendQuinielaBroadcast}
+                    disabled={isSendingPush || isTriggeringReminders}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    {isSendingPush ? <Loader2 size={14} className="spin" /> : <Send size={14} />}
+                    <span>{isSendingPush ? 'Enviando...' : 'Mandar Notificación a la Quiniela 📢'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn--outline btn--sm"
+                    onClick={handleTriggerRemindersCycle}
+                    disabled={isSendingPush || isTriggeringReminders}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    {isTriggeringReminders ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
+                    <span>{isTriggeringReminders ? 'Ejecutando...' : 'Detonar Recordatorios Ahora ⏰'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Sección de Estado de Notificaciones en este Dispositivo */}
+      <div className="settings-section">
+        <div className="settings-section__header">
+          <div className="settings-section__title-row">
+            <Bell size={18} className="text-primary" />
+            <h3 className="settings-section__title">Notificaciones en este Dispositivo</h3>
+          </div>
+        </div>
+        <PushNotificationPrompt inline={true} />
+      </div>
 
       {/* Acciones de Cuenta */}
       <div className="settings-section">

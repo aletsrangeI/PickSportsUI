@@ -388,9 +388,16 @@ export const api = createApi({
       }),
     }),
 
-    sendTestNotification: builder.mutation<ApiResponse<boolean>, void>({
+    sendTestNotification: builder.mutation<ApiResponse<boolean>, { quinielaId?: number } | void>({
+      query: (arg) => ({
+        url: arg && arg.quinielaId ? `/notifications/test?quinielaId=${arg.quinielaId}` : '/notifications/test',
+        method: 'POST',
+      }),
+    }),
+
+    triggerReminders: builder.mutation<{ isSuccess: boolean; message: string; sentCount: number }, void>({
       query: () => ({
-        url: '/notifications/test',
+        url: '/notifications/trigger-reminders',
         method: 'POST',
       }),
     }),
@@ -466,6 +473,7 @@ export const {
   useSubscribePushMutation,
   useUnsubscribePushMutation,
   useSendTestNotificationMutation,
+  useTriggerRemindersMutation,
   // SPEC-007 Migration
   usePreviewMigrationMutation,
   useExecuteMigrationMutation,

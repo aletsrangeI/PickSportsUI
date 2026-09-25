@@ -10,6 +10,7 @@ import {
   useLazyGetWhatsAppSummaryQuery,
   useLazyGetWhatsAppPrizePoolQuery,
   useLazyGetWhatsAppPlayerReportQuery,
+  useSendTestNotificationMutation,
 } from '../../services/api';
 import {
   Share2,
@@ -21,6 +22,7 @@ import {
   UserCheck,
   AlertCircle,
   ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import './WhatsAppPage.css';
 
@@ -47,6 +49,34 @@ export const WhatsAppPage: React.FC = () => {
     skip: !quinielaId,
   });
   const members = quinielaDetailResponse?.data?.members ?? [];
+
+  const [sendTestNotification, { isLoading: isSendingPush }] = useSendTestNotificationMutation();
+  const [pushSent, setPushSent] = useState(false);
+  const [pushMsg, setPushMsg] = useState<string | null>(null);
+
+  const isOwner =
+    activeQuiniela?.userRole === 'OWNER' ||
+    activeQuiniela?.userRole === 'ADMIN' ||
+    quinielaDetailResponse?.data?.userRole === 'OWNER' ||
+    quinielaDetailResponse?.data?.userRole === 'ADMIN';
+
+  const handleSendPushFromWhatsApp = async () => {
+    if (!quinielaId || isSendingPush) return;
+    setPushMsg(null);
+    try {
+      const res = await sendTestNotification({ quinielaId }).unwrap();
+      if (res.isSuccess) {
+        setPushSent(true);
+        setPushMsg(res.message || '¡Notificación enviada a los participantes!');
+        setTimeout(() => {
+          setPushSent(false);
+          setPushMsg(null);
+        }, 5000);
+      }
+    } catch (err: any) {
+      setPushMsg(err?.data?.message || err?.message || 'Error al enviar notificación push.');
+    }
+  };
 
   // Temporadas y jornadas
   const { data: seasonsData } = useGetSeasonsQuery(activeQuiniela?.leagueId, {
@@ -294,8 +324,27 @@ export const WhatsAppPage: React.FC = () => {
               <ExternalLink size={16} />
               <span>Abrir WhatsApp</span>
             </button>
+
+            {reportType === 'reminder' && isOwner && (
+              <button
+                type="button"
+                onClick={handleSendPushFromWhatsApp}
+                disabled={isSendingPush}
+                className={`whatsapp-page__push-btn ${pushSent ? 'whatsapp-page__push-btn--sent' : ''}`}
+                title="Mandar notificación push oficial a todos los miembros de la quiniela"
+              >
+                {isSendingPush ? <Loader2 size={16} className="spin" /> : <BellRing size={16} />}
+                <span>{pushSent ? '✓ ¡Push Enviado!' : 'Mandar Notificación Push 🔔'}</span>
+              </button>
+            )}
           </div>
         </div>
+
+        {pushMsg && (
+          <div style={{ padding: '10px 20px', background: '#0284c7', color: '#fff', fontSize: '0.8125rem', fontWeight: 600 }}>
+            {pushMsg}
+          </div>
+        )}
 
         <div className="whatsapp-page__bubble-container">
           <div className="whatsapp-page__bubble">
