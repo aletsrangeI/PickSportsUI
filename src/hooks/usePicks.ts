@@ -21,6 +21,7 @@ export interface UsePicksReturn {
   userPicks: Record<number, PickItem>;
   allPicks: PickItem[];
   members: Array<{ memberId: number; alias: string; displayName?: string; role: string; totalHits: number; currentStreak: number }>;
+  currentUserMemberId?: number;
   isLocked: boolean;
   isRevealed: boolean;
   allowsDraw: boolean;
@@ -236,6 +237,7 @@ export const usePicks = (): UsePicksReturn => {
     userPicks,
     allPicks,
     members,
+    currentUserMemberId: picksData?.currentUserMemberId,
     isLocked,
     isRevealed,
     allowsDraw,

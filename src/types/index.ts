@@ -58,6 +58,7 @@ export interface QuinielaMember {
 }
 
 export interface QuinielaDetail extends Quiniela {
+  currentUserMemberId?: number;
   members: QuinielaMember[];
 }
 

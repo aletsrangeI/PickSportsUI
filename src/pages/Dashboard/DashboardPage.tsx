@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../store';
 import {
   Trophy,
   Copy,
@@ -38,6 +40,7 @@ interface OutletContextType {
 export const DashboardPage: React.FC = () => {
   const { openCreateModal, openJoinModal } = useOutletContext<OutletContextType>();
   const [activeTab, setActiveTab] = useState<'picks' | 'matrix' | 'standings'>('picks');
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const {
     quiniela,
@@ -57,6 +60,7 @@ export const DashboardPage: React.FC = () => {
     userPicks,
     allPicks,
     members: pickMembers,
+    currentUserMemberId: picksCurrentUserMemberId,
     isLocked: isWeekLocked,
     isRevealed,
     allowsDraw,
@@ -219,7 +223,16 @@ export const DashboardPage: React.FC = () => {
   const secondPrize = (totalPot * Number(quiniela.secondPlacePct)) / 100;
   const thirdPrize = (totalPot * Number(quiniela.thirdPlacePct)) / 100;
 
-  const currentMember = quiniela.members?.find((m) => m.alias === quiniela.userRole || m.role === quiniela.userRole);
+  const currentMember = quiniela.members?.find(
+    (m) =>
+      (currentUser?.id && m.userId === currentUser.id) ||
+      (currentUser?.username && m.alias.toLowerCase() === currentUser.username.toLowerCase()) ||
+      (currentUser?.displayName && m.alias.toLowerCase() === currentUser.displayName.toLowerCase())
+  );
+  const effectiveCurrentUserMemberId =
+    picksCurrentUserMemberId ??
+    quiniela.currentUserMemberId ??
+    currentMember?.id;
   const progressPct = totalMatchesCount > 0 ? Math.round((completedPicksCount / totalMatchesCount) * 100) : 0;
 
   return (
@@ -540,7 +553,7 @@ export const DashboardPage: React.FC = () => {
               matches={matches}
               members={pickMembers}
               picks={allPicks}
-              currentUserMemberId={currentMember?.id}
+              currentUserMemberId={effectiveCurrentUserMemberId}
             />
           )}
         </div>
@@ -669,27 +682,40 @@ export const DashboardPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {quiniela.members?.map((member, index) => (
-                    <tr
-                      key={member.id}
-                      style={{
-                        borderBottom: '1px solid var(--border-subtle)',
-                        transition: 'background-color var(--transition-fast)',
-                      }}
-                    >
-                      <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600 }}>
-                        {index + 1}
-                      </td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 600 }}>{member.alias}</span>
-                          {member.displayName && member.displayName !== member.alias && (
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                              {member.displayName}
+                  {quiniela.members?.map((member, index) => {
+                    const isThisUser = member.id === effectiveCurrentUserMemberId;
+                    return (
+                      <tr
+                        key={member.id}
+                        style={{
+                          borderBottom: '1px solid var(--border-subtle)',
+                          backgroundColor: isThisUser ? 'rgba(16, 185, 129, 0.08)' : undefined,
+                          transition: 'background-color var(--transition-fast)',
+                        }}
+                      >
+                        <td style={{ padding: '12px 16px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                          {index + 1}
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 600 }}>
+                              {member.alias}
+                              {isThisUser && (
+                                <span
+                                  className="badge badge--accent"
+                                  style={{ marginLeft: '6px', fontSize: '0.7rem', padding: '1px 6px' }}
+                                >
+                                  Tú
+                                </span>
+                              )}
                             </span>
-                          )}
-                        </div>
-                      </td>
+                            {member.displayName && member.displayName !== member.alias && (
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                {member.displayName}
+                              </span>
+                            )}
+                          </div>
+                        </td>
                       <td style={{ padding: '12px 16px' }}>
                         <span
                           className={`badge ${
@@ -739,7 +765,8 @@ export const DashboardPage: React.FC = () => {
                         )}
                       </td>
                     </tr>
-                  ))}
+                  );
+                })}
                 </tbody>
               </table>
             </div>
