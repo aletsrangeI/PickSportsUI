@@ -46,9 +46,9 @@ export const useBulletin = () => {
   const { data: weeksData } = useGetWeeksBySeasonQuery(selectedSeasonId!, {
     skip: !selectedSeasonId,
   });
-  const weeks = weeksData?.data ?? [];
+  const weeks = (weeksData?.data ?? []).filter((week) => week.status?.toUpperCase() === 'SCORED');
 
-  // Por defecto el boletín resuelve del lado del servidor (última jornada SCORED o activa);
+  // Por defecto el boletín resuelve del lado del servidor la última jornada SCORED;
   // el selector solo fuerza un weekId cuando el usuario navega el histórico.
   useEffect(() => {
     if (weeks.length > 0 && selectedWeekId !== null && !weeks.some((w) => w.id === selectedWeekId)) {

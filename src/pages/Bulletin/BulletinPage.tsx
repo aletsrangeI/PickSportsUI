@@ -161,7 +161,7 @@ const BulletinArchiveSelector: React.FC<BulletinArchiveSelectorProps> = ({
           <option value="">Última edición oficial</option>
           {weeks.map((w) => (
             <option key={w.id} value={w.id}>
-              {w.name} {w.status === 'SCORED' ? '(Oficial)' : `(${w.status})`}
+              {w.name} (Oficial)
             </option>
           ))}
         </select>
@@ -267,9 +267,9 @@ export const BulletinPage: React.FC = () => {
               <span className="bulletin-paper__show-tag">
                 <Flame size={13} strokeWidth={2.5} /> MONDAY NIGHT RECAP
               </span>
-              <span className={`bulletin-paper__badge ${bulletin.isOfficial ? 'bulletin-paper__badge--official' : 'bulletin-paper__badge--draft'}`}>
-                {bulletin.isOfficial ? <BadgeCheck size={14} strokeWidth={2} /> : <CalendarClock size={14} strokeWidth={2} />}
-                {bulletin.isOfficial ? 'Edición Oficial' : 'Edición Preliminar'}
+              <span className="bulletin-paper__badge bulletin-paper__badge--official">
+                <BadgeCheck size={14} strokeWidth={2} />
+                Edición Oficial
               </span>
             </div>
             <h1 className="bulletin-paper__title">PickSports Weekly</h1>
