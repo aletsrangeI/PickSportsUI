@@ -61,6 +61,22 @@
   margin: 0;
 }
 
+.bulletin-page__retry {
+  margin-top: var(--space-xs);
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--text-on-primary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 18px;
+}
+
+.bulletin-page__retry:hover {
+  opacity: 0.9;
+}
+
 /* ─── Papel del periódico ───────────────────────────────────────────── */
 
 .bulletin-paper {

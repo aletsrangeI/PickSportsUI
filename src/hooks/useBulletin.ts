@@ -60,6 +60,8 @@ export const useBulletin = () => {
     data: bulletinResponse,
     isLoading: isLoadingBulletin,
     isFetching,
+    isError: isBulletinError,
+    refetch: refetchBulletin,
   } = useGetBulletinQuery({ quinielaId, weekId: selectedWeekId ?? undefined }, { skip: !quinielaId });
 
   const bulletin = bulletinResponse?.data;
@@ -102,6 +104,8 @@ export const useBulletin = () => {
     selectedWeekId,
     bulletin,
     isLoadingBulletin: isLoadingBulletin || isFetching,
+    isBulletinError: isBulletinError && !bulletin,
+    refetchBulletin,
     isOwnerOrAdmin,
     isEditingAnnouncement,
     announcementDraft,

@@ -110,6 +110,8 @@ export const BulletinPage: React.FC = () => {
     selectedWeekId,
     bulletin,
     isLoadingBulletin,
+    isBulletinError,
+    refetchBulletin,
     isOwnerOrAdmin,
     isEditingAnnouncement,
     announcementDraft,
@@ -174,6 +176,21 @@ export const BulletinPage: React.FC = () => {
 
       {isLoadingBulletin && !bulletin ? (
         <div className="bulletin-page__loading">Cargando edición...</div>
+      ) : isBulletinError && !bulletin ? (
+        <div className="bulletin-page__empty-state">
+          <AlertCircle size={40} />
+          <h2>No se pudo cargar el boletín</h2>
+          <p>El servicio no está disponible por ahora. Verifica tu conexión e intenta de nuevo.</p>
+          <button
+            type="button"
+            className="bulletin-page__retry"
+            onClick={() => {
+              void refetchBulletin();
+            }}
+          >
+            Reintentar
+          </button>
+        </div>
       ) : !bulletin ? (
         <div className="bulletin-page__empty-state">
           <Newspaper size={40} />
