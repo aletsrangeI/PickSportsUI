@@ -8,6 +8,7 @@
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-subtle);
   width: 100%;
+  padding-top: var(--safe-area-top, env(safe-area-inset-top, 0px));
 }
 
 .header__main {
@@ -16,16 +17,17 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-lg);
-  max-width: var(--max-content-width);
+  max-width: var(--max-content-width, 1400px);
   margin: 0 auto;
   width: 100%;
+  gap: var(--space-md);
 }
 
 .header__left {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 .header__logo {
@@ -58,17 +60,21 @@
 
 .header__selector-wrapper {
   display: block;
+  flex-shrink: 0;
 }
 
+/* Center Nav */
 .header__nav {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-left: var(--space-sm);
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .header__nav-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
@@ -79,6 +85,7 @@
   text-decoration: none;
   transition: all var(--transition-fast);
   border: 1px solid transparent;
+  white-space: nowrap;
 }
 
 .header__nav-link:hover {
@@ -93,17 +100,43 @@
   border-color: rgba(16, 185, 129, 0.25);
 }
 
+.header__nav-link--admin {
+  color: #a78bfa;
+  background-color: rgba(167, 139, 250, 0.08);
+  border-color: rgba(167, 139, 250, 0.2);
+}
+
+.header__nav-link--admin:hover {
+  color: #c4b5fd;
+  background-color: rgba(167, 139, 250, 0.15);
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.header__nav-link--admin.header__nav-link--active {
+  color: #c4b5fd;
+  background-color: rgba(167, 139, 250, 0.22);
+  border-color: rgba(167, 139, 250, 0.45);
+}
+
 .header__right {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   flex-shrink: 0;
+  justify-content: flex-end;
 }
 
 .header__actions-desktop {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.header__quick-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .header__user-menu {
@@ -184,6 +217,35 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Tablet / Intermediate Laptop Screen Adjustments */
+@media (max-width: 1180px) and (min-width: 769px) {
+  .header__main {
+    padding: 0 var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .header__quick-action-btn span {
+    display: none;
+  }
+
+  .header__quick-action-btn {
+    padding: 6px 10px;
+  }
+
+  .header__nav {
+    gap: 4px;
+  }
+
+  .header__nav-link {
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
+
+  .header__user-name {
+    max-width: 100px;
+  }
 }
 
 @media (max-width: 768px) {

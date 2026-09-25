@@ -55,57 +55,58 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
               />
             </div>
           )}
-
-          {isAuthenticated && (
-            <nav className="header__nav">
-              <NavLink
-                to="/"
-                end
-                className={({ isActive }) =>
-                  `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
-                }
-              >
-                Picks
-              </NavLink>
-              <NavLink
-                to="/fixtures"
-                className={({ isActive }) =>
-                  `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
-                }
-              >
-                <CalendarDays size={15} />
-                <span>Partidos</span>
-              </NavLink>
-              <NavLink
-                to="/standings"
-                className={({ isActive }) =>
-                  `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
-                }
-              >
-                Posiciones
-              </NavLink>
-              <NavLink
-                to="/awards"
-                className={({ isActive }) =>
-                  `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
-                }
-              >
-                Premios
-              </NavLink>
-              {isOwnerOrAdmin && (
-                <NavLink
-                  to="/admin/migracion"
-                  className={({ isActive }) =>
-                    `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
-                  }
-                >
-                  <FileSpreadsheet size={15} />
-                  <span>Migración XLSX</span>
-                </NavLink>
-              )}
-            </nav>
-          )}
         </div>
+
+        {isAuthenticated && (
+          <nav className="header__nav">
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) =>
+                `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+              }
+            >
+              Picks
+            </NavLink>
+            <NavLink
+              to="/fixtures"
+              className={({ isActive }) =>
+                `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+              }
+            >
+              <CalendarDays size={15} />
+              <span>Partidos</span>
+            </NavLink>
+            <NavLink
+              to="/standings"
+              className={({ isActive }) =>
+                `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+              }
+            >
+              Posiciones
+            </NavLink>
+            <NavLink
+              to="/awards"
+              className={({ isActive }) =>
+                `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+              }
+            >
+              Premios
+            </NavLink>
+            {isOwnerOrAdmin && (
+              <NavLink
+                to="/admin/migracion"
+                className={({ isActive }) =>
+                  `header__nav-link header__nav-link--admin ${isActive ? 'header__nav-link--active' : ''}`
+                }
+                title="Migración de datos desde Excel / XLSX"
+              >
+                <FileSpreadsheet size={15} />
+                <span>Migración</span>
+              </NavLink>
+            )}
+          </nav>
+        )}
 
         <div className="header__right">
           {isAuthenticated ? (
@@ -113,16 +114,18 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
               <div className="header__actions-desktop">
                 <button
                   type="button"
-                  className="btn btn--outline btn--sm"
+                  className="btn btn--outline btn--sm header__quick-action-btn"
                   onClick={onCreateClick}
+                  title="Crear nueva quiniela"
                 >
                   <Plus size={15} />
                   <span>Crear</span>
                 </button>
                 <button
                   type="button"
-                  className="btn btn--outline btn--sm"
+                  className="btn btn--outline btn--sm header__quick-action-btn"
                   onClick={onJoinClick}
+                  title="Unirse a una quiniela"
                 >
                   <UserPlus size={15} />
                   <span>Unirse</span>
