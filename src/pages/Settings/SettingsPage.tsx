@@ -33,6 +33,7 @@ import {
 } from '../../services/api';
 import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
 import { PushNotificationPrompt } from '../../components/notifications/PushNotificationPrompt';
+import { UserAvatar } from '../../components/common/UserAvatar';
 import './SettingsPage.css';
 
 const processImageToSquareBlob = (file: File, size = 512, quality = 0.88): Promise<Blob> => {
@@ -301,26 +302,13 @@ export const SettingsPage: React.FC = () => {
         <div className="settings-profile">
           <div className="settings-profile__avatar-container">
             <div className="settings-profile__avatar">
-              {user?.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt={user.displayName || user.username}
-                  className="settings-profile__avatar-img"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    const fallback = e.currentTarget.parentElement?.querySelector(
-                      '.settings-profile__avatar-fallback'
-                    ) as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <span
-                className="settings-profile__avatar-fallback"
-                style={{ display: user?.avatarUrl ? 'none' : 'flex' }}
-              >
-                {userInitial}
-              </span>
+              <UserAvatar
+                src={user?.avatarUrl}
+                alt={user?.displayName || user?.username || 'Usuario'}
+                size="lg"
+                className="settings-profile__user-avatar"
+                fallbackText={userInitial}
+              />
             </div>
 
             <button
@@ -588,29 +576,12 @@ export const SettingsPage: React.FC = () => {
             {/* Vista Previa Circular */}
             <div className="avatar-modal__preview-wrapper">
               <div className="avatar-modal__preview">
-                {previewUrl ? (
-                  <img src={previewUrl} alt="Vista previa" className="avatar-modal__preview-img" />
-                ) : user?.avatarUrl ? (
-                  <>
-                    <img
-                      src={user.avatarUrl}
-                      alt={user.displayName || user.username}
-                      className="avatar-modal__preview-img"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const fallback = e.currentTarget.parentElement?.querySelector(
-                          '.avatar-modal__preview-fallback'
-                        ) as HTMLElement;
-                        if (fallback) fallback.style.display = 'flex';
-                      }}
-                    />
-                    <span className="avatar-modal__preview-fallback" style={{ display: 'none' }}>
-                      {userInitial}
-                    </span>
-                  </>
-                ) : (
-                  <span className="avatar-modal__preview-fallback">{userInitial}</span>
-                )}
+                <UserAvatar
+                  src={previewUrl || user?.avatarUrl}
+                  alt={user?.displayName || user?.username || 'Usuario'}
+                  size="xl"
+                  fallbackText={userInitial}
+                />
               </div>
             </div>
 

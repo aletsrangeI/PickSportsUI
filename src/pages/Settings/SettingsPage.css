@@ -71,6 +71,12 @@
   border: 2px solid var(--border-medium);
 }
 
+.settings-profile__avatar .user-avatar {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 .settings-profile__avatar-img {
   width: 100%;
   height: 100%;
@@ -427,6 +433,13 @@ dialog.avatar-modal::backdrop {
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
   overflow: hidden;
   position: relative;
+}
+
+.avatar-modal__preview .user-avatar {
+  width: 100%;
+  height: 100%;
+  border: none;
+  font-size: 2.75rem;
 }
 
 .avatar-modal__preview-img {

@@ -41,12 +41,6 @@
 }
 
 .awards-page__select {
-  background: var(--bg-card, #1e293b);
-  border: 1px solid var(--border-subtle, #334155);
-  border-radius: var(--radius-sm, 6px);
-  color: var(--text-main, #f8fafc);
-  padding: 8px 12px;
-  font-size: 0.875rem;
   min-width: 220px;
 }
 

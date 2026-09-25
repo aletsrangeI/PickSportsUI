@@ -342,23 +342,25 @@ export const PicksMatrix: React.FC<PicksMatrixProps> = ({
           <div className="picks-by-match__nav-footer">
             <button
               type="button"
-              className="btn btn--outline btn--sm"
+              className="picks-by-match__nav-btn picks-by-match__nav-btn--prev"
               disabled={selectedMatchIndex === 0}
               onClick={() => setSelectedMatchIndex((curr) => Math.max(0, curr - 1))}
+              aria-label="Partido anterior"
             >
               <ChevronLeft size={16} />
-              <span>Anterior Partido</span>
+              <span>Anterior</span>
             </button>
             <span className="picks-by-match__nav-index">
               Partido {selectedMatchIndex + 1} de {matches.length}
             </span>
             <button
               type="button"
-              className="btn btn--outline btn--sm"
+              className="picks-by-match__nav-btn picks-by-match__nav-btn--next"
               disabled={selectedMatchIndex === matches.length - 1}
               onClick={() => setSelectedMatchIndex((curr) => Math.min(matches.length - 1, curr + 1))}
+              aria-label="Siguiente partido"
             >
-              <span>Siguiente Partido</span>
+              <span>Siguiente</span>
               <ChevronRight size={16} />
             </button>
           </div>

@@ -54,19 +54,7 @@
 }
 
 .fixtures-page__select {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  color: var(--text-main);
-  font-size: 0.875rem;
-  padding: 6px 10px;
-  cursor: pointer;
   min-width: 160px;
-}
-
-.fixtures-page__select:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
 }
 
 .fixtures-page__actions {

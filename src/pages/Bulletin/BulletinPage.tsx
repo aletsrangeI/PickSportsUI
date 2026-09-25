@@ -1,6 +1,7 @@
 import React from 'react';
 import { useBulletin } from '../../hooks/useBulletin';
 import type { BulletinWinner, PodiumMember } from '../../types';
+import { UserAvatar } from '../../components/common/UserAvatar';
 import {
   AlertCircle,
   BadgeCheck,
@@ -9,6 +10,7 @@ import {
   Crown,
   Flame,
   HelpCircle,
+  History,
   Medal,
   Megaphone,
   Moon,
@@ -48,13 +50,11 @@ const formatDate = (iso?: string | null): string => {
 
 const WinnerRow: React.FC<{ winner: BulletinWinner }> = ({ winner }) => (
   <div className="bulletin-winner">
-    <div className="bulletin-winner__avatar">
-      {winner.avatarUrl ? (
-        <img src={winner.avatarUrl} alt={winner.alias} />
-      ) : (
-        <span>{winner.alias.slice(0, 2).toUpperCase()}</span>
-      )}
-    </div>
+    <UserAvatar
+      src={winner.avatarUrl}
+      alt={winner.alias}
+      size="sm"
+    />
     <div className="bulletin-winner__info">
       <span className="bulletin-winner__alias">{winner.alias}</span>
       {winner.notes && <span className="bulletin-winner__notes">{winner.notes}</span>}
@@ -74,13 +74,11 @@ const PodiumCard: React.FC<{ member: PodiumMember }> = ({ member }) => {
         <Medal size={26} strokeWidth={1.75} aria-label={`Medalla de ${medal.label}`} />
         <span className="podium-card__position">{member.position}°</span>
       </div>
-      <div className="podium-card__avatar">
-        {member.avatarUrl ? (
-          <img src={member.avatarUrl} alt={member.alias} />
-        ) : (
-          <span>{member.alias.slice(0, 2).toUpperCase()}</span>
-        )}
-      </div>
+      <UserAvatar
+        src={member.avatarUrl}
+        alt={member.alias}
+        size="lg"
+      />
       <h3 className="podium-card__alias">{member.alias}</h3>
       <p className="podium-card__stats">
         {member.hits} aciertos · {member.accuracyPct}%
@@ -100,6 +98,77 @@ const PodiumCard: React.FC<{ member: PodiumMember }> = ({ member }) => {
     </article>
   );
 };
+
+interface BulletinArchiveSelectorProps {
+  seasons: Array<{ id: number; name: string; isCurrent: boolean }>;
+  selectedSeasonId: number | null;
+  onSelectSeason: (id: number) => void;
+  weeks: Array<{ id: number; name: string; status: string }>;
+  selectedWeekId: number | null;
+  onSelectWeek: (id: number | null) => void;
+}
+
+const BulletinArchiveSelector: React.FC<BulletinArchiveSelectorProps> = ({
+  seasons,
+  selectedSeasonId,
+  onSelectSeason,
+  weeks,
+  selectedWeekId,
+  onSelectWeek,
+}) => (
+  <section className="bulletin-archive-card" aria-label="Histórico de Ediciones">
+    <div className="bulletin-archive-card__header">
+      <div className="bulletin-archive-card__icon-box">
+        <History size={18} strokeWidth={2} />
+      </div>
+      <div className="bulletin-archive-card__titles">
+        <h3 className="bulletin-archive-card__title">Archivo de Ediciones · PickSports Weekly</h3>
+        <p className="bulletin-archive-card__subtitle">
+          Selecciona una jornada o temporada para consultar sus resultados y trofeos
+        </p>
+      </div>
+    </div>
+    <div className="bulletin-archive-card__filters">
+      {seasons.length > 1 && (
+        <div className="bulletin-archive-card__filter">
+          <label className="bulletin-archive-card__label" htmlFor="bulletin-season-bottom">
+            Temporada
+          </label>
+          <select
+            id="bulletin-season-bottom"
+            className="select-field bulletin-archive-card__select"
+            value={selectedSeasonId || ''}
+            onChange={(e) => onSelectSeason(Number(e.target.value))}
+          >
+            {seasons.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} {s.isCurrent ? '(En curso)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      <div className="bulletin-archive-card__filter">
+        <label className="bulletin-archive-card__label" htmlFor="bulletin-week-bottom">
+          Edición / Jornada
+        </label>
+        <select
+          id="bulletin-week-bottom"
+          className="select-field bulletin-archive-card__select"
+          value={selectedWeekId ?? ''}
+          onChange={(e) => onSelectWeek(e.target.value ? Number(e.target.value) : null)}
+        >
+          <option value="">Última edición oficial</option>
+          {weeks.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.name} {w.status === 'SCORED' ? '(Oficial)' : `(${w.status})`}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  </section>
+);
 
 export const BulletinPage: React.FC = () => {
   const {
@@ -135,79 +204,79 @@ export const BulletinPage: React.FC = () => {
 
   const countdown = formatCountdown(bulletin?.nextWeekInfo?.firstGameUtc);
 
+  const handleSeasonChange = (id: number) => {
+    setSelectedSeasonId(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleWeekChange = (id: number | null) => {
+    handleSelectWeek(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="bulletin-page">
-      {/* Selector de ediciones */}
-      <div className="bulletin-page__controls">
-        {seasons.length > 1 && (
-          <div className="bulletin-page__filter">
-            <label className="bulletin-page__label" htmlFor="bulletin-season">Temporada</label>
-            <select
-              id="bulletin-season"
-              className="bulletin-page__select"
-              value={selectedSeasonId || ''}
-              onChange={(e) => setSelectedSeasonId(Number(e.target.value))}
-            >
-              {seasons.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.isCurrent ? '(En curso)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        <div className="bulletin-page__filter">
-          <label className="bulletin-page__label" htmlFor="bulletin-week">Edición</label>
-          <select
-            id="bulletin-week"
-            className="bulletin-page__select"
-            value={selectedWeekId ?? ''}
-            onChange={(e) => handleSelectWeek(e.target.value ? Number(e.target.value) : null)}
-          >
-            <option value="">Última edición oficial</option>
-            {weeks.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name} {w.status === 'SCORED' ? '(Oficial)' : `(${w.status})`}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
       {isLoadingBulletin && !bulletin ? (
-        <div className="bulletin-page__loading">Cargando edición...</div>
+        <div className="bulletin-page__loading">Cargando edición de PickSports Weekly...</div>
       ) : isBulletinError && !bulletin ? (
-        <div className="bulletin-page__empty-state">
-          <AlertCircle size={40} />
-          <h2>No se pudo cargar el boletín</h2>
-          <p>El servicio no está disponible por ahora. Verifica tu conexión e intenta de nuevo.</p>
-          <button
-            type="button"
-            className="bulletin-page__retry"
-            onClick={() => {
-              void refetchBulletin();
-            }}
-          >
-            Reintentar
-          </button>
+        <div className="bulletin-page__empty-container">
+          <div className="bulletin-page__empty-state">
+            <AlertCircle size={40} />
+            <h2>No se pudo cargar la edición</h2>
+            <p>El servicio no está disponible por ahora. Verifica tu conexión e intenta de nuevo.</p>
+            <button
+              type="button"
+              className="bulletin-page__retry"
+              onClick={() => {
+                void refetchBulletin();
+              }}
+            >
+              Reintentar
+            </button>
+          </div>
+          <BulletinArchiveSelector
+            seasons={seasons}
+            selectedSeasonId={selectedSeasonId}
+            onSelectSeason={handleSeasonChange}
+            weeks={weeks}
+            selectedWeekId={selectedWeekId}
+            onSelectWeek={handleWeekChange}
+          />
         </div>
       ) : !bulletin ? (
-        <div className="bulletin-page__empty-state">
-          <Newspaper size={40} />
-          <h2>Aún no hay ediciones publicadas</h2>
-          <p>El periódico se publica automáticamente al calificarse la primera jornada.</p>
+        <div className="bulletin-page__empty-container">
+          <div className="bulletin-page__empty-state">
+            <Newspaper size={40} />
+            <h2>Aún no hay ediciones publicadas</h2>
+            <p>PickSports Weekly se publica automáticamente al calificarse los partidos de la jornada.</p>
+          </div>
+          <BulletinArchiveSelector
+            seasons={seasons}
+            selectedSeasonId={selectedSeasonId}
+            onSelectSeason={handleSeasonChange}
+            weeks={weeks}
+            selectedWeekId={selectedWeekId}
+            onSelectWeek={handleWeekChange}
+          />
         </div>
       ) : (
         <article className="bulletin-paper">
-          {/* Encabezado de edición */}
+          {/* Encabezado de edición estilo American Sports Recap Show */}
           <header className="bulletin-paper__masthead">
-            <p className="bulletin-paper__kicker">El Heraldo de PickSports</p>
-            <h1 className="bulletin-paper__title">Edición Jornada {bulletin.weekNumber}</h1>
-            <div className="bulletin-paper__meta">
+            <div className="bulletin-paper__badge-row">
+              <span className="bulletin-paper__show-tag">
+                <Flame size={13} strokeWidth={2.5} /> MONDAY NIGHT RECAP
+              </span>
               <span className={`bulletin-paper__badge ${bulletin.isOfficial ? 'bulletin-paper__badge--official' : 'bulletin-paper__badge--draft'}`}>
                 {bulletin.isOfficial ? <BadgeCheck size={14} strokeWidth={2} /> : <CalendarClock size={14} strokeWidth={2} />}
-                {bulletin.isOfficial ? 'Oficial' : 'Preliminar'}
+                {bulletin.isOfficial ? 'Edición Oficial' : 'Edición Preliminar'}
               </span>
+            </div>
+            <h1 className="bulletin-paper__title">PickSports Weekly</h1>
+            <p className="bulletin-paper__kicker">
+              Jornada {bulletin.weekNumber} · Análisis, Rendimiento y Sala de Trofeos
+            </p>
+            <div className="bulletin-paper__meta">
               <span className="bulletin-paper__date">Cierre: {formatDate(bulletin.weekEndDate)}</span>
               {bulletin.publishedAtUtc && (
                 <span className="bulletin-paper__date">Publicado: {formatDate(bulletin.publishedAtUtc)}</span>
@@ -358,6 +427,16 @@ export const BulletinPage: React.FC = () => {
               </div>
             </div>
           </section>
+
+          {/* Selector de ediciones al pie de página (Archivo histórico) */}
+          <BulletinArchiveSelector
+            seasons={seasons}
+            selectedSeasonId={selectedSeasonId}
+            onSelectSeason={handleSeasonChange}
+            weeks={weeks}
+            selectedWeekId={selectedWeekId}
+            onSelectWeek={handleWeekChange}
+          />
         </article>
       )}
     </div>
