@@ -192,7 +192,7 @@ export const api = createApi({
         url: `/seasons/${seasonId}/sync-full`,
         method: 'POST',
       }),
-      invalidatesTags: ['Seasons', 'Weeks', 'Matches'],
+      invalidatesTags: ['Seasons', 'Weeks', 'Matches', 'Picks', 'Standings'],
     }),
 
     ensureApertura: builder.mutation<ApiResponse<SeasonSummary>, void>({
@@ -214,7 +214,7 @@ export const api = createApi({
         url: `/weeks/${weekId}/sync-espn`,
         method: 'POST',
       }),
-      invalidatesTags: (_result, _error, weekId) => [{ type: 'Matches', id: weekId }],
+      invalidatesTags: (_result, _error, weekId) => [{ type: 'Matches', id: weekId }, 'Picks', 'Standings'],
     }),
 
     importManualJson: builder.mutation<ApiResponse<SyncResult>, { weekId: number; rawJson: string }>({
@@ -223,7 +223,7 @@ export const api = createApi({
         method: 'POST',
         body: { rawJson },
       }),
-      invalidatesTags: (_result, _error, { weekId }) => [{ type: 'Matches', id: weekId }],
+      invalidatesTags: (_result, _error, { weekId }) => [{ type: 'Matches', id: weekId }, 'Picks', 'Standings'],
     }),
 
     // ─── Admin ───────────────────────────────────────────────────────────────
@@ -237,6 +237,7 @@ export const api = createApi({
       query: ({ quinielaId, weekId }) => `/quinielas/${quinielaId}/picks?weekId=${weekId}`,
       providesTags: (_result, _error, { quinielaId, weekId }) => [
         { type: 'Picks', id: `${quinielaId}-${weekId}` },
+        'Picks',
       ],
     }),
 

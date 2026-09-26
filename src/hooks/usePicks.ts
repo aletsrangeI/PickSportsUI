@@ -35,12 +35,15 @@ export interface UsePicksReturn {
   recentlyModifiedMatchId: number | null;
   isOwnerOrAdmin: boolean;
   isLoading: boolean;
+  isFetching: boolean;
+  hasLiveMatches: boolean;
   isSubmitting: boolean;
   isLocking: boolean;
   toast: { message: string; type: 'success' | 'warning' | 'error'; isModification?: boolean } | null;
   clearToast: () => void;
   handleVote: (matchId: number, pickAbbr: string) => Promise<boolean>;
   handleLockAndAutofill: () => Promise<void>;
+  refetchPicks: () => void;
 }
 
 export const usePicks = (): UsePicksReturn => {
@@ -93,16 +96,39 @@ export const usePicks = (): UsePicksReturn => {
     }
   }, [weeks, selectedWeekId]);
 
+  // Sondeo adaptativo para marcadores en vivo
+  const [pollInterval, setPollInterval] = useState<number>(0);
+
   // 4. Cargar Picks de la jornada activa para esta quiniela
   const {
     data: picksResponse,
     isLoading: isLoadingPicks,
+    isFetching: isFetchingPicks,
+    refetch: refetchPicks,
   } = useGetPicksQuery(
     { quinielaId: activeQuinielaId!, weekId: selectedWeekId! },
-    { skip: !activeQuinielaId || !selectedWeekId }
+    {
+      skip: !activeQuinielaId || !selectedWeekId,
+      pollingInterval: pollInterval,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    }
   );
 
   const picksData = picksResponse?.data;
+
+  // Ajustar intervalo de sondeo automáticamente:
+  // - 20s cuando hay partidos en vivo (statusState == 'in')
+  // - 60s cuando la jornada está cerrada (LOCKED) pero aún con partidos pendientes
+  // - 0 cuando está en DRAFT, abierta (PUBLISHED) sin juegos en vivo, o finalizada (SCORED)
+  useEffect(() => {
+    const rawMatches = picksResponse?.data?.matches ?? [];
+    const isLive = rawMatches.some((m) => m.statusState === 'in');
+    const isLockedWeek = Boolean(picksResponse?.data?.isLocked) && picksResponse?.data?.status !== 'SCORED';
+
+    const nextInterval = isLive ? 20000 : isLockedWeek ? 60000 : 0;
+    setPollInterval((prev) => (prev !== nextInterval ? nextInterval : prev));
+  }, [picksResponse]);
 
   // Mutaciones
   const [submitPickMutation, { isLoading: isSubmitting }] = useSubmitPickMutation();
@@ -140,6 +166,10 @@ export const usePicks = (): UsePicksReturn => {
   const totalMatchesCount = matches.length;
   const completedPicksCount = Object.keys(userPicks).length;
   const isComplete = totalMatchesCount > 0 && completedPicksCount >= totalMatchesCount;
+
+  const hasLiveMatches = useMemo(() => {
+    return matches.some((m) => m.statusState === 'in');
+  }, [matches]);
 
   // Fecha límite efectiva: firstGameUtc de la jornada o el partido más próximo
   const earliestMatchDateUtc = useMemo(() => {
@@ -251,11 +281,14 @@ export const usePicks = (): UsePicksReturn => {
     recentlyModifiedMatchId,
     isOwnerOrAdmin,
     isLoading: isLoadingPicks,
+    isFetching: isFetchingPicks,
+    hasLiveMatches,
     isSubmitting,
     isLocking,
     toast,
     clearToast,
     handleVote,
     handleLockAndAutofill,
+    refetchPicks,
   };
 };

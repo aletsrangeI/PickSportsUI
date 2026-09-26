@@ -64,10 +64,20 @@ export const FixturesPage: React.FC = () => {
   });
   const weeks = weeksData?.data ?? [];
 
+  const [fixturesPollInterval, setFixturesPollInterval] = useState<number>(0);
+
   const { data: matchesData, isLoading: loadingMatches } = useGetMatchesByWeekQuery(selectedWeekId!, {
     skip: !selectedWeekId,
+    pollingInterval: fixturesPollInterval,
+    refetchOnFocus: true,
   });
   const matches = matchesData?.data ?? [];
+
+  useEffect(() => {
+    const isLive = matches.some((m) => m.statusState === 'in');
+    const nextInterval = isLive ? 20000 : 0;
+    setFixturesPollInterval((prev) => (prev !== nextInterval ? nextInterval : prev));
+  }, [matches]);
 
   // ─── Mutations ──────────────────────────────────────────────────────────────
   const [syncFullSeason, { isLoading: syncingFull }]   = useSyncFullSeasonMutation();

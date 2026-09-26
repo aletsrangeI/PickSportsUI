@@ -24,6 +24,7 @@ import {
   Bot,
   Table as TableIcon,
   AlertCircle,
+  RotateCw,
 } from 'lucide-react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { usePicks } from '../../hooks/usePicks';
@@ -71,12 +72,16 @@ export const DashboardPage: React.FC = () => {
     deadlineFormatted,
     recentlyModifiedMatchId,
     isOwnerOrAdmin: isPicksAdmin,
+    isLoading: isPicksLoading,
+    isFetching: isFetchingPicks,
+    hasLiveMatches,
     isSubmitting: isSubmittingPick,
     isLocking: isLockingWeek,
     toast: picksToast,
     clearToast: clearPicksToast,
     handleVote,
     handleLockAndAutofill,
+    refetchPicks,
   } = usePicks();
 
   if (isDashboardLoading) {
@@ -356,6 +361,25 @@ export const DashboardPage: React.FC = () => {
                   ● Abierta para Pronósticos
                 </span>
               )}
+
+              {hasLiveMatches && (
+                <span className="badge badge--accent badge--live-pulse" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="live-pulse-dot" />
+                  EN VIVO
+                </span>
+              )}
+
+              <button
+                type="button"
+                className="btn btn--outline btn--sm"
+                onClick={() => refetchPicks()}
+                disabled={isFetchingPicks}
+                title="Refrescar marcadores en vivo desde la base de datos"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <RotateCw size={13} className={isFetchingPicks ? 'spin-anim' : ''} />
+                <span>{isFetchingPicks ? 'Actualizando...' : 'Actualizar'}</span>
+              </button>
             </div>
 
             {/* Barra de progreso de pronósticos */}
@@ -484,7 +508,7 @@ export const DashboardPage: React.FC = () => {
       {activeTab === 'matrix' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
           <div className="dashboard-picks-controls">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               {weeks.length > 0 && (
                 <select
                   className="dashboard-week-select"
@@ -508,6 +532,25 @@ export const DashboardPage: React.FC = () => {
                   Abierta (Picks Ocultos)
                 </span>
               )}
+
+              {hasLiveMatches && (
+                <span className="badge badge--accent badge--live-pulse" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span className="live-pulse-dot" />
+                  EN VIVO
+                </span>
+              )}
+
+              <button
+                type="button"
+                className="btn btn--outline btn--sm"
+                onClick={() => refetchPicks()}
+                disabled={isFetchingPicks}
+                title="Refrescar marcadores y pronósticos desde la base de datos"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <RotateCw size={13} className={isFetchingPicks ? 'spin-anim' : ''} />
+                <span>{isFetchingPicks ? 'Actualizando...' : 'Actualizar'}</span>
+              </button>
             </div>
 
             {isPicksAdmin && !isWeekLocked && (
