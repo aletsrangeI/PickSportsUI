@@ -8,7 +8,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import type { MemberStanding } from '../../types';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { UserAvatar } from '../../components/common/UserAvatar';
 import './StandingsTable.css';
 
@@ -27,11 +27,41 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
       columnHelper.accessor('rank', {
         header: '#',
         cell: (info) => {
+          const member = info.row.original;
           const rank = info.getValue();
-          if (rank === 1) return <span className="standings-table__medal standings-table__medal--gold">🥇 1</span>;
-          if (rank === 2) return <span className="standings-table__medal standings-table__medal--silver">🥈 2</span>;
-          if (rank === 3) return <span className="standings-table__medal standings-table__medal--bronze">🥉 3</span>;
-          return <span className="standings-table__rank-number">{rank}</span>;
+          const rankDelta = member.rankDelta;
+          let trend: React.ReactNode = null;
+          let trendType = 'steady';
+          let trendLabel = '';
+
+          if (!isWeeklyView && rankDelta !== null && rankDelta !== undefined) {
+            if (rankDelta > 0) {
+              trend = <><ArrowUp size={13} aria-hidden="true" /><span>+{rankDelta}</span></>;
+              trendType = 'up';
+              trendLabel = `subió ${rankDelta}`;
+            } else if (rankDelta < 0) {
+              trend = <><ArrowDown size={13} aria-hidden="true" /><span>-{Math.abs(rankDelta)}</span></>;
+              trendType = 'down';
+              trendLabel = `bajó ${Math.abs(rankDelta)}`;
+            } else {
+              trend = <><Minus size={13} aria-hidden="true" /><span>0</span></>;
+              trendLabel = 'se mantuvo';
+            }
+          }
+
+          return (
+            <span className="standings-table__rank">
+              <span className="standings-table__rank-number">{rank}</span>
+              {trend && (
+                <span
+                  className={`standings-table__trend standings-table__trend--${trendType}`}
+                  aria-label={`Cambio de posición: ${trendLabel}`}
+                >
+                  {trend}
+                </span>
+              )}
+            </span>
+          );
         },
       }),
       columnHelper.accessor('alias', {
@@ -68,9 +98,9 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
         ),
       }),
       columnHelper.accessor('upsetHits', {
-        header: () => (
-          <span title="Aciertos en partidos sorpresa (≤25% del grupo)">
-            🔮 Sorpresas
+          header: () => (
+            <span title="Aciertos en partidos sorpresa (≤25% del grupo)">
+            Sorpresas
           </span>
         ),
         cell: (info) => {
@@ -85,9 +115,9 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
         },
       }),
       columnHelper.accessor('humillaciones', {
-        header: () => (
-          <span title="Derrotas por 3+ goles apostando a perdedor">
-            🤡 Humillado
+          header: () => (
+            <span title="Derrotas por 3+ goles apostando a perdedor">
+            Humillado
           </span>
         ),
         cell: (info) => {
@@ -102,9 +132,9 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
         },
       }),
       columnHelper.accessor('somniferos', {
-        header: () => (
-          <span title="Apostó ganador en partido que terminó 0-0">
-            😴 Somníferos
+          header: () => (
+            <span title="Apostó ganador en partido que terminó 0-0">
+            Somníferos
           </span>
         ),
         cell: (info) => {
@@ -119,9 +149,9 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
         },
       }),
       columnHelper.accessor('empatesFallidos', {
-        header: () => (
-          <span title="Apostó EMPATE pero hubo un ganador">
-            🤷‍♂️ Empates Rotos
+          header: () => (
+            <span title="Apostó EMPATE pero hubo un ganador">
+            Empates Rotos
           </span>
         ),
         cell: (info) => {
@@ -140,7 +170,7 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
         cell: (info) => {
           const val = info.getValue();
           return val > 0 ? (
-            <span className="standings-table__streak">🔥 {val}</span>
+            <span className="standings-table__streak">{val}</span>
           ) : (
             <span className="standings-table__zero">0</span>
           );

@@ -280,6 +280,8 @@ export interface LockAndAutofillResult {
 
 export interface MemberStanding {
   rank: number;
+  previousRank?: number;
+  rankDelta?: number;
   memberId: number;
   userId: number;
   alias: string;
@@ -488,5 +490,4 @@ export interface MigrationResultData {
   playerVerification: MigrationPlayerVerification[];
   createdUsernames: string[];
 }
-
 
