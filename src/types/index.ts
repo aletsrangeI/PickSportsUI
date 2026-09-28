@@ -310,6 +310,16 @@ export interface QuinielaStandingsData {
   generalStandings: MemberStanding[];
 }
 
+export interface AwardMatchDetail {
+  matchId: number;
+  matchTitle: string;
+  teamsAbbr: string;
+  score: string;
+  pickAbbr: string;
+  detailText: string;
+  contextText: string;
+}
+
 export interface WeeklyAward {
   id: number;
   quinielaId: number;
@@ -322,6 +332,7 @@ export interface WeeklyAward {
   awardValue1: string;
   awardValue2?: string;
   notes?: string;
+  matchDetails?: AwardMatchDetail[];
 }
 
 export interface ScoreWeekResult {

@@ -380,7 +380,32 @@ export const StandingsPage: React.FC = () => {
                           </>
                         )}
                       </div>
-                      {award.notes && <p className="awards-card__notes">{award.notes}</p>}
+                      <div className="awards-card__notes">
+                        <span className="awards-card__notes-label">Detalle</span>
+                        {award.matchDetails && award.matchDetails.length > 0 ? (
+                          <div className="awards-card__triggers">
+                            {award.notes && (
+                              <span className="awards-card__trigger-summary">
+                                {award.notes.split('. Partidos:')[0]}
+                              </span>
+                            )}
+                            {award.matchDetails.map((det, idx) => (
+                              <div key={idx} className="awards-card__trigger-row">
+                                <div className="awards-card__trigger-top">
+                                  <span className="awards-card__trigger-match">{det.teamsAbbr || det.matchTitle}</span>
+                                  <span className="awards-card__trigger-score">{det.score}</span>
+                                  <span className="awards-card__trigger-pick">Pronóstico: {det.pickAbbr}</span>
+                                </div>
+                                {det.contextText && (
+                                  <span className="awards-card__trigger-context">{det.contextText}</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span>{award.notes}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
