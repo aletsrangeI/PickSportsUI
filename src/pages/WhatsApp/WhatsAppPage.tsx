@@ -24,6 +24,7 @@ import {
   ExternalLink,
   Loader2,
 } from 'lucide-react';
+import { getMostRelevantWeekForWhatsApp } from '../../utils/weekSelection';
 import './WhatsAppPage.css';
 
 type ReportType = 'reminder' | 'summary' | 'prizepool' | 'player';
@@ -101,14 +102,12 @@ export const WhatsAppPage: React.FC = () => {
 
   useEffect(() => {
     if (weeks.length > 0 && (selectedWeekId === null || !weeks.some(w => w.id === selectedWeekId))) {
-      const activeWeek =
-        weeks.find((w) => w.status === 'PUBLISHED') ??
-        weeks.find((w) => w.status === 'LOCKED') ??
-        weeks.find((w) => w.status === 'SCORED') ??
-        weeks[0];
-      setSelectedWeekId(activeWeek.id);
+      const activeWeek = getMostRelevantWeekForWhatsApp(weeks, reportType === 'summary' ? 'summary' : 'reminder');
+      if (activeWeek) {
+        setSelectedWeekId(activeWeek.id);
+      }
     }
-  }, [weeks, selectedWeekId]);
+  }, [weeks, selectedWeekId, reportType]);
 
   useEffect(() => {
     if (members.length > 0 && selectedMemberId === null) {

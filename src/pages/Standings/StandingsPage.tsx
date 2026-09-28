@@ -11,6 +11,7 @@ import {
 import { StandingsTable } from './StandingsTable';
 import { Trophy, Award, Flame, Info, CheckCircle2, AlertCircle, RefreshCw, Share2 } from 'lucide-react';
 import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
+import { getMostRelevantWeekForStandings } from '../../utils/weekSelection';
 import './StandingsPage.css';
 
 export const StandingsPage: React.FC = () => {
@@ -53,12 +54,10 @@ export const StandingsPage: React.FC = () => {
 
   useEffect(() => {
     if (weeks.length > 0 && (selectedWeekId === null || !weeks.some(w => w.id === selectedWeekId))) {
-      const activeWeek =
-        weeks.find((w) => w.status === 'PUBLISHED') ??
-        weeks.find((w) => w.status === 'LOCKED') ??
-        weeks.find((w) => w.status === 'SCORED') ??
-        weeks[0];
-      setSelectedWeekId(activeWeek.id);
+      const activeWeek = getMostRelevantWeekForStandings(weeks);
+      if (activeWeek) {
+        setSelectedWeekId(activeWeek.id);
+      }
     }
   }, [weeks, selectedWeekId]);
 

@@ -10,6 +10,7 @@ import {
 import type { WeeklyAward } from '../../types';
 import { Trophy, Sparkles, Skull, Moon, HelpCircle, Flame, AlertCircle } from 'lucide-react';
 import { UserAvatar } from '../../components/common/UserAvatar';
+import { getMostRelevantWeekForAwards } from '../../utils/weekSelection';
 import './AwardsPage.css';
 
 interface AwardCardMeta {
@@ -91,8 +92,10 @@ export const AwardsPage: React.FC = () => {
 
   useEffect(() => {
     if (weeks.length > 0 && (selectedWeekId === null || !weeks.some(w => w.id === selectedWeekId))) {
-      const activeWeek = weeks.find((w) => w.status === 'SCORED') || weeks[0];
-      setSelectedWeekId(activeWeek.id);
+      const activeWeek = getMostRelevantWeekForAwards(weeks);
+      if (activeWeek) {
+        setSelectedWeekId(activeWeek.id);
+      }
     }
   }, [weeks, selectedWeekId]);
 

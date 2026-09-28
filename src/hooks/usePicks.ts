@@ -11,6 +11,7 @@ import {
 } from '../services/api';
 import type { PickItem, Match, QuinielaMemberPickInfo } from '../types';
 import { formatDeadline } from '../utils/dateUtils';
+import { getMostRelevantWeekForPicks } from '../utils/weekSelection';
 
 export interface UsePicksReturn {
   activeQuinielaId: number | null;
@@ -83,13 +84,10 @@ export const usePicks = (): UsePicksReturn => {
     [rawWeeks]
   );
 
-  // Auto-seleccionar la jornada más relevante
+  // Auto-seleccionar la jornada más relevante (jornada abierta más reciente)
   useEffect(() => {
-    if (weeks.length > 0 && selectedWeekId === null) {
-      const activeWeek =
-        weeks.find((w) => w.status === 'PUBLISHED') ??
-        weeks.find((w) => w.status === 'LOCKED') ??
-        weeks[0];
+    if (weeks.length > 0 && (selectedWeekId === null || !weeks.some((w) => w.id === selectedWeekId))) {
+      const activeWeek = getMostRelevantWeekForPicks(weeks);
       if (activeWeek) {
         setSelectedWeekId(activeWeek.id);
       }

@@ -15,6 +15,7 @@ import {
 import { MatchCard } from '../../components/matches/MatchCard';
 import { ApiHealthBadge } from '../../components/admin/ApiHealthBadge';
 import { AlertCircle, RotateCw, DownloadCloud, FileJson } from 'lucide-react';
+import { getMostRelevantWeekForPicks } from '../../utils/weekSelection';
 import './FixturesPage.css';
 
 type ToastType = 'success' | 'warning' | 'error';
@@ -108,8 +109,8 @@ export const FixturesPage: React.FC = () => {
     if (weeks.length > 0) {
       const isValid = weeks.some((w) => w.id === selectedWeekId);
       if (!isValid) {
-        const active = weeks.find((w) => w.status === 'PUBLISHED' || w.status === 'LOCKED') ?? weeks[0];
-        setSelectedWeekId(active.id);
+        const active = getMostRelevantWeekForPicks(weeks);
+        setSelectedWeekId(active ? active.id : null);
       }
     } else {
       setSelectedWeekId(null);
