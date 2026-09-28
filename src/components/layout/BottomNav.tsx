@@ -1,25 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Calendar, Trophy, Award, Share2, Settings, CalendarDays, Newspaper } from 'lucide-react';
+import { Calendar, Trophy, Newspaper, User } from 'lucide-react';
 import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import type { RootState } from '../../store';
-import { useGetQuinielasQuery } from '../../services/api';
+import { UserAvatar } from '../common/UserAvatar';
 import './BottomNav.css';
 
 export const BottomNav: React.FC = () => {
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
-  const { data: quinielasResponse } = useGetQuinielasQuery(undefined, { skip: !isAuthenticated });
-  const quinielas = quinielasResponse?.data || [];
-  const activeQuiniela = quinielas.find((q) => q.id === activeQuinielaId);
-
-  const isOwnerOrAdmin =
-    user?.role?.toUpperCase() === 'ADMIN' ||
-    user?.role?.toUpperCase() === 'OWNER' ||
-    activeQuiniela?.userRole === 'OWNER' ||
-    activeQuiniela?.userRole === 'ADMIN' ||
-    quinielas.some((q) => q.userRole === 'OWNER' || q.userRole === 'ADMIN');
+  const { user } = useSelector((state: RootState) => state.auth);
+  const userInitial = (user?.displayName || user?.username || 'U').charAt(0).toUpperCase();
 
   return (
     <nav className="bottom-nav" aria-label="Navegación principal">
@@ -29,108 +19,81 @@ export const BottomNav: React.FC = () => {
         contentClassName="bottom-nav__content"
       >
         <ul className="bottom-nav__list">
-        <li className="bottom-nav__item">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
-            }
-          >
-            <div className="bottom-nav__icon-box">
-              <Calendar size={18} strokeWidth={1.75} className="bottom-nav__icon" />
-            </div>
-            <span className="bottom-nav__label">Picks</span>
-            <span className="bottom-nav__pip" aria-hidden="true" />
-          </NavLink>
-        </li>
-        <li className="bottom-nav__item">
-          <NavLink
-            to="/fixtures"
-            className={({ isActive }) =>
-              `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
-            }
-          >
-            <div className="bottom-nav__icon-box">
-              <CalendarDays size={18} strokeWidth={1.75} className="bottom-nav__icon" />
-            </div>
-            <span className="bottom-nav__label">Partidos</span>
-            <span className="bottom-nav__pip" aria-hidden="true" />
-          </NavLink>
-        </li>
-        <li className="bottom-nav__item">
-          <NavLink
-            to="/standings"
-            className={({ isActive }) =>
-              `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
-            }
-          >
-            <div className="bottom-nav__icon-box">
-              <Trophy size={18} strokeWidth={1.75} className="bottom-nav__icon" />
-            </div>
-            <span className="bottom-nav__label">Posiciones</span>
-            <span className="bottom-nav__pip" aria-hidden="true" />
-          </NavLink>
-        </li>
-        <li className="bottom-nav__item">
-          <NavLink
-            to="/awards"
-            className={({ isActive }) =>
-              `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
-            }
-          >
-            <div className="bottom-nav__icon-box">
-              <Award size={18} strokeWidth={1.75} className="bottom-nav__icon" />
-            </div>
-            <span className="bottom-nav__label">Premios</span>
-            <span className="bottom-nav__pip" aria-hidden="true" />
-          </NavLink>
-        </li>
-        <li className="bottom-nav__item">
-          <NavLink
-            to="/bulletin"
-            className={({ isActive }) =>
-              `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
-            }
-          >
-            <div className="bottom-nav__icon-box">
-              <Newspaper size={18} strokeWidth={1.75} className="bottom-nav__icon" />
-            </div>
-            <span className="bottom-nav__label">Boletín</span>
-            <span className="bottom-nav__pip" aria-hidden="true" />
-          </NavLink>
-        </li>
-        {isOwnerOrAdmin && (
+          {/* 1. Picks */}
           <li className="bottom-nav__item">
             <NavLink
-              to="/share"
+              to="/"
+              end
               className={({ isActive }) =>
                 `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
               }
             >
               <div className="bottom-nav__icon-box">
-                <Share2 size={18} strokeWidth={1.75} className="bottom-nav__icon" />
+                <Calendar size={22} strokeWidth={1.8} className="bottom-nav__icon" />
               </div>
-              <span className="bottom-nav__label">WhatsApp</span>
+              <span className="bottom-nav__label">Picks</span>
               <span className="bottom-nav__pip" aria-hidden="true" />
             </NavLink>
           </li>
-        )}
-        <li className="bottom-nav__item">
-          <NavLink
-            to="/settings"
-            className={({ isActive }) =>
-              `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
-            }
-          >
-            <div className="bottom-nav__icon-box">
-              <Settings size={18} strokeWidth={1.75} className="bottom-nav__icon" />
-            </div>
-            <span className="bottom-nav__label">Ajustes</span>
-            <span className="bottom-nav__pip" aria-hidden="true" />
-          </NavLink>
-        </li>
-      </ul>
+
+          {/* 2. Posiciones */}
+          <li className="bottom-nav__item">
+            <NavLink
+              to="/standings"
+              className={({ isActive }) =>
+                `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
+              }
+            >
+              <div className="bottom-nav__icon-box">
+                <Trophy size={22} strokeWidth={1.8} className="bottom-nav__icon" />
+              </div>
+              <span className="bottom-nav__label">Posiciones</span>
+              <span className="bottom-nav__pip" aria-hidden="true" />
+            </NavLink>
+          </li>
+
+          {/* 3. Boletín */}
+          <li className="bottom-nav__item">
+            <NavLink
+              to="/bulletin"
+              className={({ isActive }) =>
+                `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
+              }
+            >
+              <div className="bottom-nav__icon-box">
+                <Newspaper size={22} strokeWidth={1.8} className="bottom-nav__icon" />
+              </div>
+              <span className="bottom-nav__label">Boletín</span>
+              <span className="bottom-nav__pip" aria-hidden="true" />
+            </NavLink>
+          </li>
+
+          {/* 4. Perfil */}
+          <li className="bottom-nav__item">
+            <NavLink
+              to="/settings"
+              className={({ isActive }) =>
+                `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
+              }
+            >
+              <div className="bottom-nav__icon-box">
+                {user ? (
+                  <UserAvatar
+                    src={user?.avatarUrl}
+                    alt={user?.displayName || user?.username || 'Perfil'}
+                    size="xs"
+                    className="bottom-nav__avatar"
+                    fallbackText={userInitial}
+                  />
+                ) : (
+                  <User size={22} strokeWidth={1.8} className="bottom-nav__icon" />
+                )}
+              </div>
+              <span className="bottom-nav__label">Perfil</span>
+              <span className="bottom-nav__pip" aria-hidden="true" />
+            </NavLink>
+          </li>
+        </ul>
       </LiquidGlass>
     </nav>
   );

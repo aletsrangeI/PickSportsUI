@@ -362,6 +362,32 @@ export const SettingsPage: React.FC = () => {
         )}
       </div>
 
+      {/* Acceso a Partidos y Calendario (Para participantes regulares) */}
+      {!isOwnerOrAdmin && (
+        <div className="settings-section">
+          <div className="settings-section__header">
+            <div className="settings-section__title-row">
+              <CalendarDays size={18} className="text-primary" />
+              <h3 className="settings-section__title">Calendario y Partidos</h3>
+            </div>
+          </div>
+          <div className="settings-grid">
+            <Link to="/fixtures" className="settings-tool-card">
+              <div className="settings-tool-card__icon settings-tool-card__icon--calendar">
+                <CalendarDays size={24} />
+              </div>
+              <div className="settings-tool-card__content">
+                <h4 className="settings-tool-card__title">Partidos & Resultados de Jornada</h4>
+                <p className="settings-tool-card__desc">
+                  Revisa el calendario oficial de Liga MX, horarios, canales de transmisión y marcadores en vivo.
+                </p>
+              </div>
+              <ChevronRight size={20} className="settings-tool-card__arrow" />
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Sección para Administradores y Owners */}
       {isOwnerOrAdmin && (
         <div className="settings-section">

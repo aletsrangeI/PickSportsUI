@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import {
@@ -126,37 +127,57 @@ export const StandingsPage: React.FC = () => {
           </p>
         </div>
 
-        {isOwnerOrAdmin && (
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => setIsClaimModalOpen(true)}
-              className="btn btn--outline"
-              style={{
-                borderColor: '#25d366',
-                color: '#25d366',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.8125rem',
-                fontWeight: 700,
-              }}
-              title="Copiar y enviar enlaces personalizados para WhatsApp a participantes migrados"
-            >
-              <Share2 size={15} />
-              <span>Activar Cuentas (WhatsApp)</span>
-            </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link
+            to="/awards"
+            className="btn btn--outline standings-page__awards-btn"
+            style={{
+              borderColor: 'rgba(234, 179, 8, 0.45)',
+              color: '#eab308',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+            }}
+            title="Consultar bolsa acumulada y asignación de premios"
+          >
+            <Award size={16} />
+            <span>Ver Premios</span>
+          </Link>
 
-            <button
-              onClick={handleScoreWeek}
-              disabled={scoringWeek || !selectedWeekId}
-              className="standings-page__score-btn"
-              title="Evalúa partidos, asigna aciertos, galardones y actualiza la tabla"
-            >
-              <RefreshCw size={16} className={scoringWeek ? 'standings-page__spin' : ''} />
-              {scoringWeek ? 'Calificando...' : 'Calificar Jornada'}
-            </button>
-          </div>
-        )}
+          {isOwnerOrAdmin && (
+            <>
+              <button
+                onClick={() => setIsClaimModalOpen(true)}
+                className="btn btn--outline"
+                style={{
+                  borderColor: '#25d366',
+                  color: '#25d366',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.8125rem',
+                  fontWeight: 700,
+                }}
+                title="Copiar y enviar enlaces personalizados para WhatsApp a participantes migrados"
+              >
+                <Share2 size={15} />
+                <span>Activar Cuentas (WhatsApp)</span>
+              </button>
+
+              <button
+                onClick={handleScoreWeek}
+                disabled={scoringWeek || !selectedWeekId}
+                className="standings-page__score-btn"
+                title="Evalúa partidos, asigna aciertos, galardones y actualiza la tabla"
+              >
+                <RefreshCw size={16} className={scoringWeek ? 'standings-page__spin' : ''} />
+                {scoringWeek ? 'Calificando...' : 'Calificar Jornada'}
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Selectores de Temporada y Jornada */}
