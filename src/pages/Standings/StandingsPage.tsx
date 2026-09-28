@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import {
@@ -7,23 +6,25 @@ import {
   useGetSeasonsQuery,
   useGetWeeksBySeasonQuery,
   useGetStandingsQuery,
+  useGetAwardsQuery,
   useScoreWeekMutation,
 } from '../../services/api';
 import { StandingsTable } from './StandingsTable';
-import { Trophy, Award, Flame, Info, CheckCircle2, AlertCircle, RefreshCw, Share2 } from 'lucide-react';
-import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
+import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { AWARD_META } from '../Awards/AwardsPage';
+import { UserAvatar } from '../../components/common/UserAvatar';
 import { getMostRelevantWeekForStandings } from '../../utils/weekSelection';
+import '../Awards/AwardsPage.css';
 import './StandingsPage.css';
 
 export const StandingsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'weekly' | 'general'>('weekly');
+  const [mainTab, setMainTab] = useState<'standings' | 'awards'>('standings');
+  const [standingsTab, setStandingsTab] = useState<'weekly' | 'general'>('weekly');
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
   const [selectedWeekId, setSelectedWeekId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
-  const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
 
   const { data: quinielasResponse } = useGetQuinielasQuery();
   const quinielas = quinielasResponse?.data || [];
@@ -54,7 +55,7 @@ export const StandingsPage: React.FC = () => {
   const weeks = weeksData?.data ?? [];
 
   useEffect(() => {
-    if (weeks.length > 0 && (selectedWeekId === null || !weeks.some(w => w.id === selectedWeekId))) {
+    if (weeks.length > 0 && (selectedWeekId === null || !weeks.some((w) => w.id === selectedWeekId))) {
       const activeWeek = getMostRelevantWeekForStandings(weeks);
       if (activeWeek) {
         setSelectedWeekId(activeWeek.id);
@@ -69,16 +70,27 @@ export const StandingsPage: React.FC = () => {
     refetch,
   } = useGetStandingsQuery(
     { quinielaId, weekId: selectedWeekId! },
-    { skip: !quinielaId || !selectedWeekId }
+    { skip: !quinielaId || !selectedWeekId || mainTab !== 'standings' }
+  );
+
+  // Consulta de Galardones / Premios
+  const {
+    data: awardsResponse,
+    isLoading: loadingAwards,
+  } = useGetAwardsQuery(
+    { quinielaId, weekId: selectedWeekId || undefined },
+    { skip: !quinielaId || mainTab !== 'awards' }
   );
 
   const [scoreWeek, { isLoading: scoringWeek }] = useScoreWeekMutation();
 
   const standingsData = standingsResponse?.data;
+  const awards = awardsResponse?.data ?? [];
   const currentWeek = weeks.find((w) => w.id === selectedWeekId);
+  const isWeekAlreadyScored = currentWeek?.status?.toUpperCase() === 'SCORED';
 
   const handleScoreWeek = async () => {
-    if (!quinielaId || !selectedWeekId) return;
+    if (!quinielaId || !selectedWeekId || isWeekAlreadyScored) return;
     try {
       const res = await scoreWeek({ quinielaId, weekId: selectedWeekId }).unwrap();
       setToast({ message: res.message || 'Jornada calificada con éxito.', type: 'success' });
@@ -118,69 +130,82 @@ export const StandingsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header integrado */}
       <div className="standings-page__header">
         <div>
-          <h1 className="standings-page__title">Tabla de Posiciones</h1>
+          <h1 className="standings-page__title">
+            {mainTab === 'standings' ? 'Tabla de Posiciones' : 'Premios y Galardones'}
+          </h1>
           <p className="standings-page__subtitle">
-            {activeQuiniela?.name} • Criterio de desempate en cascada estricto
+            {activeQuiniela?.name} •{' '}
+            {mainTab === 'standings'
+              ? 'Criterio de desempate en cascada estricto'
+              : 'Reconocimientos y distinciones por jornada'}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link
-            to="/awards"
-            className="btn btn--outline standings-page__awards-btn"
-            style={{
-              borderColor: 'rgba(234, 179, 8, 0.45)',
-              color: '#eab308',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-            }}
-            title="Consultar bolsa acumulada y asignación de premios"
-          >
-            <Award size={16} />
-            <span>Ver Premios</span>
-          </Link>
-
-          {isOwnerOrAdmin && (
-            <>
-              <button
-                onClick={() => setIsClaimModalOpen(true)}
-                className="btn btn--outline"
-                style={{
-                  borderColor: '#25d366',
-                  color: '#25d366',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.8125rem',
-                  fontWeight: 700,
-                }}
-                title="Copiar y enviar enlaces personalizados para WhatsApp a participantes migrados"
-              >
-                <Share2 size={15} />
-                <span>Activar Cuentas (WhatsApp)</span>
-              </button>
-
-              <button
-                onClick={handleScoreWeek}
-                disabled={scoringWeek || !selectedWeekId}
-                className="standings-page__score-btn"
-                title="Evalúa partidos, asigna aciertos, galardones y actualiza la tabla"
-              >
-                <RefreshCw size={16} className={scoringWeek ? 'standings-page__spin' : ''} />
-                {scoringWeek ? 'Calificando...' : 'Calificar Jornada'}
-              </button>
-            </>
-          )}
-        </div>
+        {isOwnerOrAdmin && mainTab === 'standings' && (
+          <div className="standings-page__header-actions">
+            <button
+              onClick={handleScoreWeek}
+              disabled={scoringWeek || !selectedWeekId || isWeekAlreadyScored}
+              className={`standings-page__score-btn ${
+                isWeekAlreadyScored ? 'standings-page__score-btn--disabled' : ''
+              }`}
+              title={
+                isWeekAlreadyScored
+                  ? 'Esta jornada ya ha sido calificada y cuenta con resultados oficiales'
+                  : 'Evalúa partidos, asigna aciertos, galardones y actualiza la tabla'
+              }
+            >
+              {scoringWeek ? (
+                <>
+                  <RefreshCw size={15} className="standings-page__spin" />
+                  <span>Calificando...</span>
+                </>
+              ) : isWeekAlreadyScored ? (
+                <>
+                  <CheckCircle2 size={15} />
+                  <span>Jornada Calificada</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw size={15} />
+                  <span>Calificar Jornada</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Selectores de Temporada y Jornada */}
+      {/* Segmented Control Principal: Tabla vs Premios */}
+      <div className="standings-page__main-tabs" role="tablist" aria-label="Secciones de posiciones y premios">
+        <button
+          role="tab"
+          aria-selected={mainTab === 'standings'}
+          className={`standings-page__main-tab ${
+            mainTab === 'standings' ? 'standings-page__main-tab--active' : ''
+          }`}
+          onClick={() => setMainTab('standings')}
+        >
+          <Trophy size={16} />
+          <span>Tabla de Posiciones</span>
+        </button>
+        <button
+          role="tab"
+          aria-selected={mainTab === 'awards'}
+          className={`standings-page__main-tab ${
+            mainTab === 'awards' ? 'standings-page__main-tab--active' : ''
+          }`}
+          onClick={() => setMainTab('awards')}
+        >
+          <Award size={16} />
+          <span>Premios & Galardones</span>
+        </button>
+      </div>
+
+      {/* Controles de Temporada y Jornada (Comunes a ambas vistas) */}
       <div className="standings-page__controls">
         {seasons.length > 1 && (
           <div className="standings-page__selector-group">
@@ -217,56 +242,127 @@ export const StandingsPage: React.FC = () => {
           </select>
         </div>
 
-        {/* Pestañas Semanal vs General */}
-        <div className="standings-page__tabs">
-          <button
-            className={`standings-page__tab ${activeTab === 'weekly' ? 'standings-page__tab--active' : ''}`}
-            onClick={() => setActiveTab('weekly')}
-          >
-            <Trophy size={16} />
-            <span>Jornada {currentWeek?.weekNumber || ''}</span>
-          </button>
-          <button
-            className={`standings-page__tab ${activeTab === 'general' ? 'standings-page__tab--active' : ''}`}
-            onClick={() => setActiveTab('general')}
-          >
-            <Award size={16} />
-            <span>Tabla General</span>
-          </button>
-        </div>
+        {/* Pestañas Semanal vs General (Solo visibles en modo Tabla) */}
+        {mainTab === 'standings' && (
+          <div className="standings-page__tabs">
+            <button
+              className={`standings-page__tab ${
+                standingsTab === 'weekly' ? 'standings-page__tab--active' : ''
+              }`}
+              onClick={() => setStandingsTab('weekly')}
+            >
+              <Trophy size={16} />
+              <span>Jornada {currentWeek?.weekNumber || ''}</span>
+            </button>
+            <button
+              className={`standings-page__tab ${
+                standingsTab === 'general' ? 'standings-page__tab--active' : ''
+              }`}
+              onClick={() => setStandingsTab('general')}
+            >
+              <Award size={16} />
+              <span>Tabla General</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Banner explicativo del desempate en cascada */}
-      <div className="standings-page__rules-banner">
-        <Info size={18} className="standings-page__rules-icon" />
-        <div className="standings-page__rules-text">
-          <strong>Regla de Desempate Oficial:</strong> 1° Más aciertos totales (Hits) → 2° Más sorpresas acertadas (Upsets ≤25%) → 3° Menos humillaciones (derrotas por 3+ goles).
-        </div>
-      </div>
+      {/* VISTA 1: TABLA DE POSICIONES */}
+      {mainTab === 'standings' && (
+        <>
+          {/* Banner explicativo del desempate en cascada */}
+          <div className="standings-page__rules-banner">
+            <Info size={18} className="standings-page__rules-icon" />
+            <div className="standings-page__rules-text">
+              <strong>Regla de Desempate Oficial:</strong> 1° Más aciertos totales (Hits) → 2° Más sorpresas acertadas (Upsets ≤25%) → 3° Menos humillaciones (derrotas por 3+ goles).
+            </div>
+          </div>
 
-      {/* Tabla de Posiciones */}
-      {loadingStandings ? (
-        <div className="standings-page__loading">
-          <RefreshCw size={28} className="standings-page__spin" />
-          <p>Cargando posiciones...</p>
-        </div>
-      ) : (
-        <StandingsTable
-          data={
-            activeTab === 'weekly'
-              ? standingsData?.weeklyStandings ?? []
-              : standingsData?.generalStandings ?? []
-          }
-          isWeeklyView={activeTab === 'weekly'}
-        />
+          {/* Tabla de Posiciones */}
+          {loadingStandings ? (
+            <div className="standings-page__loading">
+              <RefreshCw size={28} className="standings-page__spin" />
+              <p>Cargando posiciones...</p>
+            </div>
+          ) : (
+            <StandingsTable
+              data={
+                standingsTab === 'weekly'
+                  ? standingsData?.weeklyStandings ?? []
+                  : standingsData?.generalStandings ?? []
+              }
+              isWeeklyView={standingsTab === 'weekly'}
+            />
+          )}
+        </>
       )}
 
-      <ClaimLinksModal
-        quinielaId={quinielaId}
-        quinielaName={activeQuiniela?.name}
-        isOpen={isClaimModalOpen}
-        onClose={() => setIsClaimModalOpen(false)}
-      />
+      {/* VISTA 2: PREMIOS Y GALARDONES */}
+      {mainTab === 'awards' && (
+        <div className="standings-page__awards-container">
+          {loadingAwards ? (
+            <div className="awards-page__loading">
+              <RefreshCw size={28} className="standings-page__spin" />
+              <p>Cargando reconocimientos de la jornada...</p>
+            </div>
+          ) : awards.length === 0 ? (
+            <div className="awards-page__empty">
+              <Trophy size={48} className="awards-page__empty-icon" />
+              <h3>Aún no hay galardones asignados</h3>
+              <p>
+                Los reconocimientos y premios se calculan automáticamente al finalizar y calificar
+                los partidos de cada jornada.
+              </p>
+            </div>
+          ) : (
+            <div className="awards-page__grid">
+              {awards.map((award) => {
+                const meta = AWARD_META[award.awardType] || {
+                  title: award.awardType,
+                  icon: <Trophy size={28} />,
+                  badgeClass: 'awards-card__badge--gold',
+                  cardClass: '',
+                };
+
+                return (
+                  <div key={award.id} className={`awards-card ${meta.cardClass}`}>
+                    <div className="awards-card__header">
+                      <div className="awards-card__icon-wrapper">{meta.icon}</div>
+                      <span className={`awards-card__badge ${meta.badgeClass}`}>
+                        {award.awardValue1} {award.awardValue2 ? `(${award.awardValue2})` : ''}
+                      </span>
+                    </div>
+
+                    <div className="awards-card__content">
+                      <span className="awards-card__category">{meta.title}</span>
+                      <div className="awards-card__winner">
+                        {award.awardType === 'PARTIDO_DIFICIL' ? (
+                          <span className="awards-card__winner-alias">{award.awardValue1}</span>
+                        ) : (
+                          <>
+                            <UserAvatar
+                              src={award.avatarUrl}
+                              alt={award.memberAlias}
+                              size="sm"
+                            />
+                            <div className="awards-card__winner-info">
+                              <span className="awards-card__winner-alias">{award.memberAlias}</span>
+                              {award.displayName && award.displayName !== award.memberAlias && (
+                                <span className="awards-card__winner-sub">{award.displayName}</span>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      {award.notes && <p className="awards-card__notes">{award.notes}</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

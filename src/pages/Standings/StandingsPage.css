@@ -50,6 +50,68 @@
   cursor: not-allowed;
 }
 
+.standings-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.standings-page__score-btn--disabled {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(240, 246, 252, 0.50) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* Main Tabbed View (Tabla vs Premios) */
+.standings-page__main-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card, #1e293b);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle, #334155);
+  width: fit-content;
+  max-width: 100%;
+  box-shadow: var(--shadow-sm);
+}
+
+.standings-page__main-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.standings-page__main-tab:hover:not(.standings-page__main-tab--active) {
+  color: var(--text-main, #f8fafc);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.standings-page__main-tab--active {
+  background: var(--color-primary, #10b981);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.standings-page__awards-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg, 20px);
+  width: 100%;
+}
+
 .standings-page__controls {
   display: flex;
   justify-content: space-between;

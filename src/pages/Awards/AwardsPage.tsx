@@ -13,14 +13,14 @@ import { UserAvatar } from '../../components/common/UserAvatar';
 import { getMostRelevantWeekForAwards } from '../../utils/weekSelection';
 import './AwardsPage.css';
 
-interface AwardCardMeta {
+export interface AwardCardMeta {
   title: string;
   icon: React.ReactNode;
   badgeClass: string;
   cardClass: string;
 }
 
-const AWARD_META: Record<string, AwardCardMeta> = {
+export const AWARD_META: Record<string, AwardCardMeta> = {
   MVP: {
     title: 'MVP de la Jornada',
     icon: <Trophy size={28} className="awards-card__icon--gold" />,
