@@ -55,27 +55,35 @@ export function getMostRelevantWeekForPicks<T extends WeekOption>(weeks: T[]): T
 
 /**
  * Selecciona la jornada para vistas de tabla de posiciones (Standings):
- * Prioriza la jornada activa (PUBLISHED o LOCKED más reciente) o la última calificada (SCORED más reciente).
+ * En la tabla de posiciones se consultan puntuaciones y resultados ya disputados.
+ * - Prioridad 1: Jornada en juego ('LOCKED') más reciente (con partidos en vivo o cerrados).
+ * - Prioridad 2: Jornada calificada ('SCORED') más reciente (ej. Jornada 10 con puntuaciones oficiales).
+ * - Prioridad 3 (fallback inicial si el torneo aún no arranca): la jornada abierta más reciente o primera.
  */
 export function getMostRelevantWeekForStandings<T extends WeekOption>(weeks: T[]): T | null {
   if (!weeks || weeks.length === 0) return null;
 
   const sorted = [...weeks].sort((a, b) => a.weekNumber - b.weekNumber);
 
-  const activeWeeks = sorted.filter((w) => {
-    const s = w.status?.toUpperCase();
-    return s === 'PUBLISHED' || s === 'LOCKED';
-  });
-  if (activeWeeks.length > 0) {
-    return activeWeeks[activeWeeks.length - 1];
+  // 1. Jornada en juego (LOCKED) más reciente
+  const lockedWeeks = sorted.filter((w) => w.status?.toUpperCase() === 'LOCKED');
+  if (lockedWeeks.length > 0) {
+    return lockedWeeks[lockedWeeks.length - 1];
   }
 
+  // 2. Jornada calificada (SCORED) más reciente con resultados oficiales
   const scoredWeeks = sorted.filter((w) => w.status?.toUpperCase() === 'SCORED');
   if (scoredWeeks.length > 0) {
     return scoredWeeks[scoredWeeks.length - 1];
   }
 
-  return sorted[sorted.length - 1] ?? sorted[0];
+  // 3. Fallback inicial si ninguna ha arrancado aún
+  const publishedWeeks = sorted.filter((w) => w.status?.toUpperCase() === 'PUBLISHED');
+  if (publishedWeeks.length > 0) {
+    return publishedWeeks[publishedWeeks.length - 1];
+  }
+
+  return sorted[0];
 }
 
 /**
