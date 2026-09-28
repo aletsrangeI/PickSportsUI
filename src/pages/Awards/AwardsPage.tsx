@@ -160,7 +160,7 @@ export const AwardsPage: React.FC = () => {
               <option value="">Toda la Temporada (Vitrina Completa)</option>
               {weeks.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.name} {w.status === 'SCORED' ? '✓' : ''}
+                  {w.name} {w.status === 'SCORED' ? '· Finalizada' : ''}
                 </option>
               ))}
             </select>

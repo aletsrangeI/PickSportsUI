@@ -49,19 +49,42 @@ export const StandingsPage: React.FC = () => {
     }
   }, [seasons, selectedSeasonId]);
 
+  const formatWeekStatus = (status?: string | null): string => {
+    switch (status?.toUpperCase()) {
+      case 'SCORED':
+        return 'Finalizada';
+      case 'LOCKED':
+      case 'IN_PROGRESS':
+        return 'En Juego';
+      case 'PUBLISHED':
+        return 'Abierta';
+      case 'DRAFT':
+        return 'Próxima';
+      default:
+        return '';
+    }
+  };
+
   const { data: weeksData } = useGetWeeksBySeasonQuery(selectedSeasonId!, {
     skip: !selectedSeasonId,
   });
   const weeks = weeksData?.data ?? [];
 
+  // Ocultar jornadas en DRAFT y ordenar de más reciente a más antigua
+  const displayWeeks = React.useMemo(() => {
+    const filtered = weeks.filter((w) => w.status?.toUpperCase() !== 'DRAFT');
+    const source = filtered.length > 0 ? filtered : weeks;
+    return [...source].sort((a, b) => b.weekNumber - a.weekNumber);
+  }, [weeks]);
+
   useEffect(() => {
     if (weeks.length > 0 && (selectedWeekId === null || !weeks.some((w) => w.id === selectedWeekId))) {
-      const activeWeek = getMostRelevantWeekForStandings(weeks);
+      const activeWeek = getMostRelevantWeekForStandings(displayWeeks.length > 0 ? displayWeeks : weeks);
       if (activeWeek) {
         setSelectedWeekId(activeWeek.id);
       }
     }
-  }, [weeks, selectedWeekId]);
+  }, [weeks, displayWeeks, selectedWeekId]);
 
   // Consulta de Posiciones
   const {
@@ -234,11 +257,14 @@ export const StandingsPage: React.FC = () => {
             onChange={(e) => setSelectedWeekId(Number(e.target.value))}
             className="standings-page__select"
           >
-            {weeks.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name} ({w.status})
-              </option>
-            ))}
+            {displayWeeks.map((w) => {
+              const statusLabel = formatWeekStatus(w.status);
+              return (
+                <option key={w.id} value={w.id}>
+                  {w.name} {statusLabel ? `· ${statusLabel}` : ''}
+                </option>
+              );
+            })}
           </select>
         </div>
 
