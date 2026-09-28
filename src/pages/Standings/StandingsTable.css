@@ -75,6 +75,18 @@
   font-size: 0.95rem;
 }
 
+.standings-table__medal--gold {
+  color: #fbbf24;
+}
+
+.standings-table__medal--silver {
+  color: #cbd5e1;
+}
+
+.standings-table__medal--bronze {
+  color: #fb923c;
+}
+
 .standings-table__rank-number {
   font-weight: 600;
   color: var(--text-secondary, #94a3b8);

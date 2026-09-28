@@ -8,7 +8,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import type { MemberStanding } from '../../types';
-import { ArrowUpDown, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Minus, Medal } from 'lucide-react';
 import { UserAvatar } from '../../components/common/UserAvatar';
 import './StandingsTable.css';
 
@@ -36,22 +36,48 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
 
           if (!isWeeklyView && rankDelta !== null && rankDelta !== undefined) {
             if (rankDelta > 0) {
-              trend = <><ArrowUp size={13} aria-hidden="true" /><span>+{rankDelta}</span></>;
+              trend = <><ArrowUp size={12} aria-hidden="true" /><span>+{rankDelta}</span></>;
               trendType = 'up';
               trendLabel = `subió ${rankDelta}`;
             } else if (rankDelta < 0) {
-              trend = <><ArrowDown size={13} aria-hidden="true" /><span>-{Math.abs(rankDelta)}</span></>;
+              trend = <><ArrowDown size={12} aria-hidden="true" /><span>-{Math.abs(rankDelta)}</span></>;
               trendType = 'down';
               trendLabel = `bajó ${Math.abs(rankDelta)}`;
             } else {
-              trend = <><Minus size={13} aria-hidden="true" /><span>0</span></>;
+              trend = <><Minus size={12} aria-hidden="true" /><span>0</span></>;
               trendLabel = 'se mantuvo';
             }
           }
 
+          let rankBadge: React.ReactNode;
+          if (rank === 1) {
+            rankBadge = (
+              <span className="standings-table__medal standings-table__medal--gold" title="1° Lugar">
+                <Medal size={16} aria-hidden="true" />
+                <span>1</span>
+              </span>
+            );
+          } else if (rank === 2) {
+            rankBadge = (
+              <span className="standings-table__medal standings-table__medal--silver" title="2° Lugar">
+                <Medal size={16} aria-hidden="true" />
+                <span>2</span>
+              </span>
+            );
+          } else if (rank === 3) {
+            rankBadge = (
+              <span className="standings-table__medal standings-table__medal--bronze" title="3° Lugar">
+                <Medal size={16} aria-hidden="true" />
+                <span>3</span>
+              </span>
+            );
+          } else {
+            rankBadge = <span className="standings-table__rank-number">{rank}</span>;
+          }
+
           return (
-            <span className="standings-table__rank">
-              <span className="standings-table__rank-number">{rank}</span>
+            <div className="standings-table__rank">
+              {rankBadge}
               {trend && (
                 <span
                   className={`standings-table__trend standings-table__trend--${trendType}`}
@@ -60,7 +86,7 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
                   {trend}
                 </span>
               )}
-            </span>
+            </div>
           );
         },
       }),
