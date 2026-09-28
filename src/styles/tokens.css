@@ -64,7 +64,7 @@
 
   /* Layout */
   --header-height: 60px;
-  --bottom-nav-height: 60px;
+  --bottom-nav-height: 68px;
   --bottom-nav-floating-gap: 16px;
   --max-content-width: 1400px;
   --safe-area-top: env(safe-area-inset-top, 0px);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link, NavLink } from 'react-router-dom';
-import { Flame, LogOut, Plus, UserPlus, CalendarDays, FileSpreadsheet } from 'lucide-react';
+import { Flame, LogOut, Plus, UserPlus, CalendarDays, FileSpreadsheet, Newspaper } from 'lucide-react';
 import type { RootState } from '../../store';
 import { logout } from '../../store/authSlice';
 import { useGetQuinielasQuery } from '../../services/api';
@@ -93,6 +93,15 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
               }
             >
               Premios
+            </NavLink>
+            <NavLink
+              to="/bulletin"
+              className={({ isActive }) =>
+                `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+              }
+            >
+              <Newspaper size={15} />
+              <span>Boletín</span>
             </NavLink>
             {isOwnerOrAdmin && (
               <NavLink

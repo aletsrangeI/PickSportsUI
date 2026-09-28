@@ -13,14 +13,14 @@ import { UserAvatar } from '../../components/common/UserAvatar';
 import { getMostRelevantWeekForAwards } from '../../utils/weekSelection';
 import './AwardsPage.css';
 
-interface AwardCardMeta {
+export interface AwardCardMeta {
   title: string;
   icon: React.ReactNode;
   badgeClass: string;
   cardClass: string;
 }
 
-const AWARD_META: Record<string, AwardCardMeta> = {
+export const AWARD_META: Record<string, AwardCardMeta> = {
   MVP: {
     title: 'MVP de la Jornada',
     icon: <Trophy size={28} className="awards-card__icon--gold" />,
@@ -157,10 +157,10 @@ export const AwardsPage: React.FC = () => {
               onChange={(e) => setSelectedWeekId(e.target.value ? Number(e.target.value) : null)}
               className="awards-page__select"
             >
-              <option value="">🏆 Toda la Temporada (Vitrina Completa)</option>
+              <option value="">Toda la Temporada (Vitrina Completa)</option>
               {weeks.map((w) => (
                 <option key={w.id} value={w.id}>
-                  {w.name} {w.status === 'SCORED' ? '✓' : ''}
+                  {w.name} {w.status === 'SCORED' ? '· Finalizada' : ''}
                 </option>
               ))}
             </select>
@@ -219,7 +219,32 @@ export const AwardsPage: React.FC = () => {
                       </>
                     )}
                   </div>
-                  {award.notes && <p className="awards-card__notes">{award.notes}</p>}
+                  <div className="awards-card__notes">
+                    <span className="awards-card__notes-label">Detalle</span>
+                    {award.matchDetails && award.matchDetails.length > 0 ? (
+                      <div className="awards-card__triggers">
+                        {award.notes && (
+                          <span className="awards-card__trigger-summary">
+                            {award.notes.split('. Partidos:')[0]}
+                          </span>
+                        )}
+                        {award.matchDetails.map((det, idx) => (
+                          <div key={idx} className="awards-card__trigger-row">
+                            <div className="awards-card__trigger-top">
+                              <span className="awards-card__trigger-match">{det.teamsAbbr || det.matchTitle}</span>
+                              <span className="awards-card__trigger-score">{det.score}</span>
+                              <span className="awards-card__trigger-pick">Pronóstico: {det.pickAbbr}</span>
+                            </div>
+                            {det.contextText && (
+                              <span className="awards-card__trigger-context">{det.contextText}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span>{award.notes}</span>
+                    )}
+                  </div>
                 </div>
               </div>
             );
