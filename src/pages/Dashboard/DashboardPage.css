@@ -373,7 +373,7 @@
 }
 
 .dashboard-week-select {
-  padding: 8px 12px;
+  padding: 8px 34px 8px 14px;
   border-radius: var(--radius-md);
   background-color: var(--bg-surface);
   border: 1px solid var(--border-medium);
@@ -381,6 +381,13 @@
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.dashboard-week-select:hover {
+  border-color: var(--color-primary);
 }
 
 .dashboard-picks-progress {

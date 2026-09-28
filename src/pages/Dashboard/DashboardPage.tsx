@@ -346,7 +346,7 @@ export const DashboardPage: React.FC = () => {
                 >
                   {weeks.map((w) => (
                     <option key={w.id} value={w.id}>
-                      {w.name} {w.status === 'LOCKED' ? '🔒' : w.status === 'SCORED' ? '🏁' : w.status === 'PUBLISHED' ? '🟢' : ''}
+                      {w.name}
                     </option>
                   ))}
                 </select>
@@ -517,7 +517,7 @@ export const DashboardPage: React.FC = () => {
                 >
                   {weeks.map((w) => (
                     <option key={w.id} value={w.id}>
-                      {w.name} {w.status === 'LOCKED' ? '🔒' : w.status === 'SCORED' ? '🏁' : w.status === 'PUBLISHED' ? '🟢' : ''}
+                      {w.name}
                     </option>
                   ))}
                 </select>

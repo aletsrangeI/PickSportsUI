@@ -157,7 +157,7 @@ export const AwardsPage: React.FC = () => {
               onChange={(e) => setSelectedWeekId(e.target.value ? Number(e.target.value) : null)}
               className="awards-page__select"
             >
-              <option value="">🏆 Toda la Temporada (Vitrina Completa)</option>
+              <option value="">Toda la Temporada (Vitrina Completa)</option>
               {weeks.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name} {w.status === 'SCORED' ? '✓' : ''}
