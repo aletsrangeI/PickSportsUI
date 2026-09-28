@@ -64,29 +64,32 @@
   box-shadow: none !important;
 }
 
-/* Main Tabbed View (Tabla vs Premios) */
+/* Main Tabbed View (Posiciones vs Premios) - Same design system as Dashboard tabs */
 .standings-page__main-tabs {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
   gap: 6px;
-  background: var(--bg-card, #1e293b);
+  background-color: var(--bg-surface);
   padding: 4px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-subtle, #334155);
-  width: fit-content;
-  max-width: 100%;
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .standings-page__main-tab {
-  display: inline-flex;
+  flex: 1;
+  min-width: 0;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 8px 18px;
-  border-radius: var(--radius-full);
-  border: none;
+  padding: 10px 14px;
+  min-height: 42px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
   background: transparent;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-secondary);
+  font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -95,14 +98,15 @@
 }
 
 .standings-page__main-tab:hover:not(.standings-page__main-tab--active) {
-  color: var(--text-main, #f8fafc);
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  background-color: var(--bg-hover);
 }
 
 .standings-page__main-tab--active {
-  background: var(--color-primary, #10b981);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+  background-color: var(--bg-card);
+  color: var(--color-primary);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .standings-page__awards-container {

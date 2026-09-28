@@ -179,7 +179,7 @@ export const StandingsPage: React.FC = () => {
         )}
       </div>
 
-      {/* Segmented Control Principal: Tabla vs Premios */}
+      {/* Segmented Control Principal: Posiciones vs Premios */}
       <div className="standings-page__main-tabs" role="tablist" aria-label="Secciones de posiciones y premios">
         <button
           role="tab"
@@ -190,7 +190,7 @@ export const StandingsPage: React.FC = () => {
           onClick={() => setMainTab('standings')}
         >
           <Trophy size={16} />
-          <span>Tabla de Posiciones</span>
+          <span>Posiciones</span>
         </button>
         <button
           role="tab"
@@ -201,7 +201,7 @@ export const StandingsPage: React.FC = () => {
           onClick={() => setMainTab('awards')}
         >
           <Award size={16} />
-          <span>Premios & Galardones</span>
+          <span>Premios</span>
         </button>
       </div>
 
