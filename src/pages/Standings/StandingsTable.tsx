@@ -29,7 +29,7 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
         cell: (info) => {
           const member = info.row.original;
           const rank = info.getValue();
-          const rankDelta = member.rankDelta;
+          const rankDelta = member.rankDelta ?? (member as any)?.RankDelta;
           let trend: React.ReactNode = null;
           let trendType = 'steady';
           let trendLabel = '';
@@ -203,7 +203,7 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
         },
       }),
     ],
-    []
+    [isWeeklyView]
   );
 
   const table = useReactTable({
