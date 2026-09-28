@@ -35,6 +35,8 @@ export function compareSemVer(v1: string, v2: string): number {
 
 export const useAppVersionMonitor = () => {
   const localVersion = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0';
+  const localBuildTime = typeof __BUILD_TIME__ !== 'undefined' ? __BUILD_TIME__ : '';
+  const localGitCommit = typeof __GIT_COMMIT__ !== 'undefined' ? __GIT_COMMIT__ : '';
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState<boolean>(false);
   const [isForceUpdateRequired, setIsForceUpdateRequired] = useState<boolean>(false);
@@ -86,6 +88,15 @@ export const useAppVersionMonitor = () => {
         if (data && data.version) {
           detectedServerVersion = data.version;
         }
+
+        const hasBuildMetadataMismatch =
+          (Boolean(data?.buildTime) && data.buildTime !== localBuildTime) ||
+          (Boolean(data?.gitCommit) && data.gitCommit !== localGitCommit);
+
+        if (hasBuildMetadataMismatch) {
+          setIsUpdateAvailable(true);
+          isUpdateAvailableRef.current = true;
+        }
       }
     } catch (err) {
       console.debug('No se pudo obtener /version.json:', err);
@@ -131,7 +142,7 @@ export const useAppVersionMonitor = () => {
       setIsUpdateAvailable(true);
       isUpdateAvailableRef.current = true;
     }
-  }, [localVersion]);
+  }, [localBuildTime, localGitCommit, localVersion]);
 
   // Monitoreo inicial y periódico (cada 15 minutos)
   useEffect(() => {
