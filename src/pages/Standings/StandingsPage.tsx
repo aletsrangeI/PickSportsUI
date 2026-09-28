@@ -220,7 +220,7 @@ export const StandingsPage: React.FC = () => {
       <div className="standings-page__rules-banner">
         <Info size={18} className="standings-page__rules-icon" />
         <div className="standings-page__rules-text">
-          <strong>Regla de Desempate Oficial:</strong> 1° Más aciertos totales (Hits) → 2° Más sorpresas acertadas (🔮 Upsets ≤25%) → 3° Menos humillaciones (🤡 derrotas por 3+ goles).
+          <strong>Regla de Desempate Oficial:</strong> 1° Más aciertos totales (Hits) → 2° Más sorpresas acertadas (Upsets ≤25%) → 3° Menos humillaciones (derrotas por 3+ goles).
         </div>
       </div>
 
