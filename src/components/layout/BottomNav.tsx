@@ -28,11 +28,10 @@ export const BottomNav: React.FC = () => {
                 `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
               }
             >
-              <div className="bottom-nav__icon-box">
-                <Calendar size={22} strokeWidth={1.8} className="bottom-nav__icon" />
+              <div className="bottom-nav__capsule">
+                <Calendar size={20} strokeWidth={1.8} className="bottom-nav__icon" />
+                <span className="bottom-nav__label">Picks</span>
               </div>
-              <span className="bottom-nav__label">Picks</span>
-              <span className="bottom-nav__pip" aria-hidden="true" />
             </NavLink>
           </li>
 
@@ -44,11 +43,10 @@ export const BottomNav: React.FC = () => {
                 `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
               }
             >
-              <div className="bottom-nav__icon-box">
-                <Trophy size={22} strokeWidth={1.8} className="bottom-nav__icon" />
+              <div className="bottom-nav__capsule">
+                <Trophy size={20} strokeWidth={1.8} className="bottom-nav__icon" />
+                <span className="bottom-nav__label">Posiciones</span>
               </div>
-              <span className="bottom-nav__label">Posiciones</span>
-              <span className="bottom-nav__pip" aria-hidden="true" />
             </NavLink>
           </li>
 
@@ -60,11 +58,10 @@ export const BottomNav: React.FC = () => {
                 `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
               }
             >
-              <div className="bottom-nav__icon-box">
-                <Newspaper size={22} strokeWidth={1.8} className="bottom-nav__icon" />
+              <div className="bottom-nav__capsule">
+                <Newspaper size={20} strokeWidth={1.8} className="bottom-nav__icon" />
+                <span className="bottom-nav__label">Boletín</span>
               </div>
-              <span className="bottom-nav__label">Boletín</span>
-              <span className="bottom-nav__pip" aria-hidden="true" />
             </NavLink>
           </li>
 
@@ -76,7 +73,7 @@ export const BottomNav: React.FC = () => {
                 `bottom-nav__link ${isActive ? 'bottom-nav__link--active' : ''}`
               }
             >
-              <div className="bottom-nav__icon-box">
+              <div className="bottom-nav__capsule">
                 {user ? (
                   <UserAvatar
                     src={user?.avatarUrl}
@@ -86,11 +83,10 @@ export const BottomNav: React.FC = () => {
                     fallbackText={userInitial}
                   />
                 ) : (
-                  <User size={22} strokeWidth={1.8} className="bottom-nav__icon" />
+                  <User size={20} strokeWidth={1.8} className="bottom-nav__icon" />
                 )}
+                <span className="bottom-nav__label">Perfil</span>
               </div>
-              <span className="bottom-nav__label">Perfil</span>
-              <span className="bottom-nav__pip" aria-hidden="true" />
             </NavLink>
           </li>
         </ul>
