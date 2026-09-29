@@ -64,19 +64,22 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xs);
-  padding: 10px 18px;
+  gap: var(--space-sm);
+  padding: 12px 28px;
   font-weight: 600;
   font-size: 0.9375rem;
-  border-radius: var(--radius-md);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-spring);
   text-decoration: none;
   cursor: pointer;
   border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
 .btn:disabled {
@@ -95,25 +98,26 @@ button {
 }
 
 .btn--secondary {
-  background-color: var(--bg-elevated);
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--text-main);
-  border-color: var(--border-subtle);
+  border-color: transparent;
 }
 
 .btn--secondary:hover:not(:disabled) {
-  background-color: var(--bg-card-hover);
-  border-color: var(--border-medium);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: transparent;
 }
 
 .btn--outline {
   background-color: transparent;
-  color: var(--text-main);
-  border-color: var(--border-medium);
+  color: var(--text-secondary);
+  border-color: transparent;
 }
 
 .btn--outline:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border-color: transparent;
 }
 
 .btn--sm {
@@ -374,21 +378,21 @@ dialog.modal::backdrop {
 }
 
 .badge--primary {
-  background-color: var(--color-primary-glow);
+  background-color: rgba(16, 185, 129, 0.15);
   color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  border: 1px solid transparent;
 }
 
 .badge--accent {
   background-color: rgba(245, 158, 11, 0.15);
   color: var(--color-accent);
-  border: 1px solid var(--color-accent);
+  border: 1px solid transparent;
 }
 
 .badge--secondary {
-  background-color: var(--bg-elevated);
+  background-color: rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid transparent;
 }
 
 /* Alert Notification */
@@ -413,3 +417,35 @@ dialog.modal::backdrop {
   color: #6ee7b7;
   border: 1px solid var(--color-primary);
 }
+
+/* Accesibilidad: Fallbacks para Light Mode en Liquid Glass Tabs */
+[data-theme="light"] .dashboard-tab-btn--active,
+[data-theme="light"] .picks-matrix-view-btn--active,
+[data-theme="light"] .standings-page__main-tab--active,
+[data-theme="light"] .standings-page__tab--active,
+[data-theme="light"] .match-picker__btn--selected {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+  color: var(--text-main) !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+}
+
+[data-theme="light"] .match-picker__btn--selected .match-picker__sublabel {
+  color: var(--text-secondary) !important;
+}
+
+/* Accesibilidad: Reducir Transparencia (Reduce Transparency) */
+@media (prefers-reduced-transparency: reduce) {
+  .liquid-glass-effect,
+  .dashboard-tabs,
+  .picks-matrix-view-switcher,
+  .standings-page__main-tabs,
+  .match-picker,
+  .bottom-nav__glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: var(--bg-surface) !important;
+  }
+}
+
+

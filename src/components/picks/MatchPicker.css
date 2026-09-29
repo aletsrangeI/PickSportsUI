@@ -8,39 +8,48 @@
 }
 
 .match-picker {
-  display: flex;
   position: relative;
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  display: flex;
+  gap: 2px;
   padding: 4px;
-  gap: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
   user-select: none;
   touch-action: manipulation;
+  border-radius: 9999px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.match-picker::-webkit-scrollbar {
+  display: none;
 }
 
 .match-picker--locked {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-color: var(--border-subtle);
   opacity: 0.95;
 }
 
 .match-picker__btn {
-  flex: 1;
+  flex: 1 0 0;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px 6px;
+  padding: 10px 6px;
   min-height: 48px;
-  border-radius: var(--radius-md);
+  border-radius: 9999px;
   border: 1px solid transparent;
   background-color: transparent;
   color: var(--text-secondary);
   font-family: inherit;
   font-weight: 700;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-spring);
   position: relative;
   outline: none;
 }
@@ -68,16 +77,17 @@
   text-transform: uppercase;
 }
 
-/* Estado Seleccionado General (Pre-partido / Pendiente) */
+/* Estado Seleccionado General (Pre-partido / Pendiente) — tecla física elevada */
 .match-picker__btn--selected {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(16, 185, 129, 0.12));
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 .match-picker__btn--selected .match-picker__sublabel {
-  color: var(--color-primary);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
 }
 
@@ -85,10 +95,11 @@
 .match-picker__btn--hit,
 .match-picker__btn--hit:disabled {
   opacity: 1 !important;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.32), rgba(16, 185, 129, 0.15)) !important;
-  border-color: #10b981 !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+  border-top: 1px solid rgba(52, 211, 153, 0.35) !important;
   color: #34d399 !important;
-  box-shadow: 0 0 14px rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
 }
 
 .match-picker__btn--hit .match-picker__sublabel {
@@ -100,10 +111,11 @@
 .match-picker__btn--miss,
 .match-picker__btn--miss:disabled {
   opacity: 1 !important;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.26), rgba(239, 68, 68, 0.12)) !important;
-  border-color: #ef4444 !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid rgba(239, 68, 68, 0.45) !important;
+  border-top: 1px solid rgba(248, 113, 113, 0.35) !important;
   color: #f87171 !important;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
 }
 
 .match-picker__btn--miss .match-picker__sublabel {
@@ -125,15 +137,22 @@
   font-weight: 600 !important;
 }
 
-/* Íconos de comprobación */
+/* Ícono de comprobación — indicador integrado en la tecla */
 .match-picker__check {
   position: absolute;
-  top: 4px;
-  right: 6px;
-  color: var(--color-primary);
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-primary);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
 }
 
 .match-picker__check--hit {
@@ -144,6 +163,13 @@
   color: #ef4444;
 }
 
+/* Reservar espacio para el indicador sin solapar el texto */
+.match-picker__btn--selected,
+.match-picker__btn--hit,
+.match-picker__btn--miss {
+  padding-right: 26px;
+}
+
 /* Locked state */
 .match-picker__btn:disabled {
   cursor: not-allowed;
@@ -152,9 +178,11 @@
 
 .match-picker__btn--selected:disabled {
   opacity: 1;
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.6);
-  color: var(--color-primary);
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 .match-picker__lock-indicator {
@@ -303,26 +331,23 @@
   font-weight: 600;
 }
 
-/* Feedback de selección y modificación activa */
+/* Feedback de selección y modificación activa — texto sutil sin caja */
 .match-picker__status-info {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 4px 10px;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  background: rgba(16, 185, 129, 0.07);
-  border: 1px solid rgba(16, 185, 129, 0.22);
+  padding: 2px 4px;
+  background: none;
+  border: none;
+  box-shadow: none;
   font-size: 0.75rem;
   transition: all var(--transition-normal);
 }
 
-.match-picker__status-info--highlight {
-  background: rgba(16, 185, 129, 0.18);
-  border-color: rgba(16, 185, 129, 0.6);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
-  animation: pulseBrief 1.8s ease-in-out;
+.match-picker__status-info--highlight .match-picker__status-label {
+  color: #34d399;
 }
 
 .match-picker__status-left {
@@ -331,11 +356,13 @@
   gap: 6px;
 }
 
+/* LED indicador brillante */
 .match-picker__status-dot {
   width: 7px;
   height: 7px;
   border-radius: var(--radius-full);
   background-color: var(--color-primary);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.9), 0 0 2px rgba(16, 185, 129, 1);
   flex-shrink: 0;
 }
 
@@ -368,11 +395,5 @@
 @keyframes dotPulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.6); opacity: 0.6; }
-}
-
-@keyframes pulseBrief {
-  0% { transform: scale(0.98); }
-  50% { transform: scale(1.015); }
-  100% { transform: scale(1); }
 }
 

@@ -21,9 +21,9 @@
   .app-main {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 6px 12px;
-    padding-bottom: calc(var(--bottom-nav-height) + var(--bottom-nav-floating-gap, 16px) + 18px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(var(--bottom-nav-height) + var(--bottom-nav-floating-gap, 16px) + 24px + env(safe-area-inset-bottom, 0px));
     min-height: calc(100dvh - 54px - var(--safe-area-top, env(safe-area-inset-top, 0px)) - var(--bottom-nav-height) - var(--bottom-nav-floating-gap, 16px) - env(safe-area-inset-bottom, 0px));
   }
 }

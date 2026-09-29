@@ -14,35 +14,57 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background-color: var(--bg-surface);
+  background: transparent;
   border-bottom: 1px solid var(--border-subtle);
   gap: 12px;
   flex-wrap: wrap;
 }
 
 .picks-matrix-view-switcher {
-  display: inline-flex;
+  border-radius: 9999px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.picks-matrix-view-switcher-content {
+  display: flex;
   align-items: center;
-  background-color: var(--bg-app);
-  padding: 3px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
   gap: 2px;
+  padding: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 4px;
+  scroll-padding-right: 24px;
+}
+
+.picks-matrix-view-switcher-content::-webkit-scrollbar {
+  display: none;
+}
+
+.picks-matrix-view-switcher-content::after {
+  content: '';
+  flex: 0 0 24px;
 }
 
 .picks-matrix-view-btn {
   display: inline-flex;
   align-items: center;
+  scroll-snap-align: start;
+  flex: 0 0 auto;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  min-height: 38px;
+  border-radius: 9999px;
   border: none;
   background: transparent;
   color: var(--text-secondary);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-spring, 0.2s);
   white-space: nowrap;
 }
 
@@ -51,10 +73,12 @@
 }
 
 .picks-matrix-view-btn--active {
-  background-color: var(--bg-card);
-  color: var(--color-primary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--border-subtle);
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1.5px rgba(255, 255, 255, 0.25);
 }
 
 .picks-matrix-scroll-controls {
@@ -69,7 +93,7 @@
 }
 
 .picks-matrix-scroll-btn {
-  background-color: var(--bg-surface);
+  background: transparent;
   border: 1px solid var(--border-subtle);
   color: var(--text-main);
   padding: 4px;
@@ -120,7 +144,7 @@
   gap: 3px;
   padding: 8px 12px;
   border-radius: var(--radius-md);
-  background-color: var(--bg-surface);
+  background: transparent;
   border: 1px solid var(--border-subtle);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -162,7 +186,7 @@
 
 /* Tarjeta del Partido */
 .picks-by-match__card {
-  background-color: var(--bg-surface);
+  background: transparent;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 16px;
@@ -297,7 +321,7 @@
   justify-content: space-between;
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  background-color: var(--bg-surface);
+  background: transparent;
   border: 1px solid var(--border-subtle);
   transition: background-color var(--transition-fast);
 }
@@ -369,7 +393,7 @@
 }
 
 .picks-by-match__nav-btn--prev {
-  background-color: var(--bg-surface);
+  background: transparent;
   border-color: var(--border-medium);
   color: var(--text-main);
 }
@@ -424,7 +448,7 @@
 }
 
 .picks-member-card {
-  background-color: var(--bg-surface);
+  background: transparent;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 12px;
@@ -557,7 +581,7 @@
 }
 
 .picks-matrix__th {
-  background-color: var(--bg-surface);
+  background: transparent;
   color: var(--text-secondary);
   font-weight: 600;
   padding: 10px 12px;
@@ -570,7 +594,7 @@
   position: sticky;
   left: 0;
   z-index: 2;
-  background-color: var(--bg-surface);
+  background: transparent;
   min-width: 130px;
   box-shadow: 2px 0 6px rgba(0, 0, 0, 0.15);
 }
@@ -639,7 +663,7 @@
 }
 
 .picks-matrix__row--current .picks-matrix__td--member {
-  background-color: var(--bg-surface);
+  background: transparent;
 }
 
 .picks-matrix__member-info {
@@ -691,7 +715,7 @@
   gap: 4px;
   padding: 3px 6px;
   border-radius: var(--radius-sm);
-  background-color: var(--bg-surface);
+  background: transparent;
   border: 1px solid var(--border-subtle);
   font-weight: 700;
   font-size: 0.75rem;
@@ -742,7 +766,7 @@
     align-items: stretch;
   }
 
-  .picks-matrix-view-switcher {
+  .picks-matrix-view-switcher-content {
     width: 100%;
     display: flex;
   }
@@ -783,5 +807,17 @@
   .picks-matrix__pick-badge {
     padding: 2px 4px;
     font-size: 0.6875rem;
+  }
+}
+
+
+
+/* ==========================================================================
+   Opción: Ocultar Tabla Matriz en Móviles (UX mobile-first)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .picks-matrix-view-btn[aria-selected="false"]:nth-child(3),
+  .picks-matrix-view-btn[title="Ver tabla completa de matriz"] {
+    display: none !important;
   }
 }

@@ -8,7 +8,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import type { MemberStanding } from '../../types';
-import { ArrowUpDown, ArrowUp, ArrowDown, Minus, Medal } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, Minus, Medal, Flame, ChevronDown } from 'lucide-react';
 import { UserAvatar } from '../../components/common/UserAvatar';
 import './StandingsTable.css';
 
@@ -21,6 +21,7 @@ const columnHelper = createColumnHelper<MemberStanding>();
 
 export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyView = true }) => {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
   const columns = useMemo(
     () => [
@@ -114,7 +115,10 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
       columnHelper.accessor('hits', {
         header: 'Aciertos',
         cell: (info) => (
-          <span className="standings-table__hits">{info.getValue()}</span>
+          <div className="standings-table__hits-cell">
+            <span className="standings-table__hits">{info.getValue()}</span>
+            <span className="standings-table__pct-mobile">{info.row.original.accuracyPct}%</span>
+          </div>
         ),
       }),
       columnHelper.accessor('accuracyPct', {
@@ -196,7 +200,10 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
         cell: (info) => {
           const val = info.getValue();
           return val > 0 ? (
-            <span className="standings-table__streak">{val}</span>
+            <span className="standings-table__streak">
+              <Flame size={14} className="standings-table__streak-icon" />
+              {val}
+            </span>
           ) : (
             <span className="standings-table__zero">0</span>
           );
@@ -262,15 +269,36 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className={`standings-table__row standings-table__row--rank-${row.original.rank}`}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          {table.getRowModel().rows.map((row) => {
+            const isExpanded = expandedRowId === row.id;
+            return (
+              <tr 
+                key={row.id} 
+                className={`standings-table__row standings-table__row--rank-${row.original.rank} ${isExpanded ? 'is-expanded' : ''}`}
+                onClick={() => setExpandedRowId(isExpanded ? null : row.id)}
+              >
+                {row.getVisibleCells().map((cell) => {
+                  let label = '';
+                  if (typeof cell.column.columnDef.header === 'string') {
+                    label = cell.column.columnDef.header;
+                  } else if (cell.column.id === 'upsetHits') label = 'Sorpresas';
+                  else if (cell.column.id === 'humillaciones') label = 'Humillaciones';
+                  else if (cell.column.id === 'somniferos') label = 'Somníferos';
+                  else if (cell.column.id === 'empatesFallidos') label = 'Empates';
+                  else if (cell.column.id === 'currentStreak') label = 'Racha';
+
+                  return (
+                    <td key={cell.id} data-label={label}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  );
+                })}
+                <td className="standings-table__chevron-col">
+                  <ChevronDown size={18} className="standings-table__chevron-icon" />
                 </td>
-              ))}
-            </tr>
-          ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
