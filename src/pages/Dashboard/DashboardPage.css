@@ -6,25 +6,18 @@
   margin: var(--space-md) auto;
   padding: var(--space-xl) var(--space-lg);
   border-radius: var(--radius-lg);
-  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12) 0%, rgba(22, 27, 34, 0.98) 70%);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   position: relative;
   overflow: hidden;
 }
 
 .dashboard-welcome::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20%;
-  right: 20%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  display: none;
 }
 
 .dashboard-welcome__badge {
@@ -48,14 +41,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.1));
-  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   color: var(--color-primary);
   margin-bottom: var(--space-md);
-  box-shadow: 0 0 24px rgba(16, 185, 129, 0.25);
 }
 
 .dashboard-welcome__title {
@@ -128,8 +120,9 @@
 /* Actions */
 .dashboard-welcome__actions {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
   width: 100%;
 }
 
@@ -181,17 +174,17 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-md);
-  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(16, 185, 129, 0.08) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: var(--bg-card);
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
 }
 
 .dashboard-invite-box {
-  background-color: var(--bg-app);
+  background-color: rgba(0, 0, 0, 0.15);
   padding: 12px 18px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid transparent;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -318,45 +311,68 @@
 
 /* Tabs Navigation in Dashboard */
 .dashboard-tabs {
-  display: flex;
-  gap: 8px;
-  background-color: var(--bg-surface);
-  padding: 6px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  overflow-x: auto;
+  border-radius: 9999px;
+  margin-bottom: var(--space-md);
+  /* The liquid glass component handles background, blur, and borders */
 }
 
+.dashboard-tabs-content {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 4px;
+  scroll-padding-right: 24px;
+}
+
+.dashboard-tabs-content::-webkit-scrollbar {
+  display: none;
+}
+
+.dashboard-tabs-content::after {
+  content: '';
+  flex: 0 0 24px;
+}
+
+
 .dashboard-tab-btn {
-  flex: 1;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  min-height: 44px;
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
+  gap: 6px;
+  padding: 8px 16px;
+  min-height: 38px;
+  border-radius: 9999px;
+  border: none;
   background: transparent;
   color: var(--text-secondary);
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-spring);
+  position: relative;
 }
 
 .dashboard-tab-btn:hover {
   color: var(--text-main);
-  background-color: var(--bg-hover);
+  background-color: rgba(255, 255, 255, 0.04);
 }
 
 .dashboard-tab-btn--active {
-  background-color: var(--bg-card);
-  color: var(--color-primary);
-  border-color: rgba(16, 185, 129, 0.3);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1.5px rgba(255, 255, 255, 0.25);
 }
 
 /* Picks Section Header */
@@ -422,7 +438,7 @@
 
 .dashboard-matches-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
   gap: var(--space-md);
 }
 

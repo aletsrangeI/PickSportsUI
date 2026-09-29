@@ -14,6 +14,7 @@ import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw } from 'lucid
 import { AWARD_META } from '../Awards/AwardsPage';
 import { UserAvatar } from '../../components/common/UserAvatar';
 import { getMostRelevantWeekForStandings } from '../../utils/weekSelection';
+import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import '../Awards/AwardsPage.css';
 import './StandingsPage.css';
 
@@ -203,7 +204,14 @@ export const StandingsPage: React.FC = () => {
       </div>
 
       {/* Segmented Control Principal: Posiciones vs Premios */}
-      <div className="standings-page__main-tabs" role="tablist" aria-label="Secciones de posiciones y premios">
+      <LiquidGlass
+        className="standings-page__main-tabs"
+        contentClassName="standings-page__main-tabs-content"
+        macro={true}
+        variant="clear"
+        role="tablist"
+        aria-label="Secciones de posiciones y premios"
+      >
         <button
           role="tab"
           aria-selected={mainTab === 'standings'}
@@ -226,7 +234,7 @@ export const StandingsPage: React.FC = () => {
           <Award size={16} />
           <span>Premios</span>
         </button>
-      </div>
+      </LiquidGlass>
 
       {/* Controles de Temporada y Jornada (Comunes a ambas vistas) */}
       <div className="standings-page__controls">
@@ -270,7 +278,12 @@ export const StandingsPage: React.FC = () => {
 
         {/* Pestañas Semanal vs General (Solo visibles en modo Tabla) */}
         {mainTab === 'standings' && (
-          <div className="standings-page__tabs">
+          <LiquidGlass
+            className="standings-page__tabs"
+            contentClassName="standings-page__tabs-content"
+            macro={true}
+            variant="clear"
+          >
             <button
               className={`standings-page__tab ${
                 standingsTab === 'weekly' ? 'standings-page__tab--active' : ''
@@ -289,7 +302,7 @@ export const StandingsPage: React.FC = () => {
               <Award size={16} />
               <span>Tabla General</span>
             </button>
-          </div>
+          </LiquidGlass>
         )}
       </div>
 

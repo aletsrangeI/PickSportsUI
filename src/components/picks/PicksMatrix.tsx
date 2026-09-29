@@ -4,6 +4,7 @@ import type { RootState } from '../../store';
 import type { Match, PickItem, QuinielaMemberPickInfo } from '../../types';
 import { Bot, Check, X, Shield, Table as TableIcon, Layers, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { UserAvatar } from '../common/UserAvatar';
+import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import './PicksMatrix.css';
 
 interface PicksMatrixProps {
@@ -94,7 +95,14 @@ export const PicksMatrix: React.FC<PicksMatrixProps> = ({
     <div className="picks-matrix-wrapper">
       {/* ─── Selector de Vista (Ideal para teléfonos) ───────────────────────── */}
       <div className="picks-matrix-toolbar">
-        <div className="picks-matrix-view-switcher" role="tablist" aria-label="Modalidad de vista">
+        <LiquidGlass 
+          className="picks-matrix-view-switcher" 
+          contentClassName="picks-matrix-view-switcher-content"
+          macro={true}
+          variant="clear"
+          role="tablist" 
+          aria-label="Modalidad de vista"
+        >
           <button
             type="button"
             role="tab"
@@ -130,7 +138,7 @@ export const PicksMatrix: React.FC<PicksMatrixProps> = ({
             <TableIcon size={15} />
             <span>Tabla Matriz</span>
           </button>
-        </div>
+        </LiquidGlass>
 
         {/* Controles de flecha rápida si estamos en modo tabla */}
         {viewMode === 'matrix' && (

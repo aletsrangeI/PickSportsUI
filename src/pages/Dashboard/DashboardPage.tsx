@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { usePicks } from '../../hooks/usePicks';
+import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import { MatchCard } from '../../components/matches/MatchCard';
 import { MatchPicker } from '../../components/picks/MatchPicker';
 import { PicksMatrix } from '../../components/picks/PicksMatrix';
@@ -301,7 +302,12 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Tabs Switcher: Pronósticos | Matriz de Rivales | Bolsa & Miembros */}
-      <div className="dashboard-tabs">
+      <LiquidGlass 
+        className="dashboard-tabs"
+        contentClassName="dashboard-tabs-content"
+        macro={true}
+        variant="clear"
+      >
         <button
           type="button"
           className={`dashboard-tab-btn ${activeTab === 'picks' ? 'dashboard-tab-btn--active' : ''}`}
@@ -328,7 +334,7 @@ export const DashboardPage: React.FC = () => {
           <DollarSign size={18} />
           <span>Bolsa y Miembros</span>
         </button>
-      </div>
+      </LiquidGlass>
 
       {/* ─────────────────────────────────────────────────────────────
           TAB 1: PRONÓSTICOS DE LA JORNADA

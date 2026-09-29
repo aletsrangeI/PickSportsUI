@@ -1,4 +1,4 @@
-.standings-table__wrapper {
+﻿.standings-table__wrapper {
   overflow-x: auto;
   border-radius: var(--radius-md, 8px);
   background: var(--bg-card, #1e293b);
@@ -236,4 +236,188 @@
   .standings-table__trend {
     font-size: 0.65rem;
   }
+}
+
+
+/* ==========================================================================
+   Opción A: Listado Expandible (Leaderboard Cards) para Mobile
+   ========================================================================== */
+
+/* Hide mobile-only pct on desktop */
+.standings-table__pct-mobile {
+  display: none;
+}
+.standings-table__chevron-col {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .standings-table__wrapper {
+    overflow: visible; background: transparent; border: none; padding: 0; margin: 0;
+  }
+  
+  .standings-table thead {
+    display: none;
+  }
+
+  .standings-table {
+    display: block;
+    width: 100%;
+  }
+
+  .standings-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .standings-table tr,
+  .standings-table td {
+    display: block;
+    width: 100%;
+  }
+
+  /* 💎 Premium Card Overhaul 💎 */
+  .standings-table tr.standings-table__row {
+    border: 1px solid rgba(255, 255, 255, 0.08); /* More subtle, premium border */
+    border-radius: 20px; /* Softer, cohesive with LiquidGlass tabs */
+    background: rgba(30, 41, 59, 0.4); /* Slightly translucent */
+    backdrop-filter: blur(12px); /* Glassmorphism touch */
+    -webkit-backdrop-filter: blur(12px);
+    display: grid;
+    grid-template-columns: 36px 1fr auto 32px; /* 1 Row Grid */
+    align-items: center; /* Everything centered perfectly */
+    padding: 16px; /* More breathable space */
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .standings-table tr.standings-table__row:active {
+    transform: scale(0.96);
+    background: rgba(30, 41, 59, 0.6);
+  }
+
+  .standings-table td {
+    border: none;
+    padding: 0;
+  }
+
+  /* Col 1: Rank */
+  .standings-table td:nth-child(1) {
+    grid-column: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Col 2: Participant (Avatar + Name) */
+  .standings-table td:nth-child(2) {
+    grid-column: 2;
+    padding-left: 12px;
+  }
+  
+  /* Make names slightly larger on mobile for premium feel */
+  .standings-table__alias {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* Col 3: Hits + Pct (Combined Cell) */
+  .standings-table td:nth-child(3) {
+    grid-column: 3;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .standings-table__hits-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .standings-table td:nth-child(3) .standings-table__hits {
+    font-size: 1.35rem;
+    line-height: 1;
+    font-weight: 800;
+  }
+  
+  .standings-table__pct-mobile {
+    display: block; /* Show on mobile */
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted, #94a3b8);
+  }
+
+  /* Col 4: Hide native desktop Pct completely! */
+  .standings-table td:nth-child(4) {
+    display: none;
+  }
+
+  /* Chevron */
+  .standings-table td.standings-table__chevron-col {
+    display: flex;
+    grid-column: 4;
+    align-items: center;
+    justify-content: flex-end;
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .standings-table__chevron-icon {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .standings-table tr.is-expanded .standings-table__chevron-icon {
+    transform: rotate(180deg);
+    color: var(--text-main);
+  }
+
+  /* Hide secondary columns by default */
+  .standings-table td:nth-child(n+5) {
+    display: none;
+  }
+
+  /* Expanded State for Secondary Columns */
+  .standings-table tr.is-expanded {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .standings-table tr.is-expanded td:nth-child(n+5) {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 8px 0 8px;
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Inject labels for secondary stats */
+  .standings-table td:nth-child(n+5)::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+}
+
+.standings-table__streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.15);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  font-size: 0.75rem;
 }

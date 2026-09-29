@@ -66,18 +66,37 @@
 
 /* Main Tabbed View (Posiciones vs Premios) - Same design system as Dashboard tabs */
 .standings-page__main-tabs {
-  display: flex;
-  gap: 6px;
-  background-color: var(--bg-surface);
-  padding: 4px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
   width: 100%;
   box-sizing: border-box;
 }
 
+.standings-page__main-tabs-content {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 4px;
+  scroll-padding-right: 24px;
+}
+
+.standings-page__main-tabs-content::-webkit-scrollbar,
+.standings-page__tabs-content::-webkit-scrollbar {
+  display: none;
+}
+
+.standings-page__main-tabs-content::after {
+  content: '';
+  flex: 0 0 24px;
+}
+
 .standings-page__main-tab {
-  flex: 1;
+  flex: 1 0 0;
+  scroll-snap-align: start;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -85,7 +104,7 @@
   gap: 8px;
   padding: 10px 14px;
   min-height: 42px;
-  border-radius: var(--radius-md);
+  border-radius: 9999px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary);
@@ -103,10 +122,12 @@
 }
 
 .standings-page__main-tab--active {
-  background-color: var(--bg-card);
-  color: var(--color-primary);
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1.5px rgba(255, 255, 255, 0.25);
 }
 
 .standings-page__awards-container {
@@ -122,7 +143,7 @@
   align-items: center;
   gap: var(--space-md, 16px);
   flex-wrap: wrap;
-  background: var(--bg-card, #1e293b);
+  background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(8px);
   border: 1px solid var(--border-subtle, #334155);
   border-radius: var(--radius-md, 8px);
   padding: var(--space-md, 16px);
@@ -147,25 +168,35 @@
 }
 
 .standings-page__tabs {
+  border-radius: 9999px;
+}
+
+.standings-page__tabs-content {
   display: flex;
-  gap: 8px;
-  background: var(--bg-surface, #0f172a);
+  gap: 2px;
   padding: 4px;
-  border-radius: var(--radius-md, 8px);
-  border: 1px solid var(--border-subtle, #334155);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 4px;
+  scroll-padding-right: 24px;
 }
 
 .standings-page__tab {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 2px;
+  padding: 8px 16px; min-height: 38px;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-secondary, #94a3b8);
   background: transparent;
   border: none;
-  border-radius: var(--radius-sm, 6px);
+  border-radius: 9999px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -175,21 +206,15 @@
 }
 
 .standings-page__tab--active {
-  background: #3b82f6;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #fff;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 1.5px rgba(255, 255, 255, 0.25);
 }
 
-.standings-page__rules-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  border-radius: var(--radius-md, 8px);
-  padding: 12px 16px;
-  font-size: 0.8125rem;
-  color: #93c5fd;
-}
+.standings-page__rules-banner { display: flex; align-items: center; gap: 12px; background: rgba(59, 130, 246, 0.08); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 14px 18px; font-size: 0.8125rem; color: #93c5fd; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
 
 .standings-page__rules-icon {
   flex-shrink: 0;
@@ -251,3 +276,9 @@
   align-items: center;
   gap: 12px;
 }
+
+
+
+
+
+
