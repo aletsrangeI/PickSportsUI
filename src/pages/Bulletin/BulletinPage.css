@@ -551,9 +551,7 @@
 .bulletin-winner__notes {
   font-size: 0.72rem;
   color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .bulletin-winner__value {
