@@ -25,9 +25,11 @@ export const QuinielaSelector: React.FC<QuinielaSelectorProps> = ({
   const { data: quinielasResponse, isLoading } = useGetQuinielasQuery();
   const quinielas = quinielasResponse?.data || [];
 
-  // Si no hay quiniela activa seleccionada pero hay disponibles, seleccionar la primera por defecto
+  // Si no hay quiniela activa seleccionada, o la guardada ya no está disponible (p. ej. fue archivada),
+  // seleccionar la primera por defecto
   useEffect(() => {
-    if (quinielas.length > 0 && !activeQuinielaId) {
+    const isActiveAvailable = quinielas.some((q) => q.id === activeQuinielaId);
+    if (quinielas.length > 0 && !isActiveAvailable) {
       dispatch(setActiveQuinielaId(quinielas[0].id));
     }
   }, [quinielas, activeQuinielaId, dispatch]);
