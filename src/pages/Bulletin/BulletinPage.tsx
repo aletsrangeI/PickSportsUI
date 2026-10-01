@@ -1,14 +1,16 @@
 import React from 'react';
 import { useBulletin } from '../../hooks/useBulletin';
-import type { BulletinWinner, PodiumMember } from '../../types';
+import type { BulletinPulse, BulletinWinner, PodiumMember, RadarMover } from '../../types';
 import { UserAvatar } from '../../components/common/UserAvatar';
 import {
+  Activity,
   AlertCircle,
   BadgeCheck,
   CalendarClock,
   Check,
   Crown,
   Flame,
+  HeartHandshake,
   HelpCircle,
   History,
   Medal,
@@ -16,8 +18,11 @@ import {
   Moon,
   Newspaper,
   Pencil,
+  Radar,
   Skull,
   Sparkles,
+  TrendingDown,
+  TrendingUp,
   Trophy,
   X,
 } from 'lucide-react';
@@ -98,6 +103,92 @@ const PodiumCard: React.FC<{ member: PodiumMember }> = ({ member }) => {
     </article>
   );
 };
+
+const formatPositions = (delta: number): string => {
+  const abs = Math.abs(delta);
+  return `${delta > 0 ? '+' : '−'}${abs} ${abs === 1 ? 'lugar' : 'lugares'}`;
+};
+
+interface RadarCardProps {
+  variant: 'up' | 'down';
+  title: string;
+  mover?: RadarMover | null;
+  emptyText: string;
+}
+
+const RadarCard: React.FC<RadarCardProps> = ({ variant, title, mover, emptyText }) => {
+  const Icon = variant === 'up' ? TrendingUp : TrendingDown;
+  return (
+    <div className={`bulletin-radar__card bulletin-radar__card--${variant}`}>
+      <h3 className="bulletin-radar__title">
+        <Icon size={16} strokeWidth={2} /> {title}
+      </h3>
+      {mover ? (
+        <div className="bulletin-radar__body">
+          <UserAvatar src={mover.avatarUrl} alt={mover.alias} size="md" />
+          <div className="bulletin-radar__info">
+            <span className="bulletin-radar__alias">{mover.alias}</span>
+            <span className="bulletin-radar__ranks">
+              {mover.previousRank}° → {mover.currentRank}° en la General
+            </span>
+            {mover.tiedCount > 0 && (
+              <span className="bulletin-radar__tied">
+                y {mover.tiedCount} más con el mismo movimiento
+              </span>
+            )}
+          </div>
+          <span className="bulletin-radar__delta">{formatPositions(mover.positionsDelta)}</span>
+        </div>
+      ) : (
+        <p className="bulletin-paper__empty-note">{emptyText}</p>
+      )}
+    </div>
+  );
+};
+
+const PulseStrip: React.FC<{ pulse: BulletinPulse }> = ({ pulse }) => (
+  <div className="bulletin-pulse">
+    <div className="bulletin-pulse__metric">
+      <span className="bulletin-pulse__label">
+        <Activity size={14} strokeWidth={2} /> Efectividad Comunitaria
+      </span>
+      <strong className="bulletin-pulse__value">{pulse.communityAccuracyPct}%</strong>
+      <span className="bulletin-pulse__detail">
+        {pulse.totalHits} de {pulse.totalPicks} picks acertados
+      </span>
+    </div>
+    <div className="bulletin-pulse__metric">
+      <span className="bulletin-pulse__label">
+        <HeartHandshake size={14} strokeWidth={2} /> El Consentido
+      </span>
+      {pulse.favorite ? (
+        <>
+          <div className="bulletin-pulse__team">
+            {pulse.favorite.teamLogoUrl && (
+              <img
+                className="bulletin-pulse__logo"
+                src={pulse.favorite.teamLogoUrl}
+                alt={pulse.favorite.teamAbbr}
+                loading="lazy"
+              />
+            )}
+            <strong className="bulletin-pulse__value">{pulse.favorite.pickPct}%</strong>
+          </div>
+          <span className="bulletin-pulse__detail">
+            confió en {pulse.favorite.teamName} ({pulse.favorite.matchLabel})
+          </span>
+          <span
+            className={`bulletin-pulse__result bulletin-pulse__result--${pulse.favorite.won ? 'won' : 'lost'}`}
+          >
+            {pulse.favorite.won ? 'Y cumplió' : 'Y los dejó colgados'}
+          </span>
+        </>
+      ) : (
+        <p className="bulletin-paper__empty-note">Sin un favorito claro esta jornada.</p>
+      )}
+    </div>
+  </div>
+);
 
 interface BulletinArchiveSelectorProps {
   seasons: Array<{ id: number; name: string; isCurrent: boolean }>;
@@ -365,6 +456,39 @@ export const BulletinPage: React.FC = () => {
               </div>
             )}
           </section>
+
+          {/* Radar de la Tabla */}
+          {bulletin.radar && (
+            <section className="bulletin-paper__section" aria-label="Radar de la Tabla">
+              <h2 className="bulletin-paper__section-title">
+                <Radar size={18} strokeWidth={2} /> Radar de la Tabla
+              </h2>
+              <div className="bulletin-radar">
+                <RadarCard
+                  variant="up"
+                  title="El Trepa Cerros"
+                  mover={bulletin.radar.climber}
+                  emptyText="Nadie escaló posiciones esta jornada."
+                />
+                <RadarCard
+                  variant="down"
+                  title="Caída Libre"
+                  mover={bulletin.radar.faller}
+                  emptyText="Nadie perdió posiciones esta jornada."
+                />
+              </div>
+            </section>
+          )}
+
+          {/* El Pulso de la Jornada */}
+          {bulletin.pulse && (
+            <section className="bulletin-paper__section" aria-label="El Pulso de la Jornada">
+              <h2 className="bulletin-paper__section-title">
+                <Activity size={18} strokeWidth={2} /> El Pulso de la Jornada
+              </h2>
+              <PulseStrip pulse={bulletin.pulse} />
+            </section>
+          )}
 
           {/* Salón de la Gloria */}
           <section className="bulletin-paper__section bulletin-glory" aria-label="Salón de la Gloria">
