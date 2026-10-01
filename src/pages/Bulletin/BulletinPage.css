@@ -447,6 +447,157 @@
   color: var(--color-danger);
 }
 
+/* ─── Radar de la Tabla ─────────────────────────────────────────────── */
+
+.bulletin-radar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-md);
+}
+
+.bulletin-radar__card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.bulletin-radar__card--up { border-top: 3px solid var(--color-primary); }
+.bulletin-radar__card--down { border-top: 3px solid #f97316; }
+
+.bulletin-radar__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.bulletin-radar__card--up .bulletin-radar__title,
+.bulletin-radar__card--up .bulletin-radar__delta { color: var(--color-primary); }
+.bulletin-radar__card--down .bulletin-radar__title,
+.bulletin-radar__card--down .bulletin-radar__delta { color: #fb923c; }
+
+.bulletin-radar__body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.bulletin-radar__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.bulletin-radar__alias {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bulletin-radar__ranks {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.bulletin-radar__tied {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.bulletin-radar__delta {
+  font-family: var(--font-family-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* ─── El Pulso de la Jornada ────────────────────────────────────────── */
+
+.bulletin-pulse {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-top: 3px solid var(--color-info);
+  border-radius: var(--radius-md);
+}
+
+.bulletin-pulse__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.bulletin-pulse__metric + .bulletin-pulse__metric {
+  border-top: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 520px) {
+  .bulletin-pulse__metric + .bulletin-pulse__metric {
+    border-top: none;
+    border-left: 1px solid var(--border-subtle);
+  }
+}
+
+.bulletin-pulse__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-info);
+}
+
+.bulletin-pulse__team {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.bulletin-pulse__logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.bulletin-pulse__value {
+  font-family: var(--font-family-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-main);
+}
+
+.bulletin-pulse__detail {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+.bulletin-pulse__result {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.bulletin-pulse__result--won { color: var(--color-primary); }
+.bulletin-pulse__result--lost { color: var(--color-danger); }
+
 /* ─── Salón de la Gloria / Sala de la Infamia ───────────────────────── */
 
 .bulletin-awards-grid {

@@ -419,6 +419,41 @@ export interface NextWeekInfo {
   firstGameUtc?: string | null;
 }
 
+export interface RadarMover {
+  memberId: number;
+  alias: string;
+  displayName?: string;
+  avatarUrl?: string;
+  previousRank: number;
+  currentRank: number;
+  positionsDelta: number;
+  weeklyHits: number;
+  tiedCount: number;
+}
+
+export interface BulletinRadar {
+  climber?: RadarMover | null;
+  faller?: RadarMover | null;
+}
+
+export interface BulletinFavorite {
+  teamName: string;
+  teamAbbr: string;
+  teamLogoUrl?: string | null;
+  matchLabel: string;
+  pickPct: number;
+  pickCount: number;
+  totalPicks: number;
+  won: boolean;
+}
+
+export interface BulletinPulse {
+  communityAccuracyPct: number;
+  totalHits: number;
+  totalPicks: number;
+  favorite?: BulletinFavorite | null;
+}
+
 export interface WeeklyBulletinData {
   quinielaId: number;
   weekId: number;
@@ -431,6 +466,8 @@ export interface WeeklyBulletinData {
   adminAnnouncement?: string | null;
   podium: PodiumMember[];
   awards: BulletinAwards;
+  radar?: BulletinRadar | null;
+  pulse?: BulletinPulse | null;
   nextWeekInfo?: NextWeekInfo | null;
 }
 
