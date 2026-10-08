@@ -17,6 +17,8 @@ import type {
   SeasonSummary,
   EspnHealthStatus,
   SyncResult,
+  BroadcastSyncResult,
+  MatchBroadcasters,
   PickItem,
   QuinielaPicksData,
   SubmitPickRequest,
@@ -224,6 +226,27 @@ export const api = createApi({
         body: { rawJson },
       }),
       invalidatesTags: (_result, _error, { weekId }) => [{ type: 'Matches', id: weekId }, 'Picks', 'Standings'],
+    }),
+
+    // ─── SPEC-015 Dónde Ver ──────────────────────────────────────────────────
+    syncWeekBroadcasters: builder.mutation<ApiResponse<BroadcastSyncResult>, number>({
+      query: (weekId) => ({
+        url: `/weeks/${weekId}/sync-broadcasters`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_result, _error, weekId) => [{ type: 'Matches', id: weekId }, 'Picks'],
+    }),
+
+    updateMatchBroadcasters: builder.mutation<
+      ApiResponse<MatchBroadcasters>,
+      { matchId: number; weekId: number; channels: string[] }
+    >({
+      query: ({ matchId, channels }) => ({
+        url: `/matches/${matchId}/broadcasters`,
+        method: 'PUT',
+        body: { channels },
+      }),
+      invalidatesTags: (_result, _error, { weekId }) => [{ type: 'Matches', id: weekId }, 'Picks'],
     }),
 
     // ─── Admin ───────────────────────────────────────────────────────────────
@@ -481,6 +504,9 @@ export const {
   useSyncWeekFromEspnMutation,
   useImportManualJsonMutation,
   useGetEspnHealthQuery,
+  // SPEC-015 Dónde Ver
+  useSyncWeekBroadcastersMutation,
+  useUpdateMatchBroadcastersMutation,
   // Picks
   useGetPicksQuery,
   useSubmitPickMutation,

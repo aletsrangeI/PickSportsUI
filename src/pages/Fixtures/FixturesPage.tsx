@@ -11,10 +11,12 @@ import {
   useSyncWeekFromEspnMutation,
   useImportManualJsonMutation,
   useEnsureAperturaMutation,
+  useSyncWeekBroadcastersMutation,
 } from '../../services/api';
 import { MatchCard } from '../../components/matches/MatchCard';
+import { BroadcastEditor } from '../../components/matches/BroadcastEditor';
 import { ApiHealthBadge } from '../../components/admin/ApiHealthBadge';
-import { AlertCircle, RotateCw, DownloadCloud, FileJson } from 'lucide-react';
+import { AlertCircle, RotateCw, DownloadCloud, FileJson, Tv } from 'lucide-react';
 import { getMostRelevantWeekForPicks } from '../../utils/weekSelection';
 import './FixturesPage.css';
 
@@ -85,6 +87,7 @@ export const FixturesPage: React.FC = () => {
   const [syncWeek,       { isLoading: syncingWeek }]   = useSyncWeekFromEspnMutation();
   const [triggerImport,  { isLoading: importing }]     = useImportManualJsonMutation();
   const [ensureApertura, { isLoading: ensuringApertura }] = useEnsureAperturaMutation();
+  const [syncBroadcasters, { isLoading: syncingBroadcasters }] = useSyncWeekBroadcastersMutation();
 
   // ─── Auto-select defaults (Prioriza el torneo activo no terminado de ESTA liga)
   useEffect(() => {
@@ -150,6 +153,16 @@ export const FixturesPage: React.FC = () => {
       showToast(result.message, 'success');
     } catch {
       showToast('Error al sincronizar la jornada.', 'error');
+    }
+  };
+
+  const handleSyncBroadcasters = async () => {
+    if (!selectedWeekId) return;
+    try {
+      const result = await syncBroadcasters(selectedWeekId).unwrap();
+      showToast(result.message, result.data?.officialSourceAvailable ? 'success' : 'warning');
+    } catch {
+      showToast('Error al sincronizar los canales de transmisión.', 'error');
     }
   };
 
@@ -307,6 +320,19 @@ export const FixturesPage: React.FC = () => {
               {syncingFull ? 'Cargando temporada...' : 'Cargar Temporada Completa'}
             </button>
 
+            {isLigaMx && (
+              <button
+                type="button"
+                className="btn btn--outline btn--sm"
+                onClick={handleSyncBroadcasters}
+                disabled={!selectedWeekId || syncingBroadcasters}
+                title="Aplica la regla de localía y confirma señales en ligamx.net"
+              >
+                <Tv size={14} style={{ marginRight: '6px' }} />
+                {syncingBroadcasters ? 'Consultando...' : 'Sync Canales'}
+              </button>
+            )}
+
             <button
               type="button"
               className="btn btn--outline btn--sm"
@@ -389,7 +415,11 @@ export const FixturesPage: React.FC = () => {
       ) : (
         <div className="fixtures-page__grid">
           {matches.map((match) => (
-            <MatchCard key={match.id} match={match} />
+            <MatchCard key={match.id} match={match}>
+              {isOwnerOrAdmin && isLigaMx && (
+                <BroadcastEditor match={match} onResult={(message, ok) => showToast(message, ok ? 'success' : 'error')} />
+              )}
+            </MatchCard>
           ))}
         </div>
       )}
