@@ -175,6 +175,25 @@ export interface Match {
   venue?: string;
   city?: string;
   lastSyncUtc: string;
+  /** SPEC-015: canales/plataformas de transmisión ("Dónde Ver") */
+  broadcasters?: string[];
+}
+
+/** SPEC-015: respuesta de PUT /matches/{id}/broadcasters */
+export interface MatchBroadcasters {
+  matchId: number;
+  broadcasters: string[];
+  /** 'RULE' | 'LIGAMX' | 'MANUAL' */
+  source?: string;
+}
+
+/** SPEC-015: respuesta de POST /weeks/{id}/sync-broadcasters */
+export interface BroadcastSyncResult {
+  weekId: number;
+  defaultsApplied: number;
+  officialUpdated: number;
+  manualPreserved: number;
+  officialSourceAvailable: boolean;
 }
 
 export interface WeekSummary {

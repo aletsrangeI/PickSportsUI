@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Match } from '../../types';
+import { BroadcastBadgeList } from './BroadcastBadgeList';
 import { formatMatchDate, formatMatchTime, parseUtcDate } from '../../utils/dateUtils';
 import './MatchCard.css';
 
@@ -129,6 +130,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, children }) => {
       </div>
 
       {venue && <div className="match-card__venue">{venue}</div>}
+      <BroadcastBadgeList broadcasters={match.broadcasters} />
       {children}
     </div>
   );

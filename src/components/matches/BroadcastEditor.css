@@ -1,0 +1,103 @@
+/* SPEC-015 · Editor rápido de canales (admin) */
+.broadcast-editor__toggle {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.broadcast-editor__toggle:hover {
+  color: var(--color-primary);
+}
+
+.broadcast-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.broadcast-editor__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.broadcast-editor__empty {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.broadcast-editor__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 3px 4px 3px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  color: var(--text-main);
+}
+
+.broadcast-editor__chip button {
+  display: inline-flex;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.broadcast-editor__input {
+  width: 100%;
+  font-size: 0.8125rem;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.broadcast-editor__input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.broadcast-editor__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.broadcast-editor__suggestion {
+  font-size: 0.625rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px dashed var(--border-medium);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.broadcast-editor__suggestion:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.broadcast-editor__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}

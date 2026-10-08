@@ -1,0 +1,54 @@
+/* SPEC-015 · Dónde Ver: micro-badges con color de marca por televisora/plataforma */
+.broadcast-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.broadcast-list__icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.broadcast-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  padding: 3px 7px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid transparent;
+  color: #ffffff;
+}
+
+.broadcast-badge--prime    { background: #002f6c; color: #8fd3ff; }
+.broadcast-badge--vix      { background: linear-gradient(90deg, #ff6a00, #e5202e); }
+.broadcast-badge--disney   { background: #0b1d5c; border-color: rgba(255, 255, 255, 0.15); }
+.broadcast-badge--espn     { background: #0b1d5c; border-color: #e2231a; }
+.broadcast-badge--fox      { background: #ffffff; color: #003a7d; border-color: #003a7d; }
+.broadcast-badge--foxone   { background: #003a7d; color: #ffffff; }
+.broadcast-badge--azteca   { background: #059669; }
+.broadcast-badge--televisa { background: #1d4ed8; color: #fde047; }
+.broadcast-badge--tudn     { background: #0f766e; }
+.broadcast-badge--claro    { background: #da291c; }
+
+.broadcast-badge--pending {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-medium);
+  font-weight: 600;
+}
+
+.broadcast-badge--default {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
