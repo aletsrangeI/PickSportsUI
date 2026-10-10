@@ -1,6 +1,6 @@
 .update-banner-container {
   position: fixed;
-  top: 16px;
+  top: calc(env(safe-area-inset-top, 0px) + 16px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -31,6 +31,7 @@
   border: 1px solid rgba(16, 185, 129, 0.4);
   border-radius: var(--radius-full);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.2);
+  width: 100%;
 }
 
 .update-banner-icon {
@@ -65,12 +66,17 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 0.875rem;
+  flex: 1 1 auto;
 }
 
 .update-banner-title {
   color: var(--text-main);
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .update-banner-version {
@@ -81,6 +87,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
 .update-banner-actions {
@@ -88,6 +95,7 @@
   align-items: center;
   gap: 6px;
   margin-left: 4px;
+  flex-shrink: 0;
 }
 
 .update-banner-button {
@@ -102,6 +110,7 @@
   font-weight: 600;
   transition: all var(--transition-fast);
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  flex-shrink: 0;
 }
 
 .update-banner-button:hover {
@@ -131,6 +140,7 @@
   border-radius: 50%;
   color: var(--text-secondary);
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .update-banner-dismiss:hover {
@@ -140,13 +150,14 @@
 
 @media (max-width: 600px) {
   .update-banner-container {
-    top: 10px;
-    width: 92vw;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    width: calc(100vw - 24px);
+    max-width: none;
   }
 
   .update-banner-capsule {
-    padding: 6px 10px;
-    gap: 8px;
+    padding: 6px 8px;
+    gap: 6px;
   }
 
   .update-banner-title {
@@ -154,7 +165,12 @@
   }
 
   .update-banner-button {
-    padding: 5px 10px;
+    padding: 5px 8px;
     font-size: 0.75rem;
   }
+  
+  .update-banner-button span {
+    display: none; /* En móviles pequeños ocultamos la palabra "Actualizar" para ganar espacio */
+  }
 }
+
