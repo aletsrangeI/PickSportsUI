@@ -80,7 +80,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
             {
               url: '/auth/refresh',
               method: 'POST',
-              body: { accessToken: token, refreshToken },
+              body: { AccessToken: token, RefreshToken: refreshToken },
             },
             api,
             extraOptions
