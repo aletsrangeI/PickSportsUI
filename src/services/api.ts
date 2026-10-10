@@ -1,4 +1,6 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery, type BaseQueryFn, type FetchArgs, type FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import { logout, setCredentials } from '../store/authSlice';
+import { Mutex } from 'async-mutex';
 import type { RootState } from '../store';
 import type {
   ApiResponse,
@@ -40,19 +42,88 @@ import type {
   WeeklyBulletinData,
 } from '../types';
 
+const baseQuery = fetchBaseQuery({
+  baseUrl: '/api',
+  prepareHeaders: (headers, { getState }) => {
+    const state = getState() as RootState;
+    const token = state.auth?.token || localStorage.getItem('picksports_token');
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  },
+});
+
+// Create a new mutex
+const mutex = new Mutex();
+
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions
+) => {
+  // wait until the mutex is available without locking it
+  await mutex.waitForUnlock();
+  let result = await baseQuery(args, api, extraOptions);
+  
+  if (result.error && result.error.status === 401) {
+    // checking whether the mutex is locked
+    if (!mutex.isLocked()) {
+      const release = await mutex.acquire();
+      try {
+        const state = api.getState() as RootState;
+        const refreshToken = state.auth?.refreshToken || localStorage.getItem('picksports_refresh_token');
+        const token = state.auth?.token || localStorage.getItem('picksports_token');
+        
+        if (refreshToken && token) {
+          const refreshResult = await baseQuery(
+            {
+              url: '/auth/refresh',
+              method: 'POST',
+              body: { accessToken: token, refreshToken },
+            },
+            api,
+            extraOptions
+          );
+          
+          if (refreshResult.data) {
+            const data = refreshResult.data as ApiResponse<AuthResponse>;
+            if (data.isSuccess && data.data) {
+              api.dispatch(
+                setCredentials({
+                  token: data.data.token,
+                  refreshToken: data.data.refreshToken,
+                  user: data.data.user,
+                })
+              );
+              // retry the initial query
+              result = await baseQuery(args, api, extraOptions);
+            } else {
+              api.dispatch(logout());
+            }
+          } else {
+            api.dispatch(logout());
+          }
+        } else {
+          api.dispatch(logout());
+        }
+      } finally {
+        // release must be called once the mutex should be released again.
+        release();
+      }
+    } else {
+      // wait until the mutex is available without locking it
+      await mutex.waitForUnlock();
+      result = await baseQuery(args, api, extraOptions);
+    }
+  }
+  
+  return result;
+};
+
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api',
-    prepareHeaders: (headers, { getState }) => {
-      const state = getState() as RootState;
-      const token = state.auth?.token || localStorage.getItem('picksports_token');
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
@@ -68,7 +139,7 @@ export const api = createApi({
         method: 'POST',
         body: credentials,
       }),
-      invalidatesTags: ['Auth'],
+      invalidatesTags: ['Auth', 'Quinielas'],
     }),
 
     register: builder.mutation<ApiResponse<AuthResponse>, RegisterRequest>({
@@ -77,7 +148,7 @@ export const api = createApi({
         method: 'POST',
         body: userData,
       }),
-      invalidatesTags: ['Auth'],
+      invalidatesTags: ['Auth', 'Quinielas'],
     }),
 
     getMe: builder.query<ApiResponse<UserProfile>, void>({

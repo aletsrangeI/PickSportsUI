@@ -3,11 +3,13 @@ import type { UserProfile } from '../types';
 
 interface AuthState {
   token: string | null;
+  refreshToken: string | null;
   user: UserProfile | null;
   isAuthenticated: boolean;
 }
 
 const savedToken = localStorage.getItem('picksports_token');
+const savedRefreshToken = localStorage.getItem('picksports_refresh_token');
 let savedUser: UserProfile | null = null;
 try {
   const userJson = localStorage.getItem('picksports_user');
@@ -20,6 +22,7 @@ try {
 
 const initialState: AuthState = {
   token: savedToken,
+  refreshToken: savedRefreshToken,
   user: savedUser,
   isAuthenticated: Boolean(savedToken),
 };
@@ -30,13 +33,15 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ token: string; user: UserProfile }>
+      action: PayloadAction<{ token: string; refreshToken: string; user: UserProfile }>
     ) => {
-      const { token, user } = action.payload;
+      const { token, refreshToken, user } = action.payload;
       state.token = token;
+      state.refreshToken = refreshToken;
       state.user = user;
       state.isAuthenticated = true;
       localStorage.setItem('picksports_token', token);
+      localStorage.setItem('picksports_refresh_token', refreshToken);
       localStorage.setItem('picksports_user', JSON.stringify(user));
     },
     updateUser: (state, action: PayloadAction<UserProfile>) => {
@@ -45,9 +50,11 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       state.token = null;
+      state.refreshToken = null;
       state.user = null;
       state.isAuthenticated = false;
       localStorage.removeItem('picksports_token');
+      localStorage.removeItem('picksports_refresh_token');
       localStorage.removeItem('picksports_user');
       localStorage.removeItem('picksports_active_quiniela');
     },

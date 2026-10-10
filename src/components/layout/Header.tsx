@@ -4,7 +4,7 @@ import { useNavigate, Link, NavLink } from 'react-router-dom';
 import { Flame, LogOut, Plus, UserPlus, CalendarDays, FileSpreadsheet, Newspaper } from 'lucide-react';
 import type { RootState } from '../../store';
 import { logout } from '../../store/authSlice';
-import { useGetQuinielasQuery } from '../../services/api';
+import { useGetQuinielasQuery, api } from '../../services/api';
 import { QuinielaSelector } from '../quiniela/QuinielaSelector';
 import { UserAvatar } from '../common/UserAvatar';
 import './Header.css';
@@ -32,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(api.util.resetApiState());
     navigate('/login');
   };
 
