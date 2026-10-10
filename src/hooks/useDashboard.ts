@@ -16,8 +16,10 @@ export const useDashboard = () => {
   );
   const currentUser = useSelector((state: RootState) => state.auth.user);
 
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+
   const { data: quinielasData, isLoading: isQuinielasListLoading } =
-    useGetQuinielasQuery();
+    useGetQuinielasQuery(undefined, { skip: !isAuthenticated });
   const quinielas = quinielasData?.data || [];
   const hasQuinielas = quinielas.length > 0;
 

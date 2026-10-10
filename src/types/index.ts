@@ -16,6 +16,7 @@ export interface UserProfile {
 
 export interface AuthResponse {
   token: string;
+  refreshToken: string;
   user: UserProfile;
 }
 
