@@ -63,25 +63,63 @@ export const BulletinChronicle: React.FC<BulletinChronicleProps> = ({
       .catch((err) => console.error('Error al copiar crónica:', err));
   };
 
+  const renderInlineMarkdown = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+    return parts.map((part, pIdx) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('*') && part.endsWith('*')) {
+        return <em key={pIdx}>{part.slice(1, -1)}</em>;
+      }
+      return part;
+    });
+  };
+
   const renderFormattedParagraphs = (rawText: string) => {
-    const paragraphs = rawText.split(/\n\s*\n/);
-    return paragraphs.map((p, idx) => {
-      const trimmed = p.trim();
+    const blocks = rawText.split(/\n\s*\n/);
+    return blocks.map((block, idx) => {
+      const trimmed = block.trim();
       if (!trimmed) return null;
 
-      // Renderizado seguro de **bold** y *italic*
-      const parts = trimmed.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+      if (trimmed.startsWith('### ')) {
+        return (
+          <h3 key={idx} className="bulletin-chronicle__subheading">
+            {renderInlineMarkdown(trimmed.replace(/^###\s+/, ''))}
+          </h3>
+        );
+      }
+      if (trimmed.startsWith('## ')) {
+        return (
+          <h3 key={idx} className="bulletin-chronicle__subheading">
+            {renderInlineMarkdown(trimmed.replace(/^##\s+/, ''))}
+          </h3>
+        );
+      }
+
+      const lines = trimmed.split('\n').map((l) => l.trim()).filter(Boolean);
+      const isBulletList = lines.length > 0 && lines.every((l) => l.startsWith('- ') || l.startsWith('* '));
+
+      if (isBulletList) {
+        return (
+          <ul key={idx} className="bulletin-chronicle__list">
+            {lines.map((line, lIdx) => (
+              <li key={lIdx} className="bulletin-chronicle__list-item">
+                {renderInlineMarkdown(line.replace(/^[-*]\s+/, ''))}
+              </li>
+            ))}
+          </ul>
+        );
+      }
+
       return (
         <p key={idx} className="bulletin-chronicle__paragraph">
-          {parts.map((part, pIdx) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-              return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
-            }
-            if (part.startsWith('*') && part.endsWith('*')) {
-              return <em key={pIdx}>{part.slice(1, -1)}</em>;
-            }
-            return part;
-          })}
+          {lines.map((line, lIdx) => (
+            <React.Fragment key={lIdx}>
+              {lIdx > 0 && <br />}
+              {renderInlineMarkdown(line)}
+            </React.Fragment>
+          ))}
         </p>
       );
     });
@@ -95,12 +133,6 @@ export const BulletinChronicle: React.FC<BulletinChronicleProps> = ({
             <Newspaper size={13} strokeWidth={2.5} />
             Crónica de la Jornada
           </span>
-          {generatedByAi && (
-            <span className="bulletin-chronicle__tag bulletin-chronicle__tag--ai" title={`Modelo: ${narrativeModel || 'Gemini'}`}>
-              <Sparkles size={12} strokeWidth={2.5} />
-              Redactado con IA
-            </span>
-          )}
         </div>
 
         <div className="bulletin-chronicle__actions">
