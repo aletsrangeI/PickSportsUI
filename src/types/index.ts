@@ -484,6 +484,10 @@ export interface WeeklyBulletinData {
   weekEndDate: string;
   publishedAtUtc?: string | null;
   adminAnnouncement?: string | null;
+  headline?: string | null;
+  chronicle?: string | null;
+  generatedByAi?: boolean;
+  narrativeModel?: string | null;
   podium: PodiumMember[];
   awards: BulletinAwards;
   radar?: BulletinRadar | null;
@@ -493,6 +497,11 @@ export interface WeeklyBulletinData {
 
 export interface UpdateAnnouncementRequest {
   announcement: string | null;
+}
+
+export interface UpdateChronicleRequest {
+  headline?: string | null;
+  chronicle?: string | null;
 }
 
 export interface MigrationPlayerPreview {

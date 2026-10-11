@@ -7,6 +7,8 @@ import {
   useGetWeeksBySeasonQuery,
   useGetBulletinQuery,
   useUpdateBulletinAnnouncementMutation,
+  useRegenerateBulletinChronicleMutation,
+  useUpdateBulletinChronicleMutation,
 } from '../services/api';
 
 export const useBulletin = () => {
@@ -14,6 +16,9 @@ export const useBulletin = () => {
   const [selectedWeekId, setSelectedWeekId] = useState<number | null>(null);
   const [isEditingAnnouncement, setIsEditingAnnouncement] = useState(false);
   const [announcementDraft, setAnnouncementDraft] = useState('');
+  const [isEditingChronicle, setIsEditingChronicle] = useState(false);
+  const [headlineDraft, setHeadlineDraft] = useState('');
+  const [chronicleDraft, setChronicleDraft] = useState('');
 
   const activeQuinielaId = useSelector((state: RootState) => state.quiniela.activeQuinielaId);
   const currentUser = useSelector((state: RootState) => state.auth.user);
@@ -72,8 +77,21 @@ export const useBulletin = () => {
     }
   }, [bulletin, isEditingAnnouncement]);
 
+  useEffect(() => {
+    if (bulletin && !isEditingChronicle) {
+      setHeadlineDraft(bulletin.headline ?? '');
+      setChronicleDraft(bulletin.chronicle ?? '');
+    }
+  }, [bulletin, isEditingChronicle]);
+
   const [updateAnnouncement, { isLoading: isSavingAnnouncement }] =
     useUpdateBulletinAnnouncementMutation();
+
+  const [regenerateChronicle, { isLoading: isRegeneratingChronicle }] =
+    useRegenerateBulletinChronicleMutation();
+
+  const [updateChronicle, { isLoading: isSavingChronicle }] =
+    useUpdateBulletinChronicleMutation();
 
   const handleSaveAnnouncement = useCallback(async () => {
     if (!quinielaId || !bulletin) return;
@@ -90,9 +108,37 @@ export const useBulletin = () => {
     }
   }, [quinielaId, bulletin, announcementDraft, updateAnnouncement]);
 
+  const handleRegenerateChronicle = useCallback(async () => {
+    if (!quinielaId || !bulletin) return;
+    try {
+      await regenerateChronicle({
+        quinielaId,
+        weekId: bulletin.weekId,
+      }).unwrap();
+    } catch (err) {
+      console.error('Error al regenerar la crónica:', err);
+    }
+  }, [quinielaId, bulletin, regenerateChronicle]);
+
+  const handleSaveChronicle = useCallback(async () => {
+    if (!quinielaId || !bulletin) return;
+    try {
+      await updateChronicle({
+        quinielaId,
+        weekId: bulletin.weekId,
+        headline: headlineDraft.trim() || null,
+        chronicle: chronicleDraft.trim() || null,
+      }).unwrap();
+      setIsEditingChronicle(false);
+    } catch (err) {
+      console.error('Error al guardar la crónica:', err);
+    }
+  }, [quinielaId, bulletin, headlineDraft, chronicleDraft, updateChronicle]);
+
   const handleSelectWeek = useCallback((weekId: number | null) => {
     setSelectedWeekId(weekId);
     setIsEditingAnnouncement(false);
+    setIsEditingChronicle(false);
   }, []);
 
   return {
@@ -110,6 +156,11 @@ export const useBulletin = () => {
     isEditingAnnouncement,
     announcementDraft,
     isSavingAnnouncement,
+    isEditingChronicle,
+    headlineDraft,
+    chronicleDraft,
+    isRegeneratingChronicle,
+    isSavingChronicle,
     setSelectedSeasonId: (seasonId: number) => {
       setSelectedSeasonId(seasonId);
       setSelectedWeekId(null);
@@ -118,5 +169,10 @@ export const useBulletin = () => {
     setIsEditingAnnouncement,
     setAnnouncementDraft,
     handleSaveAnnouncement,
+    setIsEditingChronicle,
+    setHeadlineDraft,
+    setChronicleDraft,
+    handleRegenerateChronicle,
+    handleSaveChronicle,
   };
 };
