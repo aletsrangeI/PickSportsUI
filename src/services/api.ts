@@ -463,6 +463,33 @@ export const api = createApi({
       ],
     }),
 
+    regenerateBulletinChronicle: builder.mutation<
+      ApiResponse<WeeklyBulletinData>,
+      { quinielaId: number; weekId: number }
+    >({
+      query: ({ quinielaId, weekId }) => ({
+        url: `/quinielas/${quinielaId}/bulletin/${weekId}/regenerate-chronicle`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_result, _error, { quinielaId }) => [
+        { type: 'Bulletin', id: quinielaId },
+      ],
+    }),
+
+    updateBulletinChronicle: builder.mutation<
+      ApiResponse<WeeklyBulletinData>,
+      { quinielaId: number; weekId: number; headline?: string | null; chronicle?: string | null }
+    >({
+      query: ({ quinielaId, weekId, headline, chronicle }) => ({
+        url: `/quinielas/${quinielaId}/bulletin/${weekId}/chronicle`,
+        method: 'PUT',
+        body: { headline, chronicle },
+      }),
+      invalidatesTags: (_result, _error, { quinielaId }) => [
+        { type: 'Bulletin', id: quinielaId },
+      ],
+    }),
+
     // ─── WhatsApp Reports ─────────────────────────────────────────────────────
     getWhatsAppReminder: builder.query<
       ApiResponse<WhatsAppReport>,
@@ -586,9 +613,11 @@ export const {
   useGetStandingsQuery,
   useScoreWeekMutation,
   useGetAwardsQuery,
-  // SPEC-012 Boletín Semanal
+  // SPEC-012 & SPEC-021 Boletín Semanal
   useGetBulletinQuery,
   useUpdateBulletinAnnouncementMutation,
+  useRegenerateBulletinChronicleMutation,
+  useUpdateBulletinChronicleMutation,
   // WhatsApp
   useGetWhatsAppReminderQuery,
   useGetWhatsAppSummaryQuery,

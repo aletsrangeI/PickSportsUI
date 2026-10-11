@@ -2,6 +2,7 @@ import React from 'react';
 import { useBulletin } from '../../hooks/useBulletin';
 import type { BulletinPulse, BulletinWinner, PodiumMember, RadarMover } from '../../types';
 import { UserAvatar } from '../../components/common/UserAvatar';
+import { BulletinChronicle } from './BulletinChronicle';
 import {
   Activity,
   AlertCircle,
@@ -276,11 +277,21 @@ export const BulletinPage: React.FC = () => {
     isEditingAnnouncement,
     announcementDraft,
     isSavingAnnouncement,
+    isEditingChronicle,
+    headlineDraft,
+    chronicleDraft,
+    isRegeneratingChronicle,
+    isSavingChronicle,
     setSelectedSeasonId,
     handleSelectWeek,
     setIsEditingAnnouncement,
     setAnnouncementDraft,
     handleSaveAnnouncement,
+    setIsEditingChronicle,
+    setHeadlineDraft,
+    setChronicleDraft,
+    handleRegenerateChronicle,
+    handleSaveChronicle,
   } = useBulletin();
 
   if (!quinielaId) {
@@ -440,6 +451,31 @@ export const BulletinPage: React.FC = () => {
               </div>
             )}
           </section>
+
+          {/* Portada Editorial / Crónica de la Jornada (SPEC-021) */}
+          <BulletinChronicle
+            headline={bulletin.headline}
+            chronicle={bulletin.chronicle}
+            generatedByAi={bulletin.generatedByAi}
+            narrativeModel={bulletin.narrativeModel}
+            weekNumber={bulletin.weekNumber}
+            isOwnerOrAdmin={isOwnerOrAdmin}
+            isEditing={isEditingChronicle}
+            headlineDraft={headlineDraft}
+            chronicleDraft={chronicleDraft}
+            isRegenerating={isRegeneratingChronicle}
+            isSaving={isSavingChronicle}
+            onStartEdit={() => setIsEditingChronicle(true)}
+            onCancelEdit={() => {
+              setIsEditingChronicle(false);
+              setHeadlineDraft(bulletin.headline ?? '');
+              setChronicleDraft(bulletin.chronicle ?? '');
+            }}
+            onSaveEdit={handleSaveChronicle}
+            onRegenerate={handleRegenerateChronicle}
+            onChangeHeadlineDraft={setHeadlineDraft}
+            onChangeChronicleDraft={setChronicleDraft}
+          />
 
           {/* El Podio */}
           <section className="bulletin-paper__section" aria-label="Podio de la jornada">
