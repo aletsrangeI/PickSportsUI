@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
+import { useOutletContext, Link } from 'react-router-dom';
 import {
   useGetQuinielasQuery,
   useGetSeasonsQuery,
@@ -8,9 +9,10 @@ import {
   useGetStandingsQuery,
   useGetAwardsQuery,
   useScoreWeekMutation,
+  useGetLiguillaOverviewQuery,
 } from '../../services/api';
 import { StandingsTable } from './StandingsTable';
-import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw, Flame } from 'lucide-react';
 import { AWARD_META } from '../Awards/AwardsPage';
 import { UserAvatar } from '../../components/common/UserAvatar';
 import { getMostRelevantWeekForStandings } from '../../utils/weekSelection';
@@ -144,6 +146,12 @@ export const StandingsPage: React.FC = () => {
     );
   }
 
+  const { data: liguillaOverviewData } = useGetLiguillaOverviewQuery(quinielaId, {
+    skip: !quinielaId,
+  });
+  const liguillaOverview = liguillaOverviewData?.data;
+  const isLiguillaVisible = isOwnerOrAdmin || (liguillaOverview && (liguillaOverview.isAvailable || liguillaOverview.status !== 'HIDDEN'));
+
   return (
     <div className="standings-page">
       {/* Toast */}
@@ -168,8 +176,8 @@ export const StandingsPage: React.FC = () => {
           </p>
         </div>
 
-        {isOwnerOrAdmin && mainTab === 'standings' && (
-          <div className="standings-page__header-actions">
+        <div className="standings-page__header-actions">
+          {isOwnerOrAdmin && mainTab === 'standings' && (
             <button
               onClick={handleScoreWeek}
               disabled={scoringWeek || !selectedWeekId || isWeekAlreadyScored}
@@ -199,8 +207,8 @@ export const StandingsPage: React.FC = () => {
                 </>
               )}
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Segmented Control Principal: Posiciones vs Premios */}

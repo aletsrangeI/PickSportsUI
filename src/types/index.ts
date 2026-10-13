@@ -568,3 +568,89 @@ export interface MigrationResultData {
   createdUsernames: string[];
 }
 
+// ─── Liguilla Bracket Challenge ("El Pilón") ───────────────────────────────────
+
+export interface LiguillaTeam {
+  teamId: number;
+  name: string;
+  shortName: string;
+  abbreviation: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  seed: number;
+}
+
+export interface LiguillaNode {
+  id: number;
+  round: 'QF' | 'SF' | 'FINAL';
+  nodeNumber: number;
+  teamA?: LiguillaTeam;
+  teamB?: LiguillaTeam;
+  winnerTeam?: LiguillaTeam;
+  isResolved: boolean;
+  resolvedAtUtc?: string;
+  kickoffUtc?: string;
+}
+
+export interface SubmitLiguillaBracketRequest {
+  qfWinner1TeamId: number;
+  qfWinner2TeamId: number;
+  qfWinner3TeamId: number;
+  qfWinner4TeamId: number;
+  sfWinner1TeamId: number;
+  sfWinner2TeamId: number;
+  championTeamId: number;
+}
+
+export interface LiguillaBracketDetail {
+  id: number;
+  userId: number;
+  userName: string;
+  alias: string;
+  avatarUrl?: string;
+  isLocked: boolean;
+  submittedAtUtc?: string;
+  totalScore: number;
+  qfWinner1TeamId: number;
+  qfWinner2TeamId: number;
+  qfWinner3TeamId: number;
+  qfWinner4TeamId: number;
+  sfWinner1TeamId: number;
+  sfWinner2TeamId: number;
+  championTeamId: number;
+  qfPoints: number;
+  sfPoints: number;
+  championPoints: number;
+  bonusPoints: number;
+  shatteredTeamIds: number[];
+}
+
+export interface LiguillaOverview {
+  isAvailable: boolean;
+  status: 'HIDDEN' | 'ADMIN_PREVIEW_HIDDEN' | 'WAITING_PLAY_IN' | 'OPEN_FOR_PICKS' | 'LOCKED_IN_PROGRESS' | 'FINISHED';
+  lockDeadlineUtc?: string;
+  qualifiedTeams: LiguillaTeam[];
+  nodes: LiguillaNode[];
+  userBracket?: LiguillaBracketDetail;
+}
+
+export interface LiguillaStandingItem {
+  rank: number;
+  userId: number;
+  alias: string;
+  avatarUrl?: string;
+  totalPoints: number;
+  qfPoints: number;
+  sfPoints: number;
+  championPoints: number;
+  bonusPoints: number;
+  championPickedCorrectly: boolean;
+  submittedAtUtc?: string;
+}
+
+export interface LiguillaStandings {
+  quinielaId: number;
+  seasonName: string;
+  standings: LiguillaStandingItem[];
+}
+

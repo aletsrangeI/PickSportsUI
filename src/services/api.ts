@@ -40,6 +40,10 @@ import type {
   UnclaimedMemberItem,
   UnclaimedQuinielaMembersData,
   WeeklyBulletinData,
+  LiguillaOverview,
+  LiguillaBracketDetail,
+  SubmitLiguillaBracketRequest,
+  LiguillaStandings,
 } from '../types';
 
 const baseQuery = fetchBaseQuery({
@@ -124,7 +128,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin'],
+  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'Liguilla'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
     getLeagues: builder.query<ApiResponse<League[]>, void>({
@@ -571,6 +575,43 @@ export const api = createApi({
       }),
       invalidatesTags: ['Quinielas', 'QuinielaDetail', 'Seasons', 'Weeks', 'Matches', 'Picks', 'Standings', 'Awards'],
     }),
+
+    // SPEC-017 Liguilla Bracket Challenge ("El Pilón")
+    getLiguillaOverview: builder.query<ApiResponse<LiguillaOverview>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/liguilla/overview`,
+      providesTags: (_result, _error, quinielaId) => [{ type: 'Liguilla', id: `OVERVIEW_${quinielaId}` }],
+    }),
+    getMyLiguillaBracket: builder.query<ApiResponse<LiguillaBracketDetail | null>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/liguilla/my-bracket`,
+      providesTags: (_result, _error, quinielaId) => [{ type: 'Liguilla', id: `BRACKET_${quinielaId}` }],
+    }),
+    submitLiguillaBracket: builder.mutation<ApiResponse<LiguillaBracketDetail>, { quinielaId: number; data: SubmitLiguillaBracketRequest }>({
+      query: ({ quinielaId, data }) => ({
+        url: `/quinielas/${quinielaId}/liguilla/submit`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { quinielaId }) => [
+        { type: 'Liguilla', id: `OVERVIEW_${quinielaId}` },
+        { type: 'Liguilla', id: `BRACKET_${quinielaId}` },
+        { type: 'Liguilla', id: `STANDINGS_${quinielaId}` },
+      ],
+    }),
+    getLiguillaStandings: builder.query<ApiResponse<LiguillaStandings>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/liguilla/standings`,
+      providesTags: (_result, _error, quinielaId) => [{ type: 'Liguilla', id: `STANDINGS_${quinielaId}` }],
+    }),
+    seedSimulationLiguilla: builder.mutation<ApiResponse<boolean>, number>({
+      query: (quinielaId) => ({
+        url: `/quinielas/${quinielaId}/liguilla/admin/seed-simulation`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_result, _error, quinielaId) => [
+        { type: 'Liguilla', id: `OVERVIEW_${quinielaId}` },
+        { type: 'Liguilla', id: `BRACKET_${quinielaId}` },
+        { type: 'Liguilla', id: `STANDINGS_${quinielaId}` },
+      ],
+    }),
   }),
 });
 
@@ -637,6 +678,12 @@ export const {
   // SPEC-007 Migration
   usePreviewMigrationMutation,
   useExecuteMigrationMutation,
+  // SPEC-017 Liguilla Bracket Challenge
+  useGetLiguillaOverviewQuery,
+  useGetMyLiguillaBracketQuery,
+  useSubmitLiguillaBracketMutation,
+  useGetLiguillaStandingsQuery,
+  useSeedSimulationLiguillaMutation,
 } = api;
 
 
