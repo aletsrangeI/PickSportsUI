@@ -35,6 +35,7 @@ import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import { MatchCard } from '../../components/matches/MatchCard';
 import { MatchPicker } from '../../components/picks/MatchPicker';
 import { PicksMatrix } from '../../components/picks/PicksMatrix';
+import { PendingChallengesBanner } from '../../components/challenges/PendingChallengesBanner';
 import './DashboardPage.css';
 
 interface OutletContextType {
@@ -350,6 +351,14 @@ export const DashboardPage: React.FC = () => {
           ───────────────────────────────────────────────────────────── */}
       {activeTab === 'picks' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          {/* Banner Efímero de Retos Pendientes (SPEC-022) */}
+          {quiniela?.id && (
+            <PendingChallengesBanner
+              quinielaId={quiniela.id}
+              weekMatches={matches}
+            />
+          )}
+
           {/* Tarjeta Destacada: Liguilla Bracket Challenge ("El Pilón") */}
           {showLiguillaHero && (
             <Link

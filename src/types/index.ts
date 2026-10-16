@@ -493,7 +493,10 @@ export interface WeeklyBulletinData {
   radar?: BulletinRadar | null;
   pulse?: BulletinPulse | null;
   nextWeekInfo?: NextWeekInfo | null;
+  challenges?: Challenge[];
 }
+
+export type WeeklyBulletin = WeeklyBulletinData;
 
 export interface UpdateAnnouncementRequest {
   announcement: string | null;
@@ -653,4 +656,113 @@ export interface LiguillaStandings {
   seasonName: string;
   standings: LiguillaStandingItem[];
 }
+
+// ─── Retos y Apuestas Sociales (SPEC-022) ───────────────────────────────────
+
+export type ChallengeType =
+  | 'WEEKLY_RANK'
+  | 'GENERAL_RANK'
+  | 'MATCH_WINNER'
+  | 'EXACT_SCORE'
+  | 'SUDDEN_DEATH'
+  | 'TOTAL_GOALS';
+
+export type PayoutMode = 'WINNER_TAKES_ALL' | 'LAST_PLACE_PAYS';
+
+export type ChallengeStatus =
+  | 'PENDING_ACCEPTANCE'
+  | 'ACTIVE'
+  | 'UNACCEPTED_EXPIRED'
+  | 'CANCELLED'
+  | 'RESOLVED_WITH_WINNER'
+  | 'RESOLVED_NO_WINNER';
+
+export type ParticipantStatus = 'ACCEPTED' | 'PENDING' | 'DECLINED' | 'EXPIRED';
+
+export type ParticipantOutcome = 'NONE' | 'WINNER' | 'LOSER' | 'NO_WINNER_BUST';
+
+export interface ChallengeParticipant {
+  id: number;
+  challengeId: number;
+  memberId: number;
+  alias: string;
+  displayName?: string;
+  avatarUrl?: string | null;
+  isCreator: boolean;
+  status: ParticipantStatus;
+  predictedWinnerAbbr?: string | null;
+  predictedHomeScore?: number | null;
+  predictedAwayScore?: number | null;
+  predictedTotalGoals?: number | null;
+  outcome: ParticipantOutcome | string;
+  currentLiveValue?: string | null;
+  isBusted?: boolean;
+  eliminatedAtMatchId?: number | null;
+  eliminatedAtMatchLabel?: string | null;
+  isDebtSettled: boolean;
+  settledAtUtc?: string | null;
+  respondedAtUtc?: string | null;
+}
+
+export interface Challenge {
+  id: number;
+  quinielaId: number;
+  weekId: number;
+  weekName?: string;
+  creatorMemberId: number;
+  creatorAlias: string;
+  creatorAvatarUrl?: string | null;
+  challengeType: ChallengeType;
+  payoutMode: PayoutMode;
+  stakesDescription: string;
+  targetMatchId?: number | null;
+  targetMatchLabel?: string | null;
+  targetMatchScore?: string | null;
+  status: ChallengeStatus;
+  resolutionSummary?: string | null;
+  actualTotalGoals?: number | null;
+  currentTotalGoals?: number | null;
+  doubleLifeEvents?: string[] | null;
+  differentialMatches?: string[] | null;
+  takenOptions?: string[] | null;
+  createdAtUtc: string;
+  resolvedAtUtc?: string | null;
+  participants: ChallengeParticipant[];
+}
+
+export interface CreateChallengeRequest {
+  quinielaId: number;
+  weekId: number;
+  invitedMemberIds: number[];
+  challengeType: ChallengeType;
+  payoutMode: PayoutMode;
+  stakesDescription: string;
+  targetMatchId?: number | null;
+  creatorPredictedWinnerAbbr?: string | null;
+  predictedWinnerAbbr?: string | null;
+  creatorPredictedHomeScore?: number | null;
+  predictedHomeScore?: number | null;
+  creatorPredictedAwayScore?: number | null;
+  predictedAwayScore?: number | null;
+  creatorPredictedTotalGoals?: number | null;
+  predictedTotalGoals?: number | null;
+}
+
+export interface RespondChallengeRequest {
+  quinielaId: number;
+  challengeId: number;
+  action: 'ACCEPT' | 'DECLINE';
+  response?: 'ACCEPT' | 'DECLINE';
+  predictedWinnerAbbr?: string | null;
+  predictedHomeScore?: number | null;
+  predictedAwayScore?: number | null;
+  predictedTotalGoals?: number | null;
+}
+
+export interface SettleChallengeDebtRequest {
+  quinielaId: number;
+  challengeId: number;
+  memberId: number;
+}
+
 

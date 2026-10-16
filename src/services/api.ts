@@ -44,6 +44,11 @@ import type {
   LiguillaBracketDetail,
   SubmitLiguillaBracketRequest,
   LiguillaStandings,
+  Challenge,
+  ChallengeParticipant,
+  CreateChallengeRequest,
+  RespondChallengeRequest,
+  SettleChallengeDebtRequest,
 } from '../types';
 
 const baseQuery = fetchBaseQuery({
@@ -128,7 +133,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'Liguilla'],
+  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'Liguilla', 'Challenges'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
     getLeagues: builder.query<ApiResponse<League[]>, void>({
@@ -612,6 +617,45 @@ export const api = createApi({
         { type: 'Liguilla', id: `STANDINGS_${quinielaId}` },
       ],
     }),
+    // ─── SPEC-022 Retos y Apuestas Sociales ───────────────────────────────────
+    getWeekChallenges: builder.query<ApiResponse<Challenge[]>, { quinielaId: number; weekId: number }>({
+      query: ({ quinielaId, weekId }) => `/quinielas/${quinielaId}/weeks/${weekId}/challenges`,
+      providesTags: ['Challenges'],
+    }),
+    getPendingChallenges: builder.query<ApiResponse<Challenge[]>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/challenges/pending`,
+      providesTags: ['Challenges'],
+    }),
+    createChallenge: builder.mutation<ApiResponse<Challenge>, CreateChallengeRequest>({
+      query: ({ quinielaId, weekId, ...body }) => ({
+        url: `/quinielas/${quinielaId}/weeks/${weekId}/challenges`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Challenges'],
+    }),
+    respondChallenge: builder.mutation<ApiResponse<Challenge>, RespondChallengeRequest>({
+      query: ({ quinielaId, challengeId, ...body }) => ({
+        url: `/quinielas/${quinielaId}/challenges/${challengeId}/respond`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Challenges'],
+    }),
+    settleChallengeDebt: builder.mutation<ApiResponse<Challenge>, SettleChallengeDebtRequest>({
+      query: ({ quinielaId, challengeId, memberId }) => ({
+        url: `/quinielas/${quinielaId}/challenges/${challengeId}/participants/${memberId}/settle`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Challenges', 'Bulletin'],
+    }),
+    cancelChallenge: builder.mutation<ApiResponse<boolean>, { quinielaId: number; challengeId: number }>({
+      query: ({ quinielaId, challengeId }) => ({
+        url: `/quinielas/${quinielaId}/challenges/${challengeId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Challenges'],
+    }),
   }),
 });
 
@@ -684,6 +728,13 @@ export const {
   useSubmitLiguillaBracketMutation,
   useGetLiguillaStandingsQuery,
   useSeedSimulationLiguillaMutation,
+  // SPEC-022 Retos y Apuestas Sociales
+  useGetWeekChallengesQuery,
+  useGetPendingChallengesQuery,
+  useCreateChallengeMutation,
+  useRespondChallengeMutation,
+  useSettleChallengeDebtMutation,
+  useCancelChallengeMutation,
 } = api;
 
 

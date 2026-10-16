@@ -22,6 +22,7 @@ import {
   Radar,
   Skull,
   Sparkles,
+  Swords,
   TrendingDown,
   TrendingUp,
   Trophy,
@@ -587,6 +588,124 @@ export const BulletinPage: React.FC = () => {
               </div>
             </div>
           </section>
+
+          {/* ⚔️ Resumen de Retos de la Jornada (SPEC-022) */}
+          {bulletin.challenges && bulletin.challenges.length > 0 && (
+            <section className="bulletin-paper__section bulletin-challenges" aria-label="Resumen de Retos de la Jornada">
+              <h2 className="bulletin-paper__section-title">
+                <Swords size={18} strokeWidth={2} /> Resumen de Retos de la Jornada
+              </h2>
+              <div className="bulletin-challenges-grid">
+                {bulletin.challenges.map((challenge) => {
+                  const winners = challenge.participants.filter((p) => p.outcome === 'WINNER');
+                  const losers = challenge.participants.filter((p) => p.outcome === 'LOSER');
+                  const declined = challenge.participants.filter(
+                    (p) => p.status === 'DECLINED' || p.status === 'EXPIRED'
+                  );
+                  const isNoWinner = challenge.status === 'RESOLVED_NO_WINNER';
+
+                  return (
+                    <article
+                      key={challenge.id}
+                      className={`bulletin-challenge-card ${
+                        isNoWinner ? 'bulletin-challenge-card--no-winner' : ''
+                      }`}
+                    >
+                      <header className="bulletin-challenge-card__header">
+                        <span className="bulletin-challenge-card__type">
+                          {challenge.challengeType === 'WEEKLY_RANK' && '📈 Posición Semanal'}
+                          {challenge.challengeType === 'GENERAL_RANK' && '🏆 Posición General'}
+                          {challenge.challengeType === 'MATCH_WINNER' && '🥊 Directo al Partido'}
+                          {challenge.challengeType === 'EXACT_SCORE' && '🎯 Marcador Exacto'}
+                          {challenge.challengeType === 'SUDDEN_DEATH' && '💀 Muerte Súbita'}
+                          {challenge.challengeType === 'TOTAL_GOALS' && '⚽ Total de Goles'}
+                        </span>
+                        <span className="bulletin-challenge-card__mode">
+                          {challenge.payoutMode === 'WINNER_TAKES_ALL'
+                            ? '👑 El Rey Cobra'
+                            : '🤡 El Último Paga'}
+                        </span>
+                      </header>
+
+                      {/* Apuesta */}
+                      <div className="bulletin-challenge-card__stakes">
+                        Apuesta: <strong>"{challenge.stakesDescription}"</strong>
+                      </div>
+
+                      {/* Caso 1: Nadie acertó / Burla del Boletín */}
+                      {isNoWinner ? (
+                        <div className="bulletin-challenge-card__roast">
+                          <span className="bulletin-challenge-card__roast-emoji">🤡</span>
+                          <div>
+                            <strong>¡Nadie le atinó!</strong>
+                            <p>
+                              {challenge.resolutionSummary ||
+                                'Todos los participantes fallaron su pronóstico o se pasaron de goles.'}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Caso 2: Ganador(es) y Perdedor(es) */
+                        <div className="bulletin-challenge-card__results">
+                          {winners.length > 0 && (
+                            <div className="bulletin-challenge-card__winners">
+                              <span className="bulletin-challenge-card__label">🏆 Ganador:</span>
+                              <div className="bulletin-challenge-card__avatars">
+                                {winners.map((w) => (
+                                  <div key={w.id} className="bulletin-challenge-card__user">
+                                    <UserAvatar src={w.avatarUrl} alt={w.alias} size="xs" />
+                                    <span>{w.alias}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {losers.length > 0 && (
+                            <div className="bulletin-challenge-card__losers">
+                              <span className="bulletin-challenge-card__label">💀 A pagar:</span>
+                              <div className="bulletin-challenge-card__losers-list">
+                                {losers.map((l) => (
+                                  <div key={l.id} className="bulletin-challenge-card__loser-row">
+                                    <UserAvatar src={l.avatarUrl} alt={l.alias} size="xs" />
+                                    <span className="bulletin-challenge-card__loser-alias">{l.alias}</span>
+                                    {l.isDebtSettled ? (
+                                      <span className="bulletin-challenge-card__settled">
+                                        🤝 Apuesta Cumplida
+                                      </span>
+                                    ) : (
+                                      <span className="bulletin-challenge-card__debt-pending">
+                                        ⏳ Pendiente de pagar
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Eventos de Doble Vida en la edición */}
+                      {challenge.doubleLifeEvents && challenge.doubleLifeEvents.length > 0 && (
+                        <div className="bulletin-challenge-card__double-life">
+                          ❤️‍🔥 Doble Vida: {challenge.doubleLifeEvents.join(' · ')}
+                        </div>
+                      )}
+
+                      {/* Quienes pasaron del reto */}
+                      {declined.length > 0 && (
+                        <footer className="bulletin-challenge-card__declined">
+                          <span>Pasaron del reto: </span>
+                          <em>{declined.map((d) => d.alias).join(', ')}</em>
+                        </footer>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* Selector de ediciones al pie de página (Archivo histórico) */}
           <BulletinArchiveSelector
