@@ -1,4 +1,4 @@
-.challenge-card {
+ï»¿.challenge-card {
   --cc-gold: var(--color-accent);
   --cc-gold-rgb: 245, 158, 11;
   --cc-danger-rgb: 239, 68, 68;
@@ -19,6 +19,8 @@
     var(--shadow-md),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-normal),
@@ -64,7 +66,8 @@
 .challenge-card__busted,
 .challenge-card__declined,
 .challenge-card__settled,
-.challenge-card__debt-pending {
+.challenge-card__debt-pending,
+.challenge-card__winner-badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2xs);
@@ -91,7 +94,7 @@
   flex-shrink: 0;
 }
 
-/* Payout mode: corona (ganador se lleva todo) / payaso (perdedor paga castigo) */
+/* Payout mode */
 .challenge-card__payout-mode {
   color: var(--cc-gold);
   background: linear-gradient(135deg, rgba(var(--cc-gold-rgb), 0.18), rgba(var(--cc-gold-rgb), 0.06));
@@ -174,33 +177,46 @@
   border-color: var(--border-subtle);
 }
 
+.challenge-card__match-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
 /* ---------- Stakes ---------- */
 
 .challenge-card__stakes {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-  padding: var(--space-sm) var(--space-md);
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-xs);
+  padding: 8px 14px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(var(--cc-gold-rgb), 0.45);
-  background:
-    linear-gradient(135deg, rgba(var(--cc-gold-rgb), 0.12), rgba(var(--color-primary-rgb), 0.06));
-  box-shadow: inset 0 0 18px rgba(var(--cc-gold-rgb), 0.08);
+  border: 1px solid rgba(var(--cc-gold-rgb), 0.35);
+  background: linear-gradient(135deg, rgba(var(--cc-gold-rgb), 0.12), rgba(var(--color-primary-rgb), 0.05));
+  box-shadow: inset 0 0 14px rgba(var(--cc-gold-rgb), 0.06);
 }
 
 .challenge-card__stakes-label {
-  font-size: 0.68rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--cc-gold);
+  white-space: nowrap;
 }
 
 .challenge-card__stakes-value {
-  font-family: var(--font-family-heading);
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.88rem;
+  font-weight: 600;
   color: var(--text-main);
   word-break: break-word;
 }
@@ -209,36 +225,66 @@
 
 .challenge-card__double-life {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-xs);
+  flex-direction: column;
+  gap: 4px;
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-md);
   border: 1px solid rgba(var(--cc-orange-rgb), 0.6);
   background: linear-gradient(90deg, rgba(var(--cc-danger-rgb), 0.2), rgba(var(--cc-orange-rgb), 0.2));
   color: #fdba74;
   font-size: 0.8rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   box-shadow:
     0 0 14px rgba(var(--cc-orange-rgb), 0.35),
     inset 0 0 10px rgba(var(--cc-danger-rgb), 0.2);
-  animation: challenge-card-glow 2.4s ease-in-out infinite;
 }
 
-/* ---------- Termómetro de goles ---------- */
+.challenge-card__double-life-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.challenge-card__double-life-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.75rem;
+  color: #fed7aa;
+}
+
+/* ---------- TermÃ³metro de goles ---------- */
 
 .challenge-card__thermometer {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.challenge-card__thermometer-goals {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: var(--space-sm);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.challenge-card__thermometer-goals strong {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .challenge-card__thermometer-track {
   position: relative;
-  flex: 1;
-  height: 10px;
+  width: 100%;
+  height: 8px;
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-subtle);
@@ -259,22 +305,18 @@
   box-shadow: 0 0 10px rgba(var(--cc-danger-rgb), 0.6);
 }
 
-.challenge-card__thermometer-goals {
-  min-width: 2.5ch;
-  font-family: var(--font-family-heading);
-  font-size: 1.1rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  color: var(--text-main);
-}
-
 .challenge-card__busted {
   color: #fff;
   background: var(--color-danger);
   border-color: rgba(var(--cc-danger-rgb), 0.8);
   box-shadow: 0 0 10px rgba(var(--cc-danger-rgb), 0.45);
-  transform: rotate(-3deg);
+}
+
+.challenge-card__winner-badge {
+  color: #0f172a;
+  background: #f59e0b;
+  border-color: #fbbf24;
+  font-weight: 700;
 }
 
 /* ---------- Participantes ---------- */
@@ -282,59 +324,122 @@
 .challenge-card__participants {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 8px;
   margin: 0;
   padding: 0;
-  list-style: none;
+}
+
+.challenge-card__participants-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
 }
 
 .challenge-card__participant {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-xs) var(--space-sm);
+  padding: 8px 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.025);
   transition:
     opacity var(--transition-normal),
     box-shadow var(--transition-normal),
     border-color var(--transition-normal);
 }
 
+.challenge-card__participant-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .challenge-card__participant-avatar {
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   border-radius: 50%;
-  object-fit: cover;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-medium);
   display: grid;
   place-items: center;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--text-secondary);
+}
+
+.challenge-card__participant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.challenge-card__participant-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .challenge-card__participant-alias {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 700;
   color: var(--text-main);
+  white-space: nowrap;
+}
+
+.challenge-card__creator-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.challenge-card__participant-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .challenge-card__participant-pick {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  font-size: 0.8rem;
   color: var(--text-secondary);
 }
 
+.challenge-card__participant-pick strong {
+  color: #f8fafc;
+  font-weight: 700;
+}
+
 .challenge-card__participant-status {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.challenge-card__participant-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .challenge-card__participant--winner {
@@ -343,11 +448,6 @@
   box-shadow:
     0 0 14px rgba(var(--cc-gold-rgb), 0.3),
     inset 0 0 8px rgba(var(--cc-gold-rgb), 0.1);
-}
-
-.challenge-card__participant--winner .challenge-card__participant-avatar {
-  border-color: var(--cc-gold);
-  box-shadow: 0 0 8px rgba(var(--cc-gold-rgb), 0.6);
 }
 
 .challenge-card__participant--winner .challenge-card__participant-pick,
@@ -385,7 +485,7 @@
   font-style: italic;
 }
 
-/* ---------- Liquidación ---------- */
+/* ---------- LiquidaciÃ³n ---------- */
 
 .challenge-card__settled {
   color: var(--color-primary);
@@ -405,12 +505,12 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
+  padding: 4px 12px;
   border-radius: var(--radius-full);
   border: 1px solid rgba(var(--color-primary-rgb), 0.5);
   background: rgba(var(--color-primary-rgb), 0.15);
   color: var(--color-primary);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
   transition:
@@ -440,7 +540,34 @@
   cursor: not-allowed;
 }
 
-/* ---------- Nadie le atinó ---------- */
+/* ---------- Pendientes por responder ---------- */
+
+.challenge-card__pending-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(234, 179, 8, 0.35);
+  background: rgba(234, 179, 8, 0.05);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.challenge-card__pending-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: #eab308;
+}
+
+.challenge-card__pending-names {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ---------- Nadie le atinÃ³ ---------- */
 
 .challenge-card__no-winner {
   display: flex;
@@ -462,25 +589,57 @@
   text-align: center;
 }
 
-.challenge-card__no-winner-emoji {
-  display: inline-block;
-  animation: challenge-card-wobble 2s ease-in-out infinite;
-}
-
 /* ---------- Acciones ---------- */
 
 .challenge-card__actions {
   display: flex;
-  flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
   gap: var(--space-xs);
-  padding-top: var(--space-sm);
+  padding-top: var(--space-xs);
   border-top: 1px solid var(--border-subtle);
 }
 
-.challenge-card__actions > button {
-  flex: 1 1 auto;
-  min-height: 38px;
+.challenge-card__actions > button,
+.challenge-btn--cancel {
+  flex: 0 0 auto !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  min-height: 32px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  transition: all var(--transition-fast);
+}
+
+.challenge-btn--cancel:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+
+@media (max-width: 640px) {
+  .challenge-card__participant {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .challenge-card__participant-badges {
+    align-self: flex-start;
+    padding-left: 42px;
+  }
+
+  .challenge-card__actions > button {
+    flex: 1 1 auto !important;
+  }
 }
 
 /* ---------- Animaciones ---------- */
@@ -493,12 +652,6 @@
 @keyframes challenge-card-glow {
   0%, 100% { box-shadow: 0 0 10px rgba(249, 115, 22, 0.3), inset 0 0 8px rgba(239, 68, 68, 0.15); }
   50% { box-shadow: 0 0 20px rgba(249, 115, 22, 0.55), inset 0 0 12px rgba(239, 68, 68, 0.3); }
-}
-
-@keyframes challenge-card-wobble {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-10deg); }
-  75% { transform: rotate(10deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
