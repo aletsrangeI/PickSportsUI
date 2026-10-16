@@ -18,6 +18,8 @@ import {
   CircleDot,
   Check,
   AlertCircle,
+  Crown,
+  Coins,
 } from 'lucide-react';
 import './CreateChallengeModal.css';
 
@@ -31,46 +33,53 @@ interface CreateChallengeModalProps {
   weekMatches: Match[];
 }
 
-const CHALLENGE_TYPES: Array<{
-  type: ChallengeType;
-  title: string;
-  icon: string;
-  desc: string;
-}> = [
+const CHALLENGE_TYPES = [
   {
-    type: 'WEEKLY_RANK',
+    type: 'WEEKLY_RANK' as ChallengeType,
     title: 'Posición Semanal',
-    icon: '📈',
+    icon: TrendingUp,
+    iconColor: '#38bdf8',
+    iconBg: 'rgba(56, 189, 248, 0.15)',
     desc: 'Compite por quién queda más alto en la jornada con sus picks habituales.',
   },
   {
-    type: 'GENERAL_RANK',
+    type: 'GENERAL_RANK' as ChallengeType,
     title: 'Posición General',
-    icon: '🏆',
+    icon: Trophy,
+    iconColor: '#eab308',
+    iconBg: 'rgba(234, 179, 8, 0.15)',
     desc: 'Compite por quién queda mejor en el acumulado global al cierre.',
   },
   {
-    type: 'MATCH_WINNER',
+    type: 'MATCH_WINNER' as ChallengeType,
     title: 'Directo al Partido',
-    icon: '🥊',
+    icon: Swords,
+    iconColor: '#f97316',
+    iconBg: 'rgba(249, 115, 22, 0.15)',
     desc: 'Elige un partido estelar (Local, Empate o Visita). Máximo 3 retados.',
   },
   {
-    type: 'EXACT_SCORE',
+    type: 'EXACT_SCORE' as ChallengeType,
     title: 'Marcador Exacto',
-    icon: '🎯',
+    icon: Target,
+    iconColor: '#ec4899',
+    iconBg: 'rgba(236, 72, 153, 0.15)',
     desc: 'Predice el resultado exacto (ej. 2-1). No se pueden repetir marcadores.',
   },
   {
-    type: 'SUDDEN_DEATH',
+    type: 'SUDDEN_DEATH' as ChallengeType,
     title: 'Muerte Súbita',
-    icon: '💀',
+    icon: Skull,
+    iconColor: '#94a3b8',
+    iconBg: 'rgba(148, 163, 184, 0.15)',
     desc: 'El primero que falle un partido en orden cronológico queda eliminado.',
   },
   {
-    type: 'TOTAL_GOALS',
+    type: 'TOTAL_GOALS' as ChallengeType,
     title: 'Total de Goles',
-    icon: '⚽',
+    icon: CircleDot,
+    iconColor: '#10b981',
+    iconBg: 'rgba(16, 185, 129, 0.15)',
     desc: 'Regla estricta: el que se pase pierde. Gana el más cercano sin pasarse.',
   },
 ];
@@ -212,7 +221,9 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({
       >
         <header className="challenge-modal__header">
           <div className="challenge-modal__title-group">
-            <span className="challenge-modal__title-icon">⚔️</span>
+            <div className="challenge-modal__title-icon-wrapper">
+              <Swords size={18} />
+            </div>
             <h2 id="challenge-modal-title" className="challenge-modal__title">
               Lanzar Nuevo Reto
             </h2>
@@ -269,6 +280,7 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({
             <div className="challenge-type-grid">
               {CHALLENGE_TYPES.map((t) => {
                 const isSelected = challengeType === t.type;
+                const IconComponent = t.icon;
                 return (
                   <button
                     key={t.type}
@@ -278,7 +290,15 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({
                     }`}
                     onClick={() => setChallengeType(t.type)}
                   >
-                    <span className="challenge-type-option__icon">{t.icon}</span>
+                    <div
+                      className="challenge-type-option__icon-wrapper"
+                      style={{
+                        backgroundColor: t.iconBg,
+                        color: t.iconColor,
+                      }}
+                    >
+                      <IconComponent size={18} />
+                    </div>
                     <div>
                       <div className="challenge-type-option__title">{t.title}</div>
                       <div className="challenge-type-option__desc">{t.desc}</div>
@@ -302,7 +322,10 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({
                 }`}
                 onClick={() => setPayoutMode('WINNER_TAKES_ALL')}
               >
-                <span className="challenge-payout-btn__title">👑 El Rey Cobra</span>
+                <span className="challenge-payout-btn__title">
+                  <Crown size={15} color="#eab308" />
+                  <span>El Rey Cobra</span>
+                </span>
                 <span className="challenge-payout-btn__desc">
                   El 1.° cobra todo. Los demás le pagan.
                 </span>
@@ -316,7 +339,10 @@ export const CreateChallengeModal: React.FC<CreateChallengeModalProps> = ({
                 }`}
                 onClick={() => setPayoutMode('LAST_PLACE_PAYS')}
               >
-                <span className="challenge-payout-btn__title">🤡 El Último Paga</span>
+                <span className="challenge-payout-btn__title">
+                  <Coins size={15} color="#f43f5e" />
+                  <span>El Último Paga</span>
+                </span>
                 <span className="challenge-payout-btn__desc">
                   Solo el peor paga la apuesta a los demás.
                 </span>

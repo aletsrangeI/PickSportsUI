@@ -39,7 +39,7 @@ export const PendingChallengesBanner: React.FC<PendingChallengesBannerProps> = (
       >
         <div className="pending-challenges-banner__left">
           <div className="pending-challenges-banner__icon-wrap">
-            ⚔️
+            <Swords size={18} color="#eab308" />
           </div>
           <div className="pending-challenges-banner__text">
             <div className="pending-challenges-banner__title">

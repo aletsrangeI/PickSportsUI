@@ -9,6 +9,8 @@ import {
   AlertTriangle,
   AlertCircle,
   HelpCircle,
+  Crown,
+  Coins,
 } from 'lucide-react';
 import './CreateChallengeModal.css';
 
@@ -169,7 +171,9 @@ export const RespondChallengeModal: React.FC<RespondChallengeModalProps> = ({
       >
         <header className="challenge-modal__header">
           <div className="challenge-modal__title-group">
-            <span className="challenge-modal__title-icon">⚔️</span>
+            <div className="challenge-modal__title-icon-wrapper">
+              <Swords size={18} />
+            </div>
             <h2 id="respond-challenge-modal-title" className="challenge-modal__title">
               Responder Reto
             </h2>
@@ -236,12 +240,20 @@ export const RespondChallengeModal: React.FC<RespondChallengeModalProps> = ({
               </div>
             </div>
 
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              Modalidad:{' '}
-              <strong>
-                {challenge.payoutMode === 'WINNER_TAKES_ALL'
-                  ? '👑 El Rey Cobra (El 1.° se lleva todo)'
-                  : '🤡 El Último Paga (El peor invita la apuesta)'}
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>Modalidad:</span>
+              <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                {challenge.payoutMode === 'WINNER_TAKES_ALL' ? (
+                  <>
+                    <Crown size={14} color="#eab308" />
+                    <span>El Rey Cobra (El 1.° se lleva todo)</span>
+                  </>
+                ) : (
+                  <>
+                    <Coins size={14} color="#f43f5e" />
+                    <span>El Último Paga (El peor invita la apuesta)</span>
+                  </>
+                )}
               </strong>
             </div>
           </div>

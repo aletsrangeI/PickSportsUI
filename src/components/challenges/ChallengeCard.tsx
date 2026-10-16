@@ -17,6 +17,9 @@ import {
   Sparkles,
   Flame,
   AlertTriangle,
+  AlertCircle,
+  Crown,
+  Coins,
   X,
 } from 'lucide-react';
 import './ChallengeCard.css';
@@ -30,14 +33,14 @@ interface ChallengeCardProps {
 
 const TYPE_CONFIG: Record<
   string,
-  { label: string; icon: string; LucideIcon: React.ElementType }
+  { label: string; LucideIcon: React.ElementType; color: string }
 > = {
-  WEEKLY_RANK: { label: 'Posición Semanal', icon: '📈', LucideIcon: TrendingUp },
-  GENERAL_RANK: { label: 'Posición General', icon: '🏆', LucideIcon: Trophy },
-  MATCH_WINNER: { label: 'Directo al Partido', icon: '🥊', LucideIcon: Swords },
-  EXACT_SCORE: { label: 'Marcador Exacto', icon: '🎯', LucideIcon: Target },
-  SUDDEN_DEATH: { label: 'Muerte Súbita', icon: '💀', LucideIcon: Skull },
-  TOTAL_GOALS: { label: 'Total de Goles', icon: '⚽', LucideIcon: CircleDot },
+  WEEKLY_RANK: { label: 'Posición Semanal', LucideIcon: TrendingUp, color: '#38bdf8' },
+  GENERAL_RANK: { label: 'Posición General', LucideIcon: Trophy, color: '#eab308' },
+  MATCH_WINNER: { label: 'Directo al Partido', LucideIcon: Swords, color: '#f97316' },
+  EXACT_SCORE: { label: 'Marcador Exacto', LucideIcon: Target, color: '#ec4899' },
+  SUDDEN_DEATH: { label: 'Muerte Súbita', LucideIcon: Skull, color: '#94a3b8' },
+  TOTAL_GOALS: { label: 'Total de Goles', LucideIcon: CircleDot, color: '#10b981' },
 };
 
 export const ChallengeCard: React.FC<ChallengeCardProps> = ({
@@ -52,8 +55,8 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
 
   const typeInfo = TYPE_CONFIG[challenge.challengeType] || {
     label: challenge.challengeType,
-    icon: '⚔️',
     LucideIcon: Swords,
+    color: '#10b981',
   };
 
   const isWinnerTakesAll = challenge.payoutMode === 'WINNER_TAKES_ALL';
@@ -88,7 +91,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
         challengeId: challenge.id,
         memberId,
       }).unwrap();
-      setFeedback('¡Apuesta confirmada como pagada! 🤝');
+      setFeedback('¡Apuesta confirmada como pagada!');
       setTimeout(() => setFeedback(null), 3500);
     } catch (err: any) {
       setFeedback(err?.data?.message || 'Error al confirmar pago');
@@ -116,9 +119,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
       <header className="challenge-card__header">
         <div className="challenge-card__badges">
           <span className="challenge-card__type-badge">
-            <span role="img" aria-hidden="true">
-              {typeInfo.icon}
-            </span>
+            <typeInfo.LucideIcon size={14} color={typeInfo.color} />
             <span>{typeInfo.label}</span>
           </span>
 
@@ -129,7 +130,17 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
                 : 'challenge-card__payout-mode--clown'
             }`}
           >
-            {isWinnerTakesAll ? '👑 El Rey Cobra' : '🤡 El Último Paga'}
+            {isWinnerTakesAll ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Crown size={12} color="#eab308" />
+                <span>El Rey Cobra</span>
+              </span>
+            ) : (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Coins size={12} color="#f43f5e" />
+                <span>El Último Paga</span>
+              </span>
+            )}
           </span>
 
           {challenge.status === 'PENDING_ACCEPTANCE' && (
@@ -180,7 +191,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
         <div className="challenge-card__double-life" role="alert">
           <div className="challenge-card__double-life-title">
             <Flame size={16} />
-            <strong>❤️‍🔥 ¡Doble Vida Activada!</strong>
+            <strong>¡Doble Vida Activada!</strong>
           </div>
           <ul className="challenge-card__double-life-list">
             {challenge.doubleLifeEvents.map((evt, idx) => (
@@ -194,7 +205,10 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
       {challenge.challengeType === 'TOTAL_GOALS' && (
         <div className="challenge-card__thermometer">
           <div className="challenge-card__thermometer-goals">
-            <span>⚽ Goles actuales en la jornada:</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <CircleDot size={13} color="#10b981" />
+              <span>Goles actuales en la jornada:</span>
+            </span>
             <strong>{currentGoals}</strong>
           </div>
           <div className="challenge-card__thermometer-track">
@@ -282,25 +296,31 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
               {/* Badges de resultado y pago */}
               <div className="challenge-card__participant-badges">
                 {isBusted && (
-                  <span className="challenge-card__busted">💥 ¡Se pasó!</span>
+                  <span className="challenge-card__busted" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <AlertTriangle size={12} color="#f43f5e" />
+                    <span>¡Se pasó!</span>
+                  </span>
                 )}
 
                 {isWinner && (
-                  <span className="challenge-card__winner-badge">
-                    🏆 Ganador
+                  <span className="challenge-card__winner-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <Trophy size={12} color="#eab308" />
+                    <span>Ganador</span>
                   </span>
                 )}
 
                 {challenge.status === 'RESOLVED_WITH_WINNER' && isLoser && (
                   <>
                     {p.isDebtSettled ? (
-                      <span className="challenge-card__settled">
-                        🤝 Apuesta Cumplida
+                      <span className="challenge-card__settled" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Check size={12} color="#10b981" />
+                        <span>Apuesta Cumplida</span>
                       </span>
                     ) : (
                       <>
-                        <span className="challenge-card__debt-pending">
-                          ⏳ Pendiente de pagar
+                        <span className="challenge-card__debt-pending" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <Clock size={12} />
+                          <span>Pendiente de pagar</span>
                         </span>
                         {canConfirmPayment && (
                           <button
@@ -352,10 +372,10 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
         </div>
       )}
 
-      {/* Banner humorístico cuando nadie ganó */}
+      {/* Banner cuando nadie ganó */}
       {challenge.status === 'RESOLVED_NO_WINNER' && (
         <div className="challenge-card__no-winner">
-          <span className="challenge-card__no-winner-emoji">🤡</span>
+          <AlertCircle size={22} color="#f59e0b" style={{ flexShrink: 0 }} />
           <div>
             <strong>¡Nadie le atinó!</strong>
             <p>

@@ -56,8 +56,15 @@
   gap: var(--space-sm);
 }
 
-.challenge-modal__title-icon {
-  font-size: 1.4rem;
+.challenge-modal__title-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-primary);
 }
 
 .challenge-modal__title {
@@ -196,9 +203,14 @@
   box-shadow: inset 0 0 0 1px var(--color-primary);
 }
 
-.challenge-type-option__icon {
-  font-size: 1.3rem;
-  line-height: 1;
+.challenge-type-option__icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .challenge-type-option__title {

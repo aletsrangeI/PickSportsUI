@@ -18,7 +18,7 @@ import {
   useGetPendingChallengesQuery,
 } from '../../services/api';
 import { StandingsTable } from './StandingsTable';
-import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw, Flame, Swords, Plus } from 'lucide-react';
+import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw, Flame, Swords, Plus, Mail } from 'lucide-react';
 import { AWARD_META } from '../Awards/AwardsPage';
 import { UserAvatar } from '../../components/common/UserAvatar';
 import { getMostRelevantWeekForStandings } from '../../utils/weekSelection';
@@ -789,7 +789,10 @@ export const StandingsPage: React.FC = () => {
                   margin: 0,
                 }}
               >
-                <span>📬 Mis Invitaciones Pendientes</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Mail size={16} />
+                  <span>Mis Invitaciones Pendientes</span>
+                </span>
                 <span className="standings-page__tab-badge">{userPendingChallenges.length}</span>
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
@@ -837,7 +840,20 @@ export const StandingsPage: React.FC = () => {
                   gap: '12px',
                 }}
               >
-                <div style={{ fontSize: '2.5rem' }}>⚔️</div>
+                <div
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '50%',
+                    background: 'rgba(234, 179, 8, 0.15)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#eab308',
+                  }}
+                >
+                  <Swords size={26} />
+                </div>
                 <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-main)' }}>
                   Aún no hay retos lanzados para esta jornada
                 </h3>
