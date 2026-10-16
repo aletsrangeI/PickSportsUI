@@ -40,6 +40,17 @@ import type {
   UnclaimedMemberItem,
   UnclaimedQuinielaMembersData,
   WeeklyBulletinData,
+  EventRoundSummaryDto,
+  EventOptionDto,
+  EventQuestionDto,
+  EventMemberPickDto,
+  EventRoundDetailDto,
+  CreateEventRoundRequest,
+  UpdateEventRoundRequest,
+  CreateEventQuestionRequest,
+  SubmitEventPicksRequest,
+  ResolveEventRoundRequest,
+  EventStandingsResponseDto,
 } from '../types';
 
 const baseQuery = fetchBaseQuery({
@@ -124,7 +135,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin'],
+  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
     getLeagues: builder.query<ApiResponse<League[]>, void>({
@@ -250,7 +261,7 @@ export const api = createApi({
     }),
 
     // ─── Seasons ─────────────────────────────────────────────────────────────
-    getSeasons: builder.query<ApiResponse<SeasonSummary[]>, number | void>({
+    getSeasons: builder.query<ApiResponse<SeasonSummary[]>, number | null | undefined | void>({
       query: (leagueId) => (leagueId ? `/seasons?leagueId=${leagueId}` : '/seasons'),
       providesTags: ['Seasons'],
     }),
@@ -571,6 +582,67 @@ export const api = createApi({
       }),
       invalidatesTags: ['Quinielas', 'QuinielaDetail', 'Seasons', 'Weeks', 'Matches', 'Picks', 'Standings', 'Awards'],
     }),
+
+    // ─── SPEC-011: Eventos Personalizados (CustomEvents) ────────────────────
+    getEventRounds: builder.query<ApiResponse<EventRoundSummaryDto[]>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/events/rounds`,
+      providesTags: ['CustomEvents'],
+    }),
+
+    getEventRoundDetail: builder.query<ApiResponse<EventRoundDetailDto>, { quinielaId: number; roundId: number }>({
+      query: ({ quinielaId, roundId }) => `/quinielas/${quinielaId}/events/rounds/${roundId}`,
+      providesTags: ['CustomEvents'],
+    }),
+
+    createEventRound: builder.mutation<ApiResponse<EventRoundSummaryDto>, { quinielaId: number; body: CreateEventRoundRequest }>({
+      query: ({ quinielaId, body }) => ({
+        url: `/quinielas/${quinielaId}/events/rounds`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['CustomEvents'],
+    }),
+
+    updateEventRound: builder.mutation<ApiResponse<EventRoundSummaryDto>, { quinielaId: number; roundId: number; body: UpdateEventRoundRequest }>({
+      query: ({ quinielaId, roundId, body }) => ({
+        url: `/quinielas/${quinielaId}/events/rounds/${roundId}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['CustomEvents'],
+    }),
+
+    addEventQuestion: builder.mutation<ApiResponse<EventQuestionDto>, { quinielaId: number; roundId: number; body: CreateEventQuestionRequest }>({
+      query: ({ quinielaId, roundId, body }) => ({
+        url: `/quinielas/${quinielaId}/events/rounds/${roundId}/questions`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['CustomEvents'],
+    }),
+
+    submitEventPicks: builder.mutation<ApiResponse<EventRoundDetailDto>, { quinielaId: number; roundId: number; body: SubmitEventPicksRequest }>({
+      query: ({ quinielaId, roundId, body }) => ({
+        url: `/quinielas/${quinielaId}/events/rounds/${roundId}/picks`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['CustomEvents'],
+    }),
+
+    resolveEventRound: builder.mutation<ApiResponse<EventRoundDetailDto>, { quinielaId: number; roundId: number; body: ResolveEventRoundRequest }>({
+      query: ({ quinielaId, roundId, body }) => ({
+        url: `/quinielas/${quinielaId}/events/rounds/${roundId}/resolve`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['CustomEvents', 'Quinielas', 'Standings'],
+    }),
+
+    getEventStandings: builder.query<ApiResponse<EventStandingsResponseDto>, { quinielaId: number; roundId?: number | null }>({
+      query: ({ quinielaId, roundId }) => `/quinielas/${quinielaId}/events/standings${roundId ? `?roundId=${roundId}` : ''}`,
+      providesTags: ['CustomEvents', 'Standings'],
+    }),
   }),
 });
 
@@ -637,6 +709,16 @@ export const {
   // SPEC-007 Migration
   usePreviewMigrationMutation,
   useExecuteMigrationMutation,
+  // SPEC-011 CustomEvents
+  useGetEventRoundsQuery,
+  useGetEventRoundDetailQuery,
+  useCreateEventRoundMutation,
+  useUpdateEventRoundMutation,
+  useAddEventQuestionMutation,
+  useSubmitEventPicksMutation,
+  useResolveEventRoundMutation,
+  useGetEventStandingsQuery,
+  useLazyGetEventStandingsQuery,
 } = api;
 
 

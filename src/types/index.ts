@@ -24,7 +24,8 @@ export interface Quiniela {
   id: number;
   name: string;
   description?: string;
-  leagueId: number;
+  leagueId?: number | null;
+  quinielaType?: 'Sports' | 'CustomEvents';
   leagueCode: string;
   leagueName: string;
   sportName: string;
@@ -56,6 +57,7 @@ export interface QuinielaMember {
   joinedAt: string;
   displayName?: string;
   avatarUrl?: string;
+  totalPoints?: number;
 }
 
 export interface QuinielaDetail extends Quiniela {
@@ -66,7 +68,8 @@ export interface QuinielaDetail extends Quiniela {
 export interface CreateQuinielaRequest {
   name: string;
   description?: string;
-  leagueId: number;
+  leagueId?: number | null;
+  quinielaType?: 'Sports' | 'CustomEvents';
   entryFee: number;
   firstPlacePct: number;
   secondPlacePct: number;
@@ -566,5 +569,144 @@ export interface MigrationResultData {
   message: string;
   playerVerification: MigrationPlayerVerification[];
   createdUsernames: string[];
+}
+
+// ─── SPEC-011: Eventos Personalizados (CustomEvents) ─────────────────────────
+
+export interface EventRoundSummaryDto {
+  id: number;
+  eventGroupId: number;
+  quinielaId: number;
+  title: string;
+  roundOrder: number;
+  lockDateUtc: string;
+  status: 'Draft' | 'Open' | 'Locked' | 'Resolved';
+  resolvedDateUtc?: string | null;
+  isLocked: boolean;
+  questionsCount: number;
+  userPicksCount: number;
+  totalPossiblePoints: number;
+  userPointsEarned: number;
+}
+
+export interface EventOptionDto {
+  id: number;
+  eventQuestionId: number;
+  optionText: string;
+  imageUrl?: string | null;
+  isCorrect?: boolean | null;
+  optionOrder: number;
+  picksCount: number;
+  pickPercentage: number;
+}
+
+export interface EventQuestionDto {
+  id: number;
+  eventRoundId: number;
+  questionText: string;
+  description?: string | null;
+  points: number;
+  questionType: string;
+  questionOrder: number;
+  options: EventOptionDto[];
+  userSelectedOptionId?: number | null;
+  userIsHit?: boolean | null;
+  userPointsEarned: number;
+}
+
+export interface EventMemberPickDto {
+  memberId: number;
+  memberAlias: string;
+  avatarUrl?: string | null;
+  eventQuestionId: number;
+  eventOptionId: number;
+  optionText: string;
+  isHit?: boolean | null;
+  pointsEarned: number;
+  submittedAtUtc: string;
+}
+
+export interface EventRoundDetailDto {
+  id: number;
+  eventGroupId: number;
+  quinielaId: number;
+  title: string;
+  roundOrder: number;
+  lockDateUtc: string;
+  status: 'Draft' | 'Open' | 'Locked' | 'Resolved';
+  resolvedDateUtc?: string | null;
+  isLocked: boolean;
+  isRevealed: boolean;
+  currentUserMemberId?: number | null;
+  isOwnerOrAdmin: boolean;
+  questions: EventQuestionDto[];
+  allMemberPicks: EventMemberPickDto[];
+}
+
+export interface CreateEventRoundRequest {
+  title: string;
+  lockDateUtc: string;
+  roundOrder?: number;
+}
+
+export interface UpdateEventRoundRequest {
+  title: string;
+  lockDateUtc: string;
+  status?: string;
+}
+
+export interface CreateEventOptionItem {
+  optionText: string;
+  imageUrl?: string | null;
+  optionOrder?: number;
+}
+
+export interface CreateEventQuestionRequest {
+  questionText: string;
+  description?: string | null;
+  points?: number;
+  questionType?: string;
+  questionOrder?: number;
+  options: CreateEventOptionItem[];
+}
+
+export interface EventPickSelection {
+  eventQuestionId: number;
+  eventOptionId: number;
+}
+
+export interface SubmitEventPicksRequest {
+  picks: EventPickSelection[];
+}
+
+export interface QuestionResolutionItem {
+  eventQuestionId: number;
+  winningOptionId: number;
+}
+
+export interface ResolveEventRoundRequest {
+  resolutions: QuestionResolutionItem[];
+}
+
+export interface EventStandingRowDto {
+  rank: number;
+  memberId: number;
+  alias: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  points: number;
+  hits: number;
+  totalQuestions: number;
+  currentStreak: number;
+  bestStreak: number;
+}
+
+export interface EventStandingsResponseDto {
+  quinielaId: number;
+  roundId?: number | null;
+  roundTitle?: string | null;
+  roundStatus?: string | null;
+  roundStandings: EventStandingRowDto[];
+  generalStandings: EventStandingRowDto[];
 }
 

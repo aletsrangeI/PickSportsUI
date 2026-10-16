@@ -8,6 +8,8 @@ import {
   useGetStandingsQuery,
   useGetAwardsQuery,
   useScoreWeekMutation,
+  useGetEventStandingsQuery,
+  useGetEventRoundsQuery,
 } from '../../services/api';
 import { StandingsTable } from './StandingsTable';
 import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
@@ -33,10 +35,38 @@ export const StandingsPage: React.FC = () => {
   const quinielaId = activeQuiniela?.id || 0;
 
   const isOwnerOrAdmin = activeQuiniela?.userRole === 'OWNER' || activeQuiniela?.userRole === 'ADMIN';
+  const isCustomEvents = activeQuiniela?.quinielaType === 'CustomEvents';
 
+  // ─── SPEC-011: Eventos Personalizados (CustomEvents) ───────────────────────
+  const { data: eventRoundsResponse } = useGetEventRoundsQuery(quinielaId, {
+    skip: !quinielaId || !isCustomEvents,
+  });
+  const eventRounds = eventRoundsResponse?.data || [];
+  const [selectedEventRoundId, setSelectedEventRoundId] = useState<number | null>(null);
+
+  // Auto-seleccionar ronda de eventos si no hay seleccionada
+  useEffect(() => {
+    if (isCustomEvents && eventRounds.length > 0 && selectedEventRoundId === null) {
+      const openRound = eventRounds.find((r) => r.status === 'Open' && !r.isLocked);
+      const latestRound = eventRounds[eventRounds.length - 1];
+      if (openRound) setSelectedEventRoundId(openRound.id);
+      else if (latestRound) setSelectedEventRoundId(latestRound.id);
+    }
+  }, [isCustomEvents, eventRounds, selectedEventRoundId]);
+
+  const {
+    data: eventStandingsResponse,
+    isLoading: loadingEventStandings,
+  } = useGetEventStandingsQuery(
+    { quinielaId, roundId: selectedEventRoundId },
+    { skip: !quinielaId || !isCustomEvents }
+  );
+  const eventStandingsData = eventStandingsResponse?.data;
+
+  // ─── Quinielas Deportivas (Sports / ESPN) ─────────────────────────────────
   // Temporadas y jornadas
   const { data: seasonsData } = useGetSeasonsQuery(activeQuiniela?.leagueId, {
-    skip: !activeQuiniela?.leagueId,
+    skip: !activeQuiniela?.leagueId || isCustomEvents,
   });
   const seasons = seasonsData?.data ?? [];
 
@@ -67,7 +97,7 @@ export const StandingsPage: React.FC = () => {
   };
 
   const { data: weeksData } = useGetWeeksBySeasonQuery(selectedSeasonId!, {
-    skip: !selectedSeasonId,
+    skip: !selectedSeasonId || isCustomEvents,
   });
   const weeks = weeksData?.data ?? [];
 
@@ -94,7 +124,7 @@ export const StandingsPage: React.FC = () => {
     refetch,
   } = useGetStandingsQuery(
     { quinielaId, weekId: selectedWeekId! },
-    { skip: !quinielaId || !selectedWeekId || mainTab !== 'standings' }
+    { skip: !quinielaId || !selectedWeekId || mainTab !== 'standings' || isCustomEvents }
   );
 
   // Consulta de Galardones / Premios
@@ -103,7 +133,7 @@ export const StandingsPage: React.FC = () => {
     isLoading: loadingAwards,
   } = useGetAwardsQuery(
     { quinielaId, weekId: selectedWeekId || undefined },
-    { skip: !quinielaId || mainTab !== 'awards' }
+    { skip: !quinielaId || mainTab !== 'awards' || isCustomEvents }
   );
 
   const [scoreWeek, { isLoading: scoringWeek }] = useScoreWeekMutation();
@@ -162,13 +192,15 @@ export const StandingsPage: React.FC = () => {
           </h1>
           <p className="standings-page__subtitle">
             {activeQuiniela?.name} •{' '}
-            {mainTab === 'standings'
+            {isCustomEvents
+              ? 'Puntuación y ranking por rondas y general'
+              : mainTab === 'standings'
               ? 'Criterio de desempate en cascada estricto'
               : 'Reconocimientos y distinciones por jornada'}
           </p>
         </div>
 
-        {isOwnerOrAdmin && mainTab === 'standings' && (
+        {isOwnerOrAdmin && mainTab === 'standings' && !isCustomEvents && (
           <div className="standings-page__header-actions">
             <button
               onClick={handleScoreWeek}
@@ -203,96 +235,82 @@ export const StandingsPage: React.FC = () => {
         )}
       </div>
 
-      {/* Segmented Control Principal: Posiciones vs Premios */}
-      <LiquidGlass
-        className="standings-page__main-tabs"
-        contentClassName="standings-page__main-tabs-content"
-        macro={true}
-        variant="clear"
-        role="tablist"
-        aria-label="Secciones de posiciones y premios"
-      >
-        <button
-          role="tab"
-          aria-selected={mainTab === 'standings'}
-          className={`standings-page__main-tab ${
-            mainTab === 'standings' ? 'standings-page__main-tab--active' : ''
-          }`}
-          onClick={() => setMainTab('standings')}
+      {/* Segmented Control Principal: Posiciones vs Premios (Solo deportes) */}
+      {!isCustomEvents && (
+        <LiquidGlass
+          className="standings-page__main-tabs"
+          contentClassName="standings-page__main-tabs-content"
+          macro={true}
+          variant="clear"
+          role="tablist"
+          aria-label="Secciones de posiciones y premios"
         >
-          <Trophy size={16} />
-          <span>Posiciones</span>
-        </button>
-        <button
-          role="tab"
-          aria-selected={mainTab === 'awards'}
-          className={`standings-page__main-tab ${
-            mainTab === 'awards' ? 'standings-page__main-tab--active' : ''
-          }`}
-          onClick={() => setMainTab('awards')}
-        >
-          <Award size={16} />
-          <span>Premios</span>
-        </button>
-      </LiquidGlass>
+          <button
+            role="tab"
+            aria-selected={mainTab === 'standings'}
+            className={`standings-page__main-tab ${
+              mainTab === 'standings' ? 'standings-page__main-tab--active' : ''
+            }`}
+            onClick={() => setMainTab('standings')}
+          >
+            <Trophy size={16} />
+            <span>Posiciones</span>
+          </button>
+          <button
+            role="tab"
+            aria-selected={mainTab === 'awards'}
+            className={`standings-page__main-tab ${
+              mainTab === 'awards' ? 'standings-page__main-tab--active' : ''
+            }`}
+            onClick={() => setMainTab('awards')}
+          >
+            <Award size={16} />
+            <span>Premios</span>
+          </button>
+        </LiquidGlass>
+      )}
 
-      {/* Controles de Temporada y Jornada (Comunes a ambas vistas) */}
-      <div className="standings-page__controls">
-        {seasons.length > 1 && (
+      {/* Controles de Selección */}
+      {isCustomEvents ? (
+        <div className="standings-page__controls">
           <div className="standings-page__selector-group">
-            <label className="standings-page__label">Temporada</label>
+            <label className="standings-page__label">Ronda / Evento</label>
             <select
-              value={selectedSeasonId || ''}
+              value={selectedEventRoundId || ''}
               onChange={(e) => {
-                setSelectedSeasonId(Number(e.target.value));
-                setSelectedWeekId(null);
+                const val = e.target.value ? Number(e.target.value) : null;
+                setSelectedEventRoundId(val);
+                if (!val) setStandingsTab('general');
+                else setStandingsTab('weekly');
               }}
               className="standings-page__select"
             >
-              {seasons.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.isCurrent ? '★ (En Curso)' : s.isFinished ? '— (Concluido)' : ''}
+              <option value="">🏆 Tabla General Acumulada</option>
+              {eventRounds.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.title} ({r.status === 'Resolved' ? 'Finalizada' : r.status === 'Locked' ? 'Bloqueada' : 'Abierta'})
                 </option>
               ))}
             </select>
           </div>
-        )}
 
-        <div className="standings-page__selector-group">
-          <label className="standings-page__label">Jornada</label>
-          <select
-            value={selectedWeekId || ''}
-            onChange={(e) => setSelectedWeekId(Number(e.target.value))}
-            className="standings-page__select"
-          >
-            {displayWeeks.map((w) => {
-              const statusLabel = formatWeekStatus(w.status);
-              return (
-                <option key={w.id} value={w.id}>
-                  {w.name} {statusLabel ? `· ${statusLabel}` : ''}
-                </option>
-              );
-            })}
-          </select>
-        </div>
-
-        {/* Pestañas Semanal vs General (Solo visibles en modo Tabla) */}
-        {mainTab === 'standings' && (
           <LiquidGlass
             className="standings-page__tabs"
             contentClassName="standings-page__tabs-content"
             macro={true}
             variant="clear"
           >
-            <button
-              className={`standings-page__tab ${
-                standingsTab === 'weekly' ? 'standings-page__tab--active' : ''
-              }`}
-              onClick={() => setStandingsTab('weekly')}
-            >
-              <Trophy size={16} />
-              <span>Jornada {currentWeek?.weekNumber || ''}</span>
-            </button>
+            {selectedEventRoundId && (
+              <button
+                className={`standings-page__tab ${
+                  standingsTab === 'weekly' ? 'standings-page__tab--active' : ''
+                }`}
+                onClick={() => setStandingsTab('weekly')}
+              >
+                <Trophy size={16} />
+                <span>Ronda Actual</span>
+              </button>
+            )}
             <button
               className={`standings-page__tab ${
                 standingsTab === 'general' ? 'standings-page__tab--active' : ''
@@ -303,37 +321,244 @@ export const StandingsPage: React.FC = () => {
               <span>Tabla General</span>
             </button>
           </LiquidGlass>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="standings-page__controls">
+          {seasons.length > 1 && (
+            <div className="standings-page__selector-group">
+              <label className="standings-page__label">Temporada</label>
+              <select
+                value={selectedSeasonId || ''}
+                onChange={(e) => {
+                  setSelectedSeasonId(Number(e.target.value));
+                  setSelectedWeekId(null);
+                }}
+                className="standings-page__select"
+              >
+                {seasons.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} {s.isCurrent ? '★ (En Curso)' : s.isFinished ? '— (Concluido)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="standings-page__selector-group">
+            <label className="standings-page__label">Jornada</label>
+            <select
+              value={selectedWeekId || ''}
+              onChange={(e) => setSelectedWeekId(Number(e.target.value))}
+              className="standings-page__select"
+            >
+              {displayWeeks.map((w) => {
+                const statusLabel = formatWeekStatus(w.status);
+                return (
+                  <option key={w.id} value={w.id}>
+                    {w.name} {statusLabel ? `· ${statusLabel}` : ''}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          {/* Pestañas Semanal vs General (Solo visibles en modo Tabla) */}
+          {mainTab === 'standings' && (
+            <LiquidGlass
+              className="standings-page__tabs"
+              contentClassName="standings-page__tabs-content"
+              macro={true}
+              variant="clear"
+            >
+              <button
+                className={`standings-page__tab ${
+                  standingsTab === 'weekly' ? 'standings-page__tab--active' : ''
+                }`}
+                onClick={() => setStandingsTab('weekly')}
+              >
+                <Trophy size={16} />
+                <span>Jornada {currentWeek?.weekNumber || ''}</span>
+              </button>
+              <button
+                className={`standings-page__tab ${
+                  standingsTab === 'general' ? 'standings-page__tab--active' : ''
+                }`}
+                onClick={() => setStandingsTab('general')}
+              >
+                <Award size={16} />
+                <span>Tabla General</span>
+              </button>
+            </LiquidGlass>
+          )}
+        </div>
+      )}
 
       {/* VISTA 1: TABLA DE POSICIONES */}
       {mainTab === 'standings' && (
-        <>
-          {/* Banner explicativo del desempate en cascada */}
-          <div className="standings-page__rules-banner">
-            <Info size={18} className="standings-page__rules-icon" />
-            <div className="standings-page__rules-text">
-              <strong>Regla de Desempate Oficial:</strong> 1° Más aciertos totales (Hits) → 2° Más sorpresas acertadas (Upsets ≤25%) → 3° Menos humillaciones (derrotas por 3+ goles).
+        isCustomEvents ? (
+          <>
+            <div className="standings-page__rules-banner">
+              <Info size={18} className="standings-page__rules-icon" />
+              <div className="standings-page__rules-text">
+                <strong>Criterio de Posiciones (Eventos):</strong> 1° Mayor puntuación total acumulada → 2° Más preguntas acertadas → 3° Mejor racha consecutiva.
+              </div>
             </div>
-          </div>
 
-          {/* Tabla de Posiciones */}
-          {loadingStandings ? (
-            <div className="standings-page__loading">
-              <RefreshCw size={28} className="standings-page__spin" />
-              <p>Cargando posiciones...</p>
+            {loadingEventStandings ? (
+              <div className="standings-page__loading">
+                <RefreshCw size={28} className="standings-page__spin" />
+                <p>Cargando posiciones de eventos...</p>
+              </div>
+            ) : (
+              <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ overflowX: 'auto' }}>
+                  <table
+                    className="standings-table"
+                    style={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      textAlign: 'left',
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    <thead>
+                      <tr
+                        style={{
+                          borderBottom: '1px solid var(--border-subtle)',
+                          backgroundColor: 'var(--bg-app)',
+                          color: 'var(--text-secondary)',
+                          fontSize: '0.75rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                        }}
+                      >
+                        <th style={{ padding: '12px 16px', width: '50px' }}>#</th>
+                        <th style={{ padding: '12px 16px' }}>Participante</th>
+                        <th style={{ padding: '12px 16px' }}>Puntos</th>
+                        <th style={{ padding: '12px 16px' }}>Aciertos</th>
+                        <th style={{ padding: '12px 16px' }}>Efectividad</th>
+                        <th style={{ padding: '12px 16px' }}>Racha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(standingsTab === 'weekly'
+                        ? eventStandingsData?.roundStandings ?? []
+                        : eventStandingsData?.generalStandings ?? []
+                      ).length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={6}
+                            style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}
+                          >
+                            No hay registros de posiciones para esta consulta aún.
+                          </td>
+                        </tr>
+                      ) : (
+                        (standingsTab === 'weekly'
+                          ? eventStandingsData?.roundStandings ?? []
+                          : eventStandingsData?.generalStandings ?? []
+                        ).map((row) => {
+                          const medal =
+                            row.rank === 1 ? '🥇' : row.rank === 2 ? '🥈' : row.rank === 3 ? '🥉' : null;
+                          const accuracy =
+                            row.totalQuestions > 0
+                              ? Math.round((row.hits / row.totalQuestions) * 100)
+                              : 0;
+
+                          return (
+                            <tr
+                              key={row.memberId}
+                              style={{
+                                borderBottom: '1px solid var(--border-subtle)',
+                                transition: 'background-color var(--transition-fast)',
+                              }}
+                            >
+                              <td style={{ padding: '12px 16px', fontWeight: 700 }}>
+                                {medal ? <span style={{ fontSize: '1.1rem' }}>{medal}</span> : row.rank}
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <UserAvatar src={row.avatarUrl || undefined} alt={row.alias} size="sm" />
+                                  <div>
+                                    <strong style={{ color: 'var(--text-main)' }}>{row.alias}</strong>
+                                    {row.displayName && row.displayName !== row.alias && (
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                        {row.displayName}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td
+                                style={{
+                                  padding: '12px 16px',
+                                  fontWeight: 800,
+                                  color: 'var(--color-primary)',
+                                  fontSize: '1rem',
+                                }}
+                              >
+                                {row.points} pts
+                              </td>
+                              <td style={{ padding: '12px 16px', fontWeight: 600 }}>
+                                {row.hits} / {row.totalQuestions}
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <span className="badge badge--secondary" style={{ fontSize: '0.75rem' }}>
+                                  {accuracy}%
+                                </span>
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                {row.currentStreak > 0 ? (
+                                  <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+                                    🔥 {row.currentStreak}{' '}
+                                    <small style={{ color: 'var(--text-muted)', fontWeight: 400 }}>
+                                      (Mejor: {row.bestStreak})
+                                    </small>
+                                  </span>
+                                ) : (
+                                  <span style={{ color: 'var(--text-muted)' }}>
+                                    - <small>(Mejor: {row.bestStreak})</small>
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Banner explicativo del desempate en cascada */}
+            <div className="standings-page__rules-banner">
+              <Info size={18} className="standings-page__rules-icon" />
+              <div className="standings-page__rules-text">
+                <strong>Regla de Desempate Oficial:</strong> 1° Más aciertos totales (Hits) → 2° Más sorpresas acertadas (Upsets ≤25%) → 3° Menos humillaciones (derrotas por 3+ goles).
+              </div>
             </div>
-          ) : (
-            <StandingsTable
-              data={
-                standingsTab === 'weekly'
-                  ? standingsData?.weeklyStandings ?? []
-                  : standingsData?.generalStandings ?? []
-              }
-              isWeeklyView={standingsTab === 'weekly'}
-            />
-          )}
-        </>
+
+            {/* Tabla de Posiciones */}
+            {loadingStandings ? (
+              <div className="standings-page__loading">
+                <RefreshCw size={28} className="standings-page__spin" />
+                <p>Cargando posiciones...</p>
+              </div>
+            ) : (
+              <StandingsTable
+                data={
+                  standingsTab === 'weekly'
+                    ? standingsData?.weeklyStandings ?? []
+                    : standingsData?.generalStandings ?? []
+                }
+                isWeeklyView={standingsTab === 'weekly'}
+              />
+            )}
+          </>
+        )
       )}
 
       {/* VISTA 2: PREMIOS Y GALARDONES */}

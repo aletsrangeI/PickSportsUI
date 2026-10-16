@@ -32,6 +32,7 @@ import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import { MatchCard } from '../../components/matches/MatchCard';
 import { MatchPicker } from '../../components/picks/MatchPicker';
 import { PicksMatrix } from '../../components/picks/PicksMatrix';
+import { CustomEventsArena } from '../../components/events/CustomEventsArena';
 import './DashboardPage.css';
 
 interface OutletContextType {
@@ -260,16 +261,18 @@ export const DashboardPage: React.FC = () => {
             Administrada por <strong style={{ color: 'var(--text-main)' }}>{quiniela.ownerName}</strong>
             {quiniela.description && ` • ${quiniela.description}`}
           </p>
-          <div style={{ marginTop: '10px' }}>
-            <Link
-              to="/fixtures"
-              className="btn btn--outline btn--sm"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <CalendarDays size={14} />
-              <span>Ver Calendario & Sync ESPN</span>
-            </Link>
-          </div>
+          {quiniela.quinielaType !== 'CustomEvents' && (
+            <div style={{ marginTop: '10px' }}>
+              <Link
+                to="/fixtures"
+                className="btn btn--outline btn--sm"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <CalendarDays size={14} />
+                <span>Ver Calendario & Sync ESPN</span>
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Invite Code Box */}
@@ -337,10 +340,13 @@ export const DashboardPage: React.FC = () => {
       </LiquidGlass>
 
       {/* ─────────────────────────────────────────────────────────────
-          TAB 1: PRONÓSTICOS DE LA JORNADA
+          TAB 1: PRONÓSTICOS DE LA JORNADA / EVENTOS
           ───────────────────────────────────────────────────────────── */}
       {activeTab === 'picks' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+        quiniela.quinielaType === 'CustomEvents' ? (
+          <CustomEventsArena quiniela={quiniela} activeMode="picks" />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
           {/* Controles de la Jornada */}
           <div className="dashboard-picks-controls">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -506,12 +512,16 @@ export const DashboardPage: React.FC = () => {
             </div>
           )}
         </div>
+        )
       )}
 
       {/* ─────────────────────────────────────────────────────────────
           TAB 2: MATRIZ DE RIVALES
           ───────────────────────────────────────────────────────────── */}
       {activeTab === 'matrix' && (
+        quiniela.quinielaType === 'CustomEvents' ? (
+          <CustomEventsArena quiniela={quiniela} activeMode="matrix" />
+        ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
           <div className="dashboard-picks-controls">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -606,6 +616,7 @@ export const DashboardPage: React.FC = () => {
             />
           )}
         </div>
+        )
       )}
 
       {/* ─────────────────────────────────────────────────────────────
@@ -725,6 +736,9 @@ export const DashboardPage: React.FC = () => {
                     <th style={{ padding: '12px 16px' }}>#</th>
                     <th style={{ padding: '12px 16px' }}>Participante / Alias</th>
                     <th style={{ padding: '12px 16px' }}>Rol</th>
+                    {quiniela.quinielaType === 'CustomEvents' && (
+                      <th style={{ padding: '12px 16px' }}>Puntos</th>
+                    )}
                     <th style={{ padding: '12px 16px' }}>Aciertos</th>
                     <th style={{ padding: '12px 16px' }}>Racha</th>
                     <th style={{ padding: '12px 16px' }}>Cuota Cubierta</th>
@@ -778,6 +792,11 @@ export const DashboardPage: React.FC = () => {
                           {member.role}
                         </span>
                       </td>
+                      {quiniela.quinielaType === 'CustomEvents' && (
+                        <td style={{ padding: '12px 16px', fontWeight: 700, color: 'var(--color-primary)' }}>
+                          {member.totalPoints ?? 0} pts
+                        </td>
+                      )}
                       <td style={{ padding: '12px 16px', fontWeight: 600 }}>
                         {member.totalHits}
                       </td>
