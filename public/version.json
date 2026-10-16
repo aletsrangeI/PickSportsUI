@@ -1,6 +1,6 @@
 {
   "version": "1.2.0",
-  "buildTime": "2026-10-16T22:26:11.535Z",
-  "gitCommit": "development",
-  "env": "development"
+  "buildTime": "2026-10-16T22:39:35.978Z",
+  "gitCommit": "0c195aa",
+  "env": "production"
 }

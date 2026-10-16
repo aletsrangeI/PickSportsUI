@@ -27,6 +27,7 @@ import {
   RotateCw,
   Flame,
   ChevronRight,
+  Swords,
 } from 'lucide-react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { usePicks } from '../../hooks/usePicks';
@@ -531,6 +532,23 @@ export const DashboardPage: React.FC = () => {
                 <RotateCw size={13} className={isFetchingPicks ? 'spin-anim' : ''} />
                 <span>{isFetchingPicks ? 'Actualizando...' : 'Actualizar'}</span>
               </button>
+
+              <Link
+                to="/standings?tab=challenges"
+                className="btn btn--outline btn--sm"
+                title="Lanza o responde retos y duelos paralelos contra otros participantes"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'none',
+                  borderColor: 'rgba(234, 179, 8, 0.4)',
+                  color: '#eab308',
+                }}
+              >
+                <Swords size={13} />
+                <span>Duelos & Retos</span>
+              </Link>
             </div>
 
             {/* Barra de progreso de pronósticos */}
