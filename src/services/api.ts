@@ -51,6 +51,15 @@ import type {
   SubmitEventPicksRequest,
   ResolveEventRoundRequest,
   EventStandingsResponseDto,
+  LiguillaOverview,
+  LiguillaBracketDetail,
+  SubmitLiguillaBracketRequest,
+  LiguillaStandings,
+  Challenge,
+  ChallengeParticipant,
+  CreateChallengeRequest,
+  RespondChallengeRequest,
+  SettleChallengeDebtRequest,
 } from '../types';
 
 const baseQuery = fetchBaseQuery({
@@ -135,7 +144,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents'],
+  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents', 'Liguilla', 'Challenges'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
     getLeagues: builder.query<ApiResponse<League[]>, void>({
@@ -643,6 +652,82 @@ export const api = createApi({
       query: ({ quinielaId, roundId }) => `/quinielas/${quinielaId}/events/standings${roundId ? `?roundId=${roundId}` : ''}`,
       providesTags: ['CustomEvents', 'Standings'],
     }),
+
+    // SPEC-017 Liguilla Bracket Challenge ("El Pilón")
+    getLiguillaOverview: builder.query<ApiResponse<LiguillaOverview>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/liguilla/overview`,
+      providesTags: (_result, _error, quinielaId) => [{ type: 'Liguilla', id: `OVERVIEW_${quinielaId}` }],
+    }),
+    getMyLiguillaBracket: builder.query<ApiResponse<LiguillaBracketDetail | null>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/liguilla/my-bracket`,
+      providesTags: (_result, _error, quinielaId) => [{ type: 'Liguilla', id: `BRACKET_${quinielaId}` }],
+    }),
+    submitLiguillaBracket: builder.mutation<ApiResponse<LiguillaBracketDetail>, { quinielaId: number; data: SubmitLiguillaBracketRequest }>({
+      query: ({ quinielaId, data }) => ({
+        url: `/quinielas/${quinielaId}/liguilla/submit`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { quinielaId }) => [
+        { type: 'Liguilla', id: `OVERVIEW_${quinielaId}` },
+        { type: 'Liguilla', id: `BRACKET_${quinielaId}` },
+        { type: 'Liguilla', id: `STANDINGS_${quinielaId}` },
+      ],
+    }),
+    getLiguillaStandings: builder.query<ApiResponse<LiguillaStandings>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/liguilla/standings`,
+      providesTags: (_result, _error, quinielaId) => [{ type: 'Liguilla', id: `STANDINGS_${quinielaId}` }],
+    }),
+    seedSimulationLiguilla: builder.mutation<ApiResponse<boolean>, number>({
+      query: (quinielaId) => ({
+        url: `/quinielas/${quinielaId}/liguilla/admin/seed-simulation`,
+        method: 'POST',
+      }),
+      invalidatesTags: (_result, _error, quinielaId) => [
+        { type: 'Liguilla', id: `OVERVIEW_${quinielaId}` },
+        { type: 'Liguilla', id: `BRACKET_${quinielaId}` },
+        { type: 'Liguilla', id: `STANDINGS_${quinielaId}` },
+      ],
+    }),
+    // ─── SPEC-022 Retos y Apuestas Sociales ───────────────────────────────────
+    getWeekChallenges: builder.query<ApiResponse<Challenge[]>, { quinielaId: number; weekId: number }>({
+      query: ({ quinielaId, weekId }) => `/quinielas/${quinielaId}/weeks/${weekId}/challenges`,
+      providesTags: ['Challenges'],
+    }),
+    getPendingChallenges: builder.query<ApiResponse<Challenge[]>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/challenges/pending`,
+      providesTags: ['Challenges'],
+    }),
+    createChallenge: builder.mutation<ApiResponse<Challenge>, CreateChallengeRequest>({
+      query: ({ quinielaId, weekId, ...body }) => ({
+        url: `/quinielas/${quinielaId}/weeks/${weekId}/challenges`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Challenges'],
+    }),
+    respondChallenge: builder.mutation<ApiResponse<Challenge>, RespondChallengeRequest>({
+      query: ({ quinielaId, challengeId, ...body }) => ({
+        url: `/quinielas/${quinielaId}/challenges/${challengeId}/respond`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Challenges'],
+    }),
+    settleChallengeDebt: builder.mutation<ApiResponse<Challenge>, SettleChallengeDebtRequest>({
+      query: ({ quinielaId, challengeId, memberId }) => ({
+        url: `/quinielas/${quinielaId}/challenges/${challengeId}/participants/${memberId}/settle`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Challenges', 'Bulletin'],
+    }),
+    cancelChallenge: builder.mutation<ApiResponse<boolean>, { quinielaId: number; challengeId: number }>({
+      query: ({ quinielaId, challengeId }) => ({
+        url: `/quinielas/${quinielaId}/challenges/${challengeId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Challenges'],
+    }),
   }),
 });
 
@@ -719,6 +804,19 @@ export const {
   useResolveEventRoundMutation,
   useGetEventStandingsQuery,
   useLazyGetEventStandingsQuery,
+  // SPEC-017 Liguilla Bracket Challenge
+  useGetLiguillaOverviewQuery,
+  useGetMyLiguillaBracketQuery,
+  useSubmitLiguillaBracketMutation,
+  useGetLiguillaStandingsQuery,
+  useSeedSimulationLiguillaMutation,
+  // SPEC-022 Retos y Apuestas Sociales
+  useGetWeekChallengesQuery,
+  useGetPendingChallengesQuery,
+  useCreateChallengeMutation,
+  useRespondChallengeMutation,
+  useSettleChallengeDebtMutation,
+  useCancelChallengeMutation,
 } = api;
 
 

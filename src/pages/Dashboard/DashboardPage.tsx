@@ -25,14 +25,18 @@ import {
   Table as TableIcon,
   AlertCircle,
   RotateCw,
+  Flame,
+  ChevronRight,
 } from 'lucide-react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { usePicks } from '../../hooks/usePicks';
+import { useGetLiguillaOverviewQuery } from '../../services/api';
 import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import { MatchCard } from '../../components/matches/MatchCard';
 import { MatchPicker } from '../../components/picks/MatchPicker';
 import { PicksMatrix } from '../../components/picks/PicksMatrix';
 import { CustomEventsArena } from '../../components/events/CustomEventsArena';
+import { PendingChallengesBanner } from '../../components/challenges/PendingChallengesBanner';
 import './DashboardPage.css';
 
 interface OutletContextType {
@@ -54,6 +58,12 @@ export const DashboardPage: React.FC = () => {
     handleCopyInviteCode,
     handleTogglePayment,
   } = useDashboard();
+
+  const { data: liguillaData } = useGetLiguillaOverviewQuery(quiniela?.id || 0, {
+    skip: !quiniela?.id,
+  });
+  const liguillaOverview = liguillaData?.data;
+  const showLiguillaHero = isOwnerOrAdmin || (liguillaOverview && (liguillaOverview.isAvailable || liguillaOverview.status !== 'HIDDEN'));
 
   const {
     selectedWeekId,
@@ -346,7 +356,136 @@ export const DashboardPage: React.FC = () => {
         quiniela.quinielaType === 'CustomEvents' ? (
           <CustomEventsArena quiniela={quiniela} activeMode="picks" />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          {/* Banner Efímero de Retos Pendientes (SPEC-022) */}
+          {quiniela?.id && (
+            <PendingChallengesBanner
+              quinielaId={quiniela.id}
+              weekMatches={matches}
+            />
+          )}
+
+          {/* Tarjeta Destacada: Liguilla Bracket Challenge ("El Pilón") */}
+          {showLiguillaHero && (
+            <Link
+              to="/liguilla"
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+                display: 'block',
+              }}
+            >
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%)',
+                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  borderRadius: 'var(--radius-lg, 14px)',
+                  padding: '16px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  backdropFilter: 'blur(12px)',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+                  transition: 'transform 0.2s ease, border-color 0.2s ease',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.55)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.3)';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '12px',
+                      background: 'radial-gradient(circle, rgba(234, 179, 8, 0.3) 0%, rgba(249, 115, 22, 0.15) 100%)',
+                      border: '1px solid rgba(234, 179, 8, 0.4)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Flame size={22} color="#eab308" />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                      <span
+                        style={{
+                          fontSize: '0.6875rem',
+                          fontWeight: 800,
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                          color: '#eab308',
+                        }}
+                      >
+                        Fiesta Grande
+                      </span>
+                      {liguillaOverview?.userBracket && (
+                        <span
+                          style={{
+                            fontSize: '0.6875rem',
+                            fontWeight: 700,
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            background: 'rgba(16, 185, 129, 0.2)',
+                            color: '#34d399',
+                            border: '1px solid rgba(16, 185, 129, 0.3)',
+                          }}
+                        >
+                          ✓ Pronóstico Confirmado
+                        </span>
+                      )}
+                    </div>
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: '#f8fafc',
+                      }}
+                    >
+                      Pick'em Liguilla
+                    </h3>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: '0.8125rem',
+                        color: 'var(--text-secondary, #94a3b8)',
+                      }}
+                    >
+                      {liguillaOverview?.userBracket
+                        ? `Tu pronóstico está listo (${liguillaOverview.userBracket.totalScore} pts). Toca para ver tu árbol.`
+                        : 'Pronostica el camino al título desde Cuartos de Final hasta la Gran Final.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#eab308',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    flexShrink: 0,
+                  }}
+                >
+                  <span className="hide-on-mobile">Participar</span>
+                  <ChevronRight size={18} />
+                </div>
+              </div>
+            </Link>
+          )}
+
           {/* Controles de la Jornada */}
           <div className="dashboard-picks-controls">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>

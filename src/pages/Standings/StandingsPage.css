@@ -277,6 +277,22 @@
   gap: 12px;
 }
 
+.standings-page__tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent, #f59e0b);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  margin-left: 4px;
+}
+
+
 
 
 

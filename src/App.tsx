@@ -14,6 +14,8 @@ import { BulletinPage } from './pages/Bulletin/BulletinPage';
 import { MigrationPage } from './pages/Admin/MigrationPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 import { ActivatePage } from './pages/Auth/ActivatePage';
+import { LiguillaPage } from './components/liguilla/LiguillaPage';
+import { LiguillaRouteGuard } from './components/liguilla/LiguillaRouteGuard';
 
 import { useGetQuinielasQuery } from './services/api';
 
@@ -95,6 +97,14 @@ export const App: React.FC = () => {
           <Route path="standings" element={<StandingsPage />} />
           <Route path="awards" element={<AwardsPage />} />
           <Route path="bulletin" element={<BulletinPage />} />
+          <Route
+            path="liguilla"
+            element={
+              <LiguillaRouteGuard>
+                <LiguillaPage />
+              </LiguillaRouteGuard>
+            }
+          />
           <Route
             path="share"
             element={

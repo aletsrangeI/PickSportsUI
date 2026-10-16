@@ -103,6 +103,13 @@ export const MatchPicker: React.FC<MatchPickerProps> = ({
 
   return (
     <div className="match-picker-container">
+      {isLocked && !isMatchFinished && (
+        <div className="match-picker__lock-indicator" title="Pronósticos bloqueados para este partido">
+          <Lock size={12} strokeWidth={2.5} />
+          <span>Bloqueado</span>
+        </div>
+      )}
+
       <div className={`match-picker ${isLocked ? 'match-picker--locked' : ''}`}>
         {/* Botón Local */}
         {renderOptionBtn(homeAbbr, homeAbbr, 'Local')}
@@ -112,12 +119,6 @@ export const MatchPicker: React.FC<MatchPickerProps> = ({
 
         {/* Botón Visita */}
         {renderOptionBtn(awayAbbr, awayAbbr, 'Visita')}
-
-        {isLocked && !isMatchFinished && (
-          <div className="match-picker__lock-indicator" title="Pronósticos bloqueados para este partido">
-            <Lock size={12} />
-          </div>
-        )}
       </div>
 
       {/* Banner / Píldora de resultado y feedback visual */}
@@ -197,6 +198,17 @@ export const MatchPicker: React.FC<MatchPickerProps> = ({
           </span>
           <span className="match-picker__result-text">
             Tu pronóstico registrado: <strong>{selectedAbbr}</strong>
+          </span>
+        </div>
+      )}
+
+      {!isMatchFinished && !isMatchLive && isLocked && !hasPick && (
+        <div className="match-picker__result-banner match-picker__result-banner--locked">
+          <span className="match-picker__result-badge match-picker__result-badge--locked">
+            🔒 BLOQUEADO
+          </span>
+          <span className="match-picker__result-text">
+            Tiempo límite expirado · Sin pronóstico registrado
           </span>
         </div>
       )}

@@ -105,16 +105,29 @@ export const Header: React.FC<HeaderProps> = ({ onCreateClick, onJoinClick }) =>
               <span>Boletín</span>
             </NavLink>
             {isOwnerOrAdmin && (
-              <NavLink
-                to="/admin/migracion"
-                className={({ isActive }) =>
-                  `header__nav-link header__nav-link--admin ${isActive ? 'header__nav-link--active' : ''}`
-                }
-                title="Migración de datos desde Excel / XLSX"
-              >
-                <FileSpreadsheet size={15} />
-                <span>Migración</span>
-              </NavLink>
+              <>
+                <NavLink
+                  to="/liguilla"
+                  className={({ isActive }) =>
+                    `header__nav-link ${isActive ? 'header__nav-link--active' : ''}`
+                  }
+                  style={{ color: '#fef08a' }}
+                  title="Pick'em Liguilla"
+                >
+                  <Flame size={15} color="#eab308" />
+                  <span>Pick'em</span>
+                </NavLink>
+                <NavLink
+                  to="/admin/migracion"
+                  className={({ isActive }) =>
+                    `header__nav-link header__nav-link--admin ${isActive ? 'header__nav-link--active' : ''}`
+                  }
+                  title="Migración de datos desde Excel / XLSX"
+                >
+                  <FileSpreadsheet size={15} />
+                  <span>Migración</span>
+                </NavLink>
+              </>
             )}
           </nav>
         )}
