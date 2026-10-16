@@ -54,6 +54,12 @@ export const StandingsPage: React.FC = () => {
     }
   }, [isCustomEvents, eventRounds, selectedEventRoundId]);
 
+  useEffect(() => {
+    if (isCustomEvents && mainTab === 'awards') {
+      setMainTab('standings');
+    }
+  }, [isCustomEvents, mainTab]);
+
   const {
     data: eventStandingsResponse,
     isLoading: loadingEventStandings,
