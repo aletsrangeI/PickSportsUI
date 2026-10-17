@@ -96,7 +96,21 @@ jobs:
           cat << 'DEPLOY_SCRIPT_EOF' > deploy_remote.sh
           set -e
           cd /opt/picksports
-          docker compose pull ui
+          echo ">> Descargando imagen Docker de picksports-ui desde ghcr.io..."
+          PULL_OK=0
+          for p in $(seq 1 6); do
+            if docker compose pull ui; then
+              PULL_OK=1
+              echo ">> Imagen descargada exitosamente en intento $p."
+              break
+            fi
+            echo ">> Intento $p/6 falló con timeout/error de red en ghcr.io. Reintentando en 8 segundos..."
+            sleep 8
+          done
+          if [ "$PULL_OK" -ne 1 ]; then
+            echo ">> Error crítico: No se pudo descargar la imagen desde ghcr.io tras 6 intentos."
+            exit 1
+          fi
           
           echo ">> === DIAGNÓSTICO PREVIO DE PUERTO 8089 ==="
           ss -tulpn | grep 8089 || echo ">> (ss) Ningún socket estándar detectado en 8089"
