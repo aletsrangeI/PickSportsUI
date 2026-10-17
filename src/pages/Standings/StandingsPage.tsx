@@ -21,7 +21,11 @@ import { StandingsTable } from './StandingsTable';
 import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw, Flame, Swords, Plus, Mail } from 'lucide-react';
 import { AWARD_META } from '../Awards/AwardsPage';
 import { UserAvatar } from '../../components/common/UserAvatar';
-import { getMostRelevantWeekForStandings } from '../../utils/weekSelection';
+import {
+  getMostRelevantWeekForStandings,
+  getMostRelevantWeekForChallenges,
+  getMostRelevantWeekForAwards,
+} from '../../utils/weekSelection';
 import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import { ChallengeCard } from '../../components/challenges/ChallengeCard';
 import { CreateChallengeModal } from '../../components/challenges/CreateChallengeModal';
@@ -131,12 +135,20 @@ export const StandingsPage: React.FC = () => {
 
   useEffect(() => {
     if (weeks.length > 0 && (selectedWeekId === null || !weeks.some((w) => w.id === selectedWeekId))) {
-      const activeWeek = getMostRelevantWeekForStandings(displayWeeks.length > 0 ? displayWeeks : weeks);
+      const weekPool = displayWeeks.length > 0 ? displayWeeks : weeks;
+      let activeWeek: any = null;
+      if (mainTab === 'challenges') {
+        activeWeek = getMostRelevantWeekForChallenges(weekPool);
+      } else if (mainTab === 'awards') {
+        activeWeek = getMostRelevantWeekForAwards(weekPool);
+      } else {
+        activeWeek = getMostRelevantWeekForStandings(weekPool);
+      }
       if (activeWeek) {
         setSelectedWeekId(activeWeek.id);
       }
     }
-  }, [weeks, displayWeeks, selectedWeekId]);
+  }, [weeks, displayWeeks, selectedWeekId, mainTab]);
 
   // Consulta de Posiciones
   const {
@@ -208,14 +220,54 @@ export const StandingsPage: React.FC = () => {
 
   useEffect(() => {
     const challengeIdParam = searchParams.get('challengeId');
-    if (challengeIdParam && weekChallenges.length > 0) {
-      const ch = weekChallenges.find((c) => c.id === Number(challengeIdParam));
+    if (challengeIdParam) {
+      const idNum = Number(challengeIdParam);
+      const ch =
+        weekChallenges.find((c) => c.id === idNum) ||
+        pendingChallenges.find((c) => c.id === idNum);
       if (ch) {
+        if (selectedWeekId !== ch.weekId) {
+          setSelectedWeekId(ch.weekId);
+        }
         setRespondingChallenge(ch);
         setMainTab('challenges');
       }
     }
-  }, [searchParams, weekChallenges]);
+  }, [searchParams, weekChallenges, pendingChallenges, selectedWeekId]);
+
+  const handleTabChange = (tab: 'standings' | 'challenges' | 'awards') => {
+    setMainTab(tab);
+    const weekPool = displayWeeks.length > 0 ? displayWeeks : weeks;
+    if (weekPool.length === 0) return;
+
+    if (tab === 'challenges') {
+      // Si la jornada actual ya cerró o concluyó (LOCKED / SCORED), cambiar automáticamente
+      // a la jornada abierta donde sí se pueden lanzar y responder retos.
+      if (isWeekLocked || !currentWeek || currentWeek.status?.toUpperCase() !== 'PUBLISHED') {
+        const challengeWeek = getMostRelevantWeekForChallenges(weekPool);
+        if (challengeWeek) {
+          setSelectedWeekId(challengeWeek.id);
+        }
+      }
+    } else if (tab === 'standings') {
+      // Si la jornada actual está en PUBLISHED (aún no se juega ningún partido y la tabla está vacía),
+      // cambiar a la jornada con resultados (SCORED o LOCKED).
+      if (currentWeek?.status?.toUpperCase() === 'PUBLISHED') {
+        const standingsWeek = getMostRelevantWeekForStandings(weekPool);
+        if (standingsWeek) {
+          setSelectedWeekId(standingsWeek.id);
+        }
+      }
+    } else if (tab === 'awards') {
+      // Premios solo existen en jornadas ya evaluadas (SCORED).
+      if (currentWeek?.status?.toUpperCase() !== 'SCORED') {
+        const awardsWeek = getMostRelevantWeekForAwards(weekPool);
+        if (awardsWeek) {
+          setSelectedWeekId(awardsWeek.id);
+        }
+      }
+    }
+  };
 
   const handleScoreWeek = async () => {
     if (!quinielaId || !selectedWeekId || isWeekAlreadyScored) return;
@@ -356,7 +408,7 @@ export const StandingsPage: React.FC = () => {
             className={`standings-page__main-tab ${
               mainTab === 'standings' ? 'standings-page__main-tab--active' : ''
             }`}
-            onClick={() => setMainTab('standings')}
+            onClick={() => handleTabChange('standings')}
           >
             <Trophy size={16} />
             <span>Posiciones</span>
@@ -367,7 +419,7 @@ export const StandingsPage: React.FC = () => {
             className={`standings-page__main-tab ${
               mainTab === 'challenges' ? 'standings-page__main-tab--active' : ''
             }`}
-            onClick={() => setMainTab('challenges')}
+            onClick={() => handleTabChange('challenges')}
           >
             <Swords size={16} />
             <span>Retos</span>
@@ -381,7 +433,7 @@ export const StandingsPage: React.FC = () => {
             className={`standings-page__main-tab ${
               mainTab === 'awards' ? 'standings-page__main-tab--active' : ''
             }`}
-            onClick={() => setMainTab('awards')}
+            onClick={() => handleTabChange('awards')}
           >
             <Award size={16} />
             <span>Premios</span>
