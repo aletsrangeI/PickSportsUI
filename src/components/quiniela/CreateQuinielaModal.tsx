@@ -1,5 +1,5 @@
 import React, { useState, useEffect, forwardRef } from 'react';
-import { X, Trophy, AlertCircle } from 'lucide-react';
+import { X, Trophy, AlertCircle, Sparkles } from 'lucide-react';
 import { useCreateQuinielaMutation, useGetLeaguesQuery, useGetSeasonsQuery } from '../../services/api';
 import { useDispatch } from 'react-redux';
 import { setActiveQuinielaId } from '../../store/quinielaSlice';
@@ -12,6 +12,7 @@ export const CreateQuinielaModal = forwardRef<HTMLDialogElement, CreateQuinielaM
   ({ onClose }, ref) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [quinielaType, setQuinielaType] = useState<'Sports' | 'CustomEvents'>('Sports');
     const [leagueId, setLeagueId] = useState<number>(0);
     const [entryFee, setEntryFee] = useState<number>(100);
     const [firstPlacePct, setFirstPlacePct] = useState<number>(70);
@@ -47,7 +48,7 @@ export const CreateQuinielaModal = forwardRef<HTMLDialogElement, CreateQuinielaM
       e.preventDefault();
       setErrorMessage(null);
 
-      if (!leagueId) {
+      if (quinielaType === 'Sports' && !leagueId) {
         setErrorMessage('Por favor selecciona una liga deportiva.');
         return;
       }
@@ -61,7 +62,8 @@ export const CreateQuinielaModal = forwardRef<HTMLDialogElement, CreateQuinielaM
         const result = await createQuiniela({
           name,
           description: description || undefined,
-          leagueId: Number(leagueId),
+          quinielaType,
+          leagueId: quinielaType === 'Sports' ? Number(leagueId) : null,
           entryFee: Number(entryFee),
           firstPlacePct: Number(firstPlacePct),
           secondPlacePct: Number(secondPlacePct),
@@ -109,6 +111,80 @@ export const CreateQuinielaModal = forwardRef<HTMLDialogElement, CreateQuinielaM
               </div>
             )}
 
+            {/* Selector de Tipo de Quiniela */}
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label className="form-group__label">Tipo de Quiniela *</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  type="button"
+                  className={`btn ${quinielaType === 'Sports' ? 'btn--primary' : 'btn--outline'}`}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '12px 8px',
+                    gap: '4px',
+                    borderRadius: 'var(--radius-md)',
+                    border: quinielaType === 'Sports' ? '2px solid var(--color-primary)' : '1px solid var(--border-subtle)',
+                    backgroundColor: quinielaType === 'Sports' ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
+                    color: quinielaType === 'Sports' ? 'var(--color-primary)' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setQuinielaType('Sports')}
+                >
+                  <span style={{ fontSize: '1.25rem' }}>🏆</span>
+                  <strong style={{ fontSize: '0.875rem' }}>Deportiva</strong>
+                  <span style={{ fontSize: '0.6875rem', opacity: 0.85 }}>Liga MX / NFL / ESPN</span>
+                </button>
+                <button
+                  type="button"
+                  className={`btn ${quinielaType === 'CustomEvents' ? 'btn--primary' : 'btn--outline'}`}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '12px 8px',
+                    gap: '4px',
+                    borderRadius: 'var(--radius-md)',
+                    border: quinielaType === 'CustomEvents' ? '2px solid var(--color-primary)' : '1px solid var(--border-subtle)',
+                    backgroundColor: quinielaType === 'CustomEvents' ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
+                    color: quinielaType === 'CustomEvents' ? 'var(--color-primary)' : 'var(--text-secondary)',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setQuinielaType('CustomEvents')}
+                >
+                  <span style={{ fontSize: '1.25rem' }}>✨</span>
+                  <strong style={{ fontSize: '0.875rem' }}>Eventos Personalizados</strong>
+                  <span style={{ fontSize: '0.6875rem', opacity: 0.85 }}>Realities, Premios, Props</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Banner explicativo de Eventos Personalizados */}
+            {quinielaType === 'CustomEvents' && (
+              <div
+                style={{
+                  padding: '12px 14px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                  border: '1px solid rgba(245, 158, 11, 0.25)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                  marginBottom: '16px',
+                  fontSize: '0.8125rem',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-accent)', fontWeight: 600 }}>
+                  <Sparkles size={16} />
+                  <span>Quiniela de Eventos Personalizados y Manuales</span>
+                </div>
+                <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                  Crea tus propias rondas semanales, preguntas dinámicas y opciones múltiples (con fotos de nominados o participantes). Ideal para <em>La Casa de los Famosos</em>, <em>Premios Oscar</em>, <em>Survivor</em> o prop bets entre amigos. Dictamina los resultados oficiales manualmente con recálculo automático de la bolsa y posiciones.
+                </p>
+              </div>
+            )}
+
             <div className="form-group">
               <label className="form-group__label" htmlFor="quiniela-name">
                 Nombre de la Quiniela *
@@ -117,7 +193,13 @@ export const CreateQuinielaModal = forwardRef<HTMLDialogElement, CreateQuinielaM
                 id="quiniela-name"
                 type="text"
                 className="form-group__input"
-                placeholder={currentSeason ? `Ej. Quiniela ${currentSeason.name}` : `Ej. Quiniela Apertura ${new Date().getFullYear()}`}
+                placeholder={
+                  quinielaType === 'CustomEvents'
+                    ? 'Ej. La Casa de los Famosos 2026 - Amigos'
+                    : currentSeason
+                    ? `Ej. Quiniela ${currentSeason.name}`
+                    : `Ej. Quiniela Apertura ${new Date().getFullYear()}`
+                }
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -126,61 +208,63 @@ export const CreateQuinielaModal = forwardRef<HTMLDialogElement, CreateQuinielaM
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-group__label" htmlFor="quiniela-league">
-                Torneo / Liga Deportiva *
-              </label>
-              <select
-                id="quiniela-league"
-                className="form-group__select"
-                value={leagueId}
-                onChange={(e) => setLeagueId(Number(e.target.value))}
-                disabled={isLeaguesLoading || leagues.length === 0}
-              >
-                {isLeaguesLoading && <option value={0}>Cargando torneos desde la base de datos...</option>}
-                {!isLeaguesLoading && leagues.length === 0 && <option value={0}>No hay ligas disponibles</option>}
-                {leagues.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name} {l.country ? `(${l.country})` : ''} - {l.sportName}
-                  </option>
-                ))}
-              </select>
-
-              {/* Colchón de seguridad y torneo en curso */}
-              {currentSeason && !currentSeason.isFinished && (
-                <div
-                  style={{
-                    marginTop: '8px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    border: '1px solid rgba(16, 185, 129, 0.25)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    fontSize: '0.8125rem',
-                  }}
+            {quinielaType === 'Sports' && (
+              <div className="form-group">
+                <label className="form-group__label" htmlFor="quiniela-league">
+                  Torneo / Liga Deportiva *
+                </label>
+                <select
+                  id="quiniela-league"
+                  className="form-group__select"
+                  value={leagueId}
+                  onChange={(e) => setLeagueId(Number(e.target.value))}
+                  disabled={isLeaguesLoading || leagues.length === 0}
                 >
-                  <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>Torneo actual en curso: </span>
-                    <strong style={{ color: 'var(--color-primary)' }}>{currentSeason.name}</strong>
+                  {isLeaguesLoading && <option value={0}>Cargando torneos desde la base de datos...</option>}
+                  {!isLeaguesLoading && leagues.length === 0 && <option value={0}>No hay ligas disponibles</option>}
+                  {leagues.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.name} {l.country ? `(${l.country})` : ''} - {l.sportName}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Colchón de seguridad y torneo en curso */}
+                {currentSeason && !currentSeason.isFinished && (
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      padding: '8px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      fontSize: '0.8125rem',
+                    }}
+                  >
+                    <div>
+                      <span style={{ color: 'var(--text-secondary)' }}>Torneo actual en curso: </span>
+                      <strong style={{ color: 'var(--color-primary)' }}>{currentSeason.name}</strong>
+                    </div>
+                    <span className="badge badge--primary" style={{ fontSize: '0.6875rem' }}>
+                      {currentSeason.status === 'ACTIVE' ? 'Activo' : 'Próximo'}
+                    </span>
                   </div>
-                  <span className="badge badge--primary" style={{ fontSize: '0.6875rem' }}>
-                    {currentSeason.status === 'ACTIVE' ? 'Activo' : 'Próximo'}
-                  </span>
-                </div>
-              )}
+                )}
 
-              {hasFinishedOnly && (
-                <div
-                  className="alert alert--warning"
-                  style={{ marginTop: '8px', padding: '8px 12px', fontSize: '0.8125rem', display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  <AlertCircle size={15} style={{ flexShrink: 0 }} />
-                  <span>Todos los torneos registrados para esta liga han concluido. Sincroniza el torneo en curso desde el menú <strong>Partidos / Sync</strong>.</span>
-                </div>
-              )}
-            </div>
+                {hasFinishedOnly && (
+                  <div
+                    className="alert alert--warning"
+                    style={{ marginTop: '8px', padding: '8px 12px', fontSize: '0.8125rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                    <span>Todos los torneos registrados para esta liga han concluido. Sincroniza el torneo en curso desde el menú <strong>Partidos / Sync</strong>.</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="form-group">
               <label className="form-group__label" htmlFor="quiniela-fee">

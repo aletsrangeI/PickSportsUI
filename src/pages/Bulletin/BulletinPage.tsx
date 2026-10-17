@@ -9,6 +9,8 @@ import {
   BadgeCheck,
   CalendarClock,
   Check,
+  Clock,
+  Coins,
   Crown,
   Flame,
   HeartHandshake,
@@ -22,6 +24,9 @@ import {
   Radar,
   Skull,
   Sparkles,
+  Swords,
+  Target,
+  CircleDot,
   TrendingDown,
   TrendingUp,
   Trophy,
@@ -587,6 +592,141 @@ export const BulletinPage: React.FC = () => {
               </div>
             </div>
           </section>
+
+          {/* ⚔️ Resumen de Retos de la Jornada (SPEC-022) */}
+          {bulletin.challenges && bulletin.challenges.length > 0 && (
+            <section className="bulletin-paper__section bulletin-challenges" aria-label="Resumen de Retos de la Jornada">
+              <h2 className="bulletin-paper__section-title">
+                <Swords size={18} strokeWidth={2} /> Resumen de Retos de la Jornada
+              </h2>
+              <div className="bulletin-challenges-grid">
+                {bulletin.challenges.map((challenge) => {
+                  const winners = challenge.participants.filter((p) => p.outcome === 'WINNER');
+                  const losers = challenge.participants.filter((p) => p.outcome === 'LOSER');
+                  const declined = challenge.participants.filter(
+                    (p) => p.status === 'DECLINED' || p.status === 'EXPIRED'
+                  );
+                  const isNoWinner = challenge.status === 'RESOLVED_NO_WINNER';
+
+                  return (
+                    <article
+                      key={challenge.id}
+                      className={`bulletin-challenge-card ${
+                        isNoWinner ? 'bulletin-challenge-card--no-winner' : ''
+                      }`}
+                    >
+                      <header className="bulletin-challenge-card__header">
+                        <span className="bulletin-challenge-card__type" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          {challenge.challengeType === 'WEEKLY_RANK' && <><TrendingUp size={13} color="#38bdf8" /><span>Posición Semanal</span></>}
+                          {challenge.challengeType === 'GENERAL_RANK' && <><Trophy size={13} color="#eab308" /><span>Posición General</span></>}
+                          {challenge.challengeType === 'MATCH_WINNER' && <><Swords size={13} color="#f97316" /><span>Directo al Partido</span></>}
+                          {challenge.challengeType === 'EXACT_SCORE' && <><Target size={13} color="#ec4899" /><span>Marcador Exacto</span></>}
+                          {challenge.challengeType === 'SUDDEN_DEATH' && <><Skull size={13} color="#94a3b8" /><span>Muerte Súbita</span></>}
+                          {challenge.challengeType === 'TOTAL_GOALS' && <><CircleDot size={13} color="#10b981" /><span>Total de Goles</span></>}
+                        </span>
+                        <span className="bulletin-challenge-card__mode" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          {challenge.payoutMode === 'WINNER_TAKES_ALL' ? (
+                            <>
+                              <Crown size={12} color="#eab308" />
+                              <span>El Rey Cobra</span>
+                            </>
+                          ) : (
+                            <>
+                              <Coins size={12} color="#f43f5e" />
+                              <span>El Último Paga</span>
+                            </>
+                          )}
+                        </span>
+                      </header>
+
+                      {/* Apuesta */}
+                      <div className="bulletin-challenge-card__stakes">
+                        Apuesta: <strong>"{challenge.stakesDescription}"</strong>
+                      </div>
+
+                      {/* Caso 1: Nadie acertó / Resumen del Boletín */}
+                      {isNoWinner ? (
+                        <div className="bulletin-challenge-card__roast">
+                          <AlertCircle size={20} color="#f59e0b" style={{ flexShrink: 0 }} />
+                          <div>
+                            <strong>¡Nadie le atinó!</strong>
+                            <p>
+                              {challenge.resolutionSummary ||
+                                'Todos los participantes fallaron su pronóstico o se pasaron de goles.'}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Caso 2: Ganador(es) y Perdedor(es) */
+                        <div className="bulletin-challenge-card__results">
+                          {winners.length > 0 && (
+                            <div className="bulletin-challenge-card__winners">
+                              <span className="bulletin-challenge-card__label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <Trophy size={13} color="#eab308" />
+                                <span>Ganador:</span>
+                              </span>
+                              <div className="bulletin-challenge-card__avatars">
+                                {winners.map((w) => (
+                                  <div key={w.id} className="bulletin-challenge-card__user">
+                                    <UserAvatar src={w.avatarUrl} alt={w.alias} size="xs" />
+                                    <span>{w.alias}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {losers.length > 0 && (
+                            <div className="bulletin-challenge-card__losers">
+                              <span className="bulletin-challenge-card__label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <Skull size={13} color="#f43f5e" />
+                                <span>A pagar:</span>
+                              </span>
+                              <div className="bulletin-challenge-card__losers-list">
+                                {losers.map((l) => (
+                                  <div key={l.id} className="bulletin-challenge-card__loser-row">
+                                    <UserAvatar src={l.avatarUrl} alt={l.alias} size="xs" />
+                                    <span className="bulletin-challenge-card__loser-alias">{l.alias}</span>
+                                    {l.isDebtSettled ? (
+                                      <span className="bulletin-challenge-card__settled" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                        <Check size={11} color="#10b981" />
+                                        <span>Apuesta Cumplida</span>
+                                      </span>
+                                    ) : (
+                                      <span className="bulletin-challenge-card__debt-pending" style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                        <Clock size={11} />
+                                        <span>Pendiente de pagar</span>
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Eventos de Doble Vida en la edición */}
+                      {challenge.doubleLifeEvents && challenge.doubleLifeEvents.length > 0 && (
+                        <div className="bulletin-challenge-card__double-life" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <Flame size={13} color="#f97316" />
+                          <span>Doble Vida: {challenge.doubleLifeEvents.join(' · ')}</span>
+                        </div>
+                      )}
+
+                      {/* Quienes pasaron del reto */}
+                      {declined.length > 0 && (
+                        <footer className="bulletin-challenge-card__declined">
+                          <span>Pasaron del reto: </span>
+                          <em>{declined.map((d) => d.alias).join(', ')}</em>
+                        </footer>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* Selector de ediciones al pie de página (Archivo histórico) */}
           <BulletinArchiveSelector

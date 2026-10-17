@@ -24,7 +24,8 @@ export interface Quiniela {
   id: number;
   name: string;
   description?: string;
-  leagueId: number;
+  leagueId?: number | null;
+  quinielaType?: 'Sports' | 'CustomEvents';
   leagueCode: string;
   leagueName: string;
   sportName: string;
@@ -56,6 +57,7 @@ export interface QuinielaMember {
   joinedAt: string;
   displayName?: string;
   avatarUrl?: string;
+  totalPoints?: number;
 }
 
 export interface QuinielaDetail extends Quiniela {
@@ -66,7 +68,8 @@ export interface QuinielaDetail extends Quiniela {
 export interface CreateQuinielaRequest {
   name: string;
   description?: string;
-  leagueId: number;
+  leagueId?: number | null;
+  quinielaType?: 'Sports' | 'CustomEvents';
   entryFee: number;
   firstPlacePct: number;
   secondPlacePct: number;
@@ -493,7 +496,10 @@ export interface WeeklyBulletinData {
   radar?: BulletinRadar | null;
   pulse?: BulletinPulse | null;
   nextWeekInfo?: NextWeekInfo | null;
+  challenges?: Challenge[];
 }
+
+export type WeeklyBulletin = WeeklyBulletinData;
 
 export interface UpdateAnnouncementRequest {
   announcement: string | null;
@@ -566,6 +572,145 @@ export interface MigrationResultData {
   message: string;
   playerVerification: MigrationPlayerVerification[];
   createdUsernames: string[];
+}
+
+// ─── SPEC-011: Eventos Personalizados (CustomEvents) ─────────────────────────
+
+export interface EventRoundSummaryDto {
+  id: number;
+  eventGroupId: number;
+  quinielaId: number;
+  title: string;
+  roundOrder: number;
+  lockDateUtc: string;
+  status: 'Draft' | 'Open' | 'Locked' | 'Resolved';
+  resolvedDateUtc?: string | null;
+  isLocked: boolean;
+  questionsCount: number;
+  userPicksCount: number;
+  totalPossiblePoints: number;
+  userPointsEarned: number;
+}
+
+export interface EventOptionDto {
+  id: number;
+  eventQuestionId: number;
+  optionText: string;
+  imageUrl?: string | null;
+  isCorrect?: boolean | null;
+  optionOrder: number;
+  picksCount: number;
+  pickPercentage: number;
+}
+
+export interface EventQuestionDto {
+  id: number;
+  eventRoundId: number;
+  questionText: string;
+  description?: string | null;
+  points: number;
+  questionType: string;
+  questionOrder: number;
+  options: EventOptionDto[];
+  userSelectedOptionId?: number | null;
+  userIsHit?: boolean | null;
+  userPointsEarned: number;
+}
+
+export interface EventMemberPickDto {
+  memberId: number;
+  memberAlias: string;
+  avatarUrl?: string | null;
+  eventQuestionId: number;
+  eventOptionId: number;
+  optionText: string;
+  isHit?: boolean | null;
+  pointsEarned: number;
+  submittedAtUtc: string;
+}
+
+export interface EventRoundDetailDto {
+  id: number;
+  eventGroupId: number;
+  quinielaId: number;
+  title: string;
+  roundOrder: number;
+  lockDateUtc: string;
+  status: 'Draft' | 'Open' | 'Locked' | 'Resolved';
+  resolvedDateUtc?: string | null;
+  isLocked: boolean;
+  isRevealed: boolean;
+  currentUserMemberId?: number | null;
+  isOwnerOrAdmin: boolean;
+  questions: EventQuestionDto[];
+  allMemberPicks: EventMemberPickDto[];
+}
+
+export interface CreateEventRoundRequest {
+  title: string;
+  lockDateUtc: string;
+  roundOrder?: number;
+}
+
+export interface UpdateEventRoundRequest {
+  title: string;
+  lockDateUtc: string;
+  status?: string;
+}
+
+export interface CreateEventOptionItem {
+  optionText: string;
+  imageUrl?: string | null;
+  optionOrder?: number;
+}
+
+export interface CreateEventQuestionRequest {
+  questionText: string;
+  description?: string | null;
+  points?: number;
+  questionType?: string;
+  questionOrder?: number;
+  options: CreateEventOptionItem[];
+}
+
+export interface EventPickSelection {
+  eventQuestionId: number;
+  eventOptionId: number;
+}
+
+export interface SubmitEventPicksRequest {
+  picks: EventPickSelection[];
+}
+
+export interface QuestionResolutionItem {
+  eventQuestionId: number;
+  winningOptionId: number;
+}
+
+export interface ResolveEventRoundRequest {
+  resolutions: QuestionResolutionItem[];
+}
+
+export interface EventStandingRowDto {
+  rank: number;
+  memberId: number;
+  alias: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  points: number;
+  hits: number;
+  totalQuestions: number;
+  currentStreak: number;
+  bestStreak: number;
+}
+
+export interface EventStandingsResponseDto {
+  quinielaId: number;
+  roundId?: number | null;
+  roundTitle?: string | null;
+  roundStatus?: string | null;
+  roundStandings: EventStandingRowDto[];
+  generalStandings: EventStandingRowDto[];
 }
 
 // ─── Liguilla Bracket Challenge ("El Pilón") ───────────────────────────────────
@@ -652,5 +797,113 @@ export interface LiguillaStandings {
   quinielaId: number;
   seasonName: string;
   standings: LiguillaStandingItem[];
+}
+
+// ─── Retos y Apuestas Sociales (SPEC-022) ───────────────────────────────────
+
+export type ChallengeType =
+  | 'WEEKLY_RANK'
+  | 'GENERAL_RANK'
+  | 'MATCH_WINNER'
+  | 'EXACT_SCORE'
+  | 'SUDDEN_DEATH'
+  | 'TOTAL_GOALS';
+
+export type PayoutMode = 'WINNER_TAKES_ALL' | 'LAST_PLACE_PAYS';
+
+export type ChallengeStatus =
+  | 'PENDING_ACCEPTANCE'
+  | 'ACTIVE'
+  | 'UNACCEPTED_EXPIRED'
+  | 'CANCELLED'
+  | 'RESOLVED_WITH_WINNER'
+  | 'RESOLVED_NO_WINNER';
+
+export type ParticipantStatus = 'ACCEPTED' | 'PENDING' | 'DECLINED' | 'EXPIRED';
+
+export type ParticipantOutcome = 'NONE' | 'WINNER' | 'LOSER' | 'NO_WINNER_BUST';
+
+export interface ChallengeParticipant {
+  id: number;
+  challengeId: number;
+  memberId: number;
+  alias: string;
+  displayName?: string;
+  avatarUrl?: string | null;
+  isCreator: boolean;
+  status: ParticipantStatus;
+  predictedWinnerAbbr?: string | null;
+  predictedHomeScore?: number | null;
+  predictedAwayScore?: number | null;
+  predictedTotalGoals?: number | null;
+  outcome: ParticipantOutcome | string;
+  currentLiveValue?: string | null;
+  isBusted?: boolean;
+  eliminatedAtMatchId?: number | null;
+  eliminatedAtMatchLabel?: string | null;
+  isDebtSettled: boolean;
+  settledAtUtc?: string | null;
+  respondedAtUtc?: string | null;
+}
+
+export interface Challenge {
+  id: number;
+  quinielaId: number;
+  weekId: number;
+  weekName?: string;
+  creatorMemberId: number;
+  creatorAlias: string;
+  creatorAvatarUrl?: string | null;
+  challengeType: ChallengeType;
+  payoutMode: PayoutMode;
+  stakesDescription: string;
+  targetMatchId?: number | null;
+  targetMatchLabel?: string | null;
+  targetMatchScore?: string | null;
+  status: ChallengeStatus;
+  resolutionSummary?: string | null;
+  actualTotalGoals?: number | null;
+  currentTotalGoals?: number | null;
+  doubleLifeEvents?: string[] | null;
+  differentialMatches?: string[] | null;
+  takenOptions?: string[] | null;
+  createdAtUtc: string;
+  resolvedAtUtc?: string | null;
+  participants: ChallengeParticipant[];
+}
+
+export interface CreateChallengeRequest {
+  quinielaId: number;
+  weekId: number;
+  invitedMemberIds: number[];
+  challengeType: ChallengeType;
+  payoutMode: PayoutMode;
+  stakesDescription: string;
+  targetMatchId?: number | null;
+  creatorPredictedWinnerAbbr?: string | null;
+  predictedWinnerAbbr?: string | null;
+  creatorPredictedHomeScore?: number | null;
+  predictedHomeScore?: number | null;
+  creatorPredictedAwayScore?: number | null;
+  predictedAwayScore?: number | null;
+  creatorPredictedTotalGoals?: number | null;
+  predictedTotalGoals?: number | null;
+}
+
+export interface RespondChallengeRequest {
+  quinielaId: number;
+  challengeId: number;
+  action: 'ACCEPT' | 'DECLINE';
+  response?: 'ACCEPT' | 'DECLINE';
+  predictedWinnerAbbr?: string | null;
+  predictedHomeScore?: number | null;
+  predictedAwayScore?: number | null;
+  predictedTotalGoals?: number | null;
+}
+
+export interface SettleChallengeDebtRequest {
+  quinielaId: number;
+  challengeId: number;
+  memberId: number;
 }
 

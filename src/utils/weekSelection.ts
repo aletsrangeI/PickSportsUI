@@ -1,4 +1,4 @@
-export interface WeekOption {
+﻿export interface WeekOption {
   id: number;
   weekNumber: number;
   name?: string;
@@ -57,7 +57,7 @@ export function getMostRelevantWeekForPicks<T extends WeekOption>(weeks: T[]): T
  * Selecciona la jornada para vistas de tabla de posiciones (Standings):
  * En la tabla de posiciones se consultan puntuaciones y resultados ya disputados.
  * - Prioridad 1: Jornada en juego ('LOCKED') más reciente (con partidos en vivo o cerrados).
- * - Prioridad 2: Jornada calificada ('SCORED') más reciente (ej. Jornada 10 con puntuaciones oficiales).
+ * - Prioridad 2: Jornada calificada ('SCORED') más reciente (ej. Jornada 11 con puntuaciones oficiales).
  * - Prioridad 3 (fallback inicial si el torneo aún no arranca): la jornada abierta más reciente o primera.
  */
 export function getMostRelevantWeekForStandings<T extends WeekOption>(weeks: T[]): T | null {
@@ -84,6 +84,42 @@ export function getMostRelevantWeekForStandings<T extends WeekOption>(weeks: T[]
   }
 
   return sorted[0];
+}
+
+/**
+ * Selecciona la jornada para la vista de Retos y Apuestas (Challenges / SPEC-022):
+ * Los retos solo pueden crearse y lanzarse en jornadas ABIERTAS ('PUBLISHED') antes del silbatazo inicial.
+ * - Prioridad 1: Jornada abierta ('PUBLISHED') más reciente (donde se pueden crear y aceptar retos).
+ * - Prioridad 2: Jornada en juego ('LOCKED' o 'IN_PROGRESS') más reciente (para ver retos activos).
+ * - Prioridad 3: Jornada calificada ('SCORED') más reciente (historial de retos concluidos).
+ * - Fallback: primera disponible.
+ */
+export function getMostRelevantWeekForChallenges<T extends WeekOption>(weeks: T[]): T | null {
+  if (!weeks || weeks.length === 0) return null;
+
+  const sorted = [...weeks].sort((a, b) => a.weekNumber - b.weekNumber);
+
+  // 1. Jornada abierta (PUBLISHED) donde se pueden crear y responder retos
+  const publishedWeeks = sorted.filter((w) => w.status?.toUpperCase() === 'PUBLISHED');
+  if (publishedWeeks.length > 0) {
+    return publishedWeeks[publishedWeeks.length - 1];
+  }
+
+  // 2. Jornada en juego (LOCKED / IN_PROGRESS) para seguir los retos en vivo
+  const inProgressWeeks = sorted.filter(
+    (w) => w.status?.toUpperCase() === 'LOCKED' || w.status?.toUpperCase() === 'IN_PROGRESS'
+  );
+  if (inProgressWeeks.length > 0) {
+    return inProgressWeeks[inProgressWeeks.length - 1];
+  }
+
+  // 3. Fallback: última calificada (SCORED)
+  const scoredWeeks = sorted.filter((w) => w.status?.toUpperCase() === 'SCORED');
+  if (scoredWeeks.length > 0) {
+    return scoredWeeks[scoredWeeks.length - 1];
+  }
+
+  return sorted[sorted.length - 1] ?? null;
 }
 
 /**
