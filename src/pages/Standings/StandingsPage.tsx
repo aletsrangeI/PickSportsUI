@@ -290,6 +290,12 @@ export const StandingsPage: React.FC = () => {
     }
   }, [toast]);
 
+  const { data: liguillaOverviewData } = useGetLiguillaOverviewQuery(quinielaId, {
+    skip: !quinielaId,
+  });
+  const liguillaOverview = liguillaOverviewData?.data;
+  const isLiguillaVisible = isOwnerOrAdmin || (liguillaOverview && (liguillaOverview.isAvailable || liguillaOverview.status !== 'HIDDEN'));
+
   if (!quinielaId) {
     return (
       <div className="standings-page__no-quiniela">
@@ -299,12 +305,6 @@ export const StandingsPage: React.FC = () => {
       </div>
     );
   }
-
-  const { data: liguillaOverviewData } = useGetLiguillaOverviewQuery(quinielaId, {
-    skip: !quinielaId,
-  });
-  const liguillaOverview = liguillaOverviewData?.data;
-  const isLiguillaVisible = isOwnerOrAdmin || (liguillaOverview && (liguillaOverview.isAvailable || liguillaOverview.status !== 'HIDDEN'));
 
   return (
     <div className="standings-page">
