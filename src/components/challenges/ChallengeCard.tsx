@@ -14,7 +14,6 @@ import {
   CircleDot,
   Check,
   Clock,
-  Sparkles,
   Flame,
   AlertTriangle,
   AlertCircle,
@@ -31,17 +30,92 @@ interface ChallengeCardProps {
   onRespond?: (challenge: Challenge) => void;
 }
 
-const TYPE_CONFIG: Record<
-  string,
-  { label: string; LucideIcon: React.ElementType; color: string }
-> = {
-  WEEKLY_RANK: { label: 'Posición Semanal', LucideIcon: TrendingUp, color: '#38bdf8' },
-  GENERAL_RANK: { label: 'Posición General', LucideIcon: Trophy, color: '#eab308' },
-  MATCH_WINNER: { label: 'Directo al Partido', LucideIcon: Swords, color: '#f97316' },
-  EXACT_SCORE: { label: 'Marcador Exacto', LucideIcon: Target, color: '#ec4899' },
-  SUDDEN_DEATH: { label: 'Muerte Súbita', LucideIcon: Skull, color: '#94a3b8' },
-  TOTAL_GOALS: { label: 'Total de Goles', LucideIcon: CircleDot, color: '#10b981' },
-};
+/** Configuración clara de criterios de victoria en lenguaje humano */
+function getChallengeCriteria(type: string, matchLabel?: string | null): {
+  title: string;
+  description: string;
+  Icon: React.ElementType;
+  color: string;
+} {
+  switch (type) {
+    case 'WEEKLY_RANK':
+      return {
+        title: 'Mejor posición en la jornada',
+        description: 'Gana quien sume más puntos en la jornada semanal.',
+        Icon: TrendingUp,
+        color: '#38bdf8',
+      };
+    case 'GENERAL_RANK':
+      return {
+        title: 'Mejor posición general',
+        description: 'Gana quien quede más arriba en la tabla acumulada.',
+        Icon: Trophy,
+        color: '#eab308',
+      };
+    case 'MATCH_WINNER':
+      return {
+        title: 'Ganador de partido',
+        description: matchLabel
+          ? `Acierta al ganador de ${matchLabel}.`
+          : 'Acierta al equipo que gane el encuentro.',
+        Icon: Swords,
+        color: '#f97316',
+      };
+    case 'EXACT_SCORE':
+      return {
+        title: 'Marcador exacto',
+        description: matchLabel
+          ? `Acierta el marcador exacto de ${matchLabel}.`
+          : 'Acierta los goles exactos del encuentro.',
+        Icon: Target,
+        color: '#ec4899',
+      };
+    case 'TOTAL_GOALS':
+      return {
+        title: 'Total de goles (Sin pasarse)',
+        description: 'Quien más se acerque a los goles totales sin pasarse.',
+        Icon: CircleDot,
+        color: '#10b981',
+      };
+    case 'SUDDEN_DEATH':
+      return {
+        title: 'Muerte súbita',
+        description: 'Quien acierte más partidos seguidos sin fallar.',
+        Icon: Skull,
+        color: '#94a3b8',
+      };
+    default:
+      return {
+        title: type,
+        description: 'Reto personalizado entre participantes.',
+        Icon: Swords,
+        color: '#10b981',
+      };
+  }
+}
+
+/** Configuración clara de cómo se paga y quién cobra */
+function getPayoutModeInfo(mode: string): {
+  title: string;
+  description: string;
+  Icon: React.ElementType;
+  color: string;
+} {
+  if (mode === 'WINNER_TAKES_ALL') {
+    return {
+      title: 'El ganador se lleva todo',
+      description: 'Todos los que pierdan le pagan la apuesta al 1er lugar.',
+      Icon: Crown,
+      color: '#eab308',
+    };
+  }
+  return {
+    title: 'El último lugar paga',
+    description: 'El peor posicionado le cumple la apuesta a todos.',
+    Icon: Coins,
+    color: '#f43f5e',
+  };
+}
 
 export const ChallengeCard: React.FC<ChallengeCardProps> = ({
   challenge,
@@ -53,35 +127,29 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
   const [cancelChallenge, { isLoading: isCancelling }] = useCancelChallengeMutation();
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const typeInfo = TYPE_CONFIG[challenge.challengeType] || {
-    label: challenge.challengeType,
-    LucideIcon: Swords,
-    color: '#10b981',
-  };
+  const criteria = getChallengeCriteria(challenge.challengeType, challenge.targetMatchLabel);
+  const payout = getPayoutModeInfo(challenge.payoutMode);
 
-  const isWinnerTakesAll = challenge.payoutMode === 'WINNER_TAKES_ALL';
+  // Participantes organizados
+  const participants = challenge.participants || [];
+  const sortedParticipants = [...participants].sort((a, b) => {
+    if (a.isCreator) return -1;
+    if (b.isCreator) return 1;
+    if (a.status === 'ACCEPTED' && b.status !== 'ACCEPTED') return -1;
+    if (a.status !== 'ACCEPTED' && b.status === 'ACCEPTED') return 1;
+    return a.alias.localeCompare(b.alias);
+  });
 
-  // Participantes
-  const acceptedParticipants = challenge.participants.filter(
-    (p) => p.status === 'ACCEPTED'
-  );
-  const nonAcceptedParticipants = challenge.participants.filter(
-    (p) => p.status === 'DECLINED' || p.status === 'EXPIRED'
-  );
-  const pendingParticipants = challenge.participants.filter(
-    (p) => p.status === 'PENDING'
-  );
+  const acceptedCount = participants.filter((p) => p.status === 'ACCEPTED').length;
+  const totalCount = participants.length;
 
-  // Usuario actual
-  const currentParticipant = challenge.participants.find(
-    (p) => p.memberId === currentMemberId
-  );
+  // Estado del usuario actual en este reto
+  const currentParticipant = participants.find((p) => p.memberId === currentMemberId);
   const isCreator = challenge.creatorMemberId === currentMemberId;
   const isPendingForCurrentUser = currentParticipant?.status === 'PENDING';
-  const isCurrentUserWinner = challenge.participants.some(
+  const isCurrentUserWinner = participants.some(
     (p) => p.memberId === currentMemberId && p.outcome === 'WINNER'
   );
-
   const canConfirmPayment = isCurrentUserWinner || isOwnerOrAdmin;
 
   const handleSettle = async (memberId: number) => {
@@ -113,104 +181,114 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
 
   const currentGoals = challenge.actualTotalGoals ?? challenge.currentTotalGoals ?? 0;
 
+  // Etiqueta de estado del reto
+  const renderStatusTag = () => {
+    switch (challenge.status) {
+      case 'PENDING_ACCEPTANCE':
+        return (
+          <span className="challenge-card__status challenge-card__status--pending">
+            <span className="challenge-card__status-dot" />
+            <span>Esperando respuestas</span>
+          </span>
+        );
+      case 'ACTIVE':
+        return (
+          <span className="challenge-card__status challenge-card__status--active">
+            <span className="challenge-card__status-dot" />
+            <span>En juego</span>
+          </span>
+        );
+      case 'RESOLVED_WITH_WINNER':
+        return (
+          <span className="challenge-card__status challenge-card__status--resolved">
+            <Trophy size={12} />
+            <span>Finalizado</span>
+          </span>
+        );
+      case 'RESOLVED_NO_WINNER':
+        return (
+          <span className="challenge-card__status challenge-card__status--no-winner">
+            <AlertCircle size={12} />
+            <span>Sin ganador</span>
+          </span>
+        );
+      case 'UNACCEPTED_EXPIRED':
+        return (
+          <span className="challenge-card__status challenge-card__status--expired">
+            <span>Expirado</span>
+          </span>
+        );
+      case 'CANCELLED':
+        return (
+          <span className="challenge-card__status challenge-card__status--cancelled">
+            <span>Cancelado</span>
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <article className="challenge-card">
-      {/* Header con insignias */}
-      <header className="challenge-card__header">
-        <div className="challenge-card__badges">
-          <span className="challenge-card__type-badge">
-            <typeInfo.LucideIcon size={14} color={typeInfo.color} />
-            <span>{typeInfo.label}</span>
-          </span>
-
-          <span
-            className={`challenge-card__payout-mode ${
-              isWinnerTakesAll
-                ? 'challenge-card__payout-mode--crown'
-                : 'challenge-card__payout-mode--clown'
-            }`}
-          >
-            {isWinnerTakesAll ? (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <Crown size={12} color="#eab308" />
-                <span>El Rey Cobra</span>
-              </span>
-            ) : (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <Coins size={12} color="#f43f5e" />
-                <span>El Último Paga</span>
-              </span>
-            )}
-          </span>
-
-          {challenge.status === 'PENDING_ACCEPTANCE' && (
-            <span className="challenge-card__status-badge challenge-card__status-badge--pending-acceptance">
-              Esperando aceptación
-            </span>
-          )}
-          {challenge.status === 'ACTIVE' && (
-            <span className="challenge-card__status-badge challenge-card__status-badge--active">
-              En juego
-            </span>
-          )}
-          {challenge.status === 'RESOLVED_WITH_WINNER' && (
-            <span className="challenge-card__status-badge challenge-card__status-badge--resolved-with-winner">
-              Finalizado
-            </span>
-          )}
-          {challenge.status === 'RESOLVED_NO_WINNER' && (
-            <span className="challenge-card__status-badge challenge-card__status-badge--resolved-no-winner">
-              Sin Ganador
-            </span>
-          )}
-          {challenge.status === 'UNACCEPTED_EXPIRED' && (
-            <span className="challenge-card__status-badge challenge-card__status-badge--expired">
-              Expirado
+      {/* 1. Header: Etiqueta de apuesta y estado del reto */}
+      <header className="challenge-card__top">
+        <div className="challenge-card__badge-row">
+          <div className="challenge-card__stakes-badge">
+            <Flame size={13} color="#f59e0b" />
+            <span>Apuesta en juego</span>
+          </div>
+          {challenge.targetMatchLabel && (
+            <span className="challenge-card__match-pill">
+              {challenge.targetMatchLabel}
+              {challenge.targetMatchScore ? ` (${challenge.targetMatchScore})` : ''}
             </span>
           )}
         </div>
-
-        {challenge.targetMatchLabel && (
-          <span className="challenge-card__match-label">
-            {challenge.targetMatchLabel}
-            {challenge.targetMatchScore ? ` (${challenge.targetMatchScore})` : ''}
-          </span>
-        )}
+        {renderStatusTag()}
       </header>
 
-      {/* Apuesta / Premio */}
-      <div className="challenge-card__stakes">
-        <div className="challenge-card__stakes-label">
-          <Flame size={12} color="#f59e0b" />
-          <span>Apuesta en juego:</span>
-        </div>
-        <div className="challenge-card__stakes-value">
+      {/* 2. Título de la apuesta (Lo que se apostó) */}
+      <div className="challenge-card__stakes-hero">
+        <h3 className="challenge-card__stakes-title">
           "{challenge.stakesDescription}"
+        </h3>
+      </div>
+
+      {/* 3. Panel de Reglas: Criterio de Victoria y Modo de Pago */}
+      <div className="challenge-card__rules">
+        <div className="challenge-card__rule-item">
+          <div className="challenge-card__rule-icon" style={{ color: criteria.color }}>
+            <criteria.Icon size={16} />
+          </div>
+          <div className="challenge-card__rule-texts">
+            <span className="challenge-card__rule-label">Criterio para ganar</span>
+            <strong className="challenge-card__rule-name">{criteria.title}</strong>
+            <span className="challenge-card__rule-desc">{criteria.description}</span>
+          </div>
+        </div>
+
+        <div className="challenge-card__rule-divider" />
+
+        <div className="challenge-card__rule-item">
+          <div className="challenge-card__rule-icon" style={{ color: payout.color }}>
+            <payout.Icon size={16} />
+          </div>
+          <div className="challenge-card__rule-texts">
+            <span className="challenge-card__rule-label">Cómo se cobra</span>
+            <strong className="challenge-card__rule-name">{payout.title}</strong>
+            <span className="challenge-card__rule-desc">{payout.description}</span>
+          </div>
         </div>
       </div>
 
-      {/* Banner de Doble Vida */}
-      {challenge.doubleLifeEvents && challenge.doubleLifeEvents.length > 0 && (
-        <div className="challenge-card__double-life" role="alert">
-          <div className="challenge-card__double-life-title">
-            <Flame size={16} />
-            <strong>¡Doble Vida Activada!</strong>
-          </div>
-          <ul className="challenge-card__double-life-list">
-            {challenge.doubleLifeEvents.map((evt, idx) => (
-              <li key={idx}>{evt}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Termómetro de Total de Goles (Price is Right) */}
+      {/* Termómetro de Total de Goles (Price is Right) si aplica */}
       {challenge.challengeType === 'TOTAL_GOALS' && (
         <div className="challenge-card__thermometer">
           <div className="challenge-card__thermometer-goals">
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
               <CircleDot size={13} color="#10b981" />
-              <span>Goles actuales en la jornada:</span>
+              <span>Goles acumulados en la jornada:</span>
             </span>
             <strong>{currentGoals}</strong>
           </div>
@@ -225,164 +303,190 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
         </div>
       )}
 
-      {/* Participantes aceptados */}
-      <div className="challenge-card__participants">
-        <span className="challenge-card__participants-title">
-          Participantes ({acceptedParticipants.length}):
-        </span>
-
-        {acceptedParticipants.map((p) => {
-          const isWinner = p.outcome === 'WINNER';
-          const isLoser = p.outcome === 'LOSER';
-          const isBusted =
-            p.isBusted ||
-            (challenge.challengeType === 'TOTAL_GOALS' &&
-              p.predictedTotalGoals !== null &&
-              p.predictedTotalGoals !== undefined &&
-              currentGoals > p.predictedTotalGoals);
-
-          return (
-            <div
-              key={p.id}
-              className={`challenge-card__participant ${
-                isWinner ? 'challenge-card__participant--winner' : ''
-              } ${isLoser ? 'challenge-card__participant--loser' : ''} ${
-                isBusted ? 'challenge-card__participant--disqualified' : ''
-              }`}
-            >
-              <div className="challenge-card__participant-left">
-                <div className="challenge-card__participant-avatar">
-                  <UserAvatar src={p.avatarUrl} alt={p.alias} size="sm" />
-                </div>
-
-                <div className="challenge-card__participant-info">
-                  <div className="challenge-card__participant-header">
-                    <span className="challenge-card__participant-alias">{p.alias}</span>
-                    {p.isCreator && (
-                      <span className="challenge-card__creator-tag">Creador</span>
-                    )}
-                  </div>
-
-                  <div className="challenge-card__participant-sub">
-                    {/* Pronóstico específico */}
-                    {p.predictedWinnerAbbr && (
-                      <span className="challenge-card__participant-pick">
-                        Pronóstico: <strong>{p.predictedWinnerAbbr}</strong>
-                      </span>
-                    )}
-                    {p.predictedHomeScore !== null &&
-                      p.predictedHomeScore !== undefined &&
-                      p.predictedAwayScore !== null &&
-                      p.predictedAwayScore !== undefined && (
-                        <span className="challenge-card__participant-pick">
-                          Marcador: <strong>{p.predictedHomeScore} - {p.predictedAwayScore}</strong>
-                        </span>
-                      )}
-                    {p.predictedTotalGoals !== null &&
-                      p.predictedTotalGoals !== undefined && (
-                        <span className="challenge-card__participant-pick">
-                          Predijo: <strong>{p.predictedTotalGoals} goles</strong>
-                        </span>
-                      )}
-
-                    {/* Estado en vivo / eliminación */}
-                    {p.currentLiveValue && (
-                      <span className="challenge-card__participant-status">
-                        {p.currentLiveValue}
-                      </span>
-                    )}
-                    {p.eliminatedAtMatchLabel && (
-                      <span className="challenge-card__participant-status">
-                        Eliminado en: {p.eliminatedAtMatchLabel}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Badges de resultado y pago */}
-              <div className="challenge-card__participant-badges">
-                {isBusted && (
-                  <span className="challenge-card__busted" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <AlertTriangle size={12} color="#f43f5e" />
-                    <span>¡Se pasó!</span>
-                  </span>
-                )}
-
-                {isWinner && (
-                  <span className="challenge-card__winner-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                    <Trophy size={12} color="#eab308" />
-                    <span>Ganador</span>
-                  </span>
-                )}
-
-                {challenge.status === 'RESOLVED_WITH_WINNER' && isLoser && (
-                  <>
-                    {p.isDebtSettled ? (
-                      <span className="challenge-card__settled" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                        <Check size={12} color="#10b981" />
-                        <span>Apuesta Cumplida</span>
-                      </span>
-                    ) : (
-                      <>
-                        <span className="challenge-card__debt-pending" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          <Clock size={12} />
-                          <span>Pendiente de pagar</span>
-                        </span>
-                        {canConfirmPayment && (
-                          <button
-                            type="button"
-                            className="challenge-card__settle-btn"
-                            disabled={isSettling}
-                            onClick={() => handleSettle(p.memberId)}
-                            title="Confirmar que este participante ya cumplió la apuesta"
-                          >
-                            <Check size={14} />
-                            <span>Confirmar Pago</span>
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Participantes que declinaron o no respondieron a tiempo */}
-      {nonAcceptedParticipants.length > 0 && (
-        <div className="challenge-card__non-accepted">
-          {nonAcceptedParticipants.map((p) => (
-            <span key={p.id} className="challenge-card__declined">
-              <UserAvatar src={p.avatarUrl} alt={p.alias} size="xs" />
-              <span>{p.alias}: </span>
-              <em>
-                {p.status === 'DECLINED'
-                  ? 'Pasó del reto'
-                  : 'No respondió a tiempo'}
-              </em>
-            </span>
-          ))}
+      {/* Banner de Doble Vida si aplica */}
+      {challenge.doubleLifeEvents && challenge.doubleLifeEvents.length > 0 && (
+        <div className="challenge-card__double-life" role="alert">
+          <div className="challenge-card__double-life-title">
+            <Flame size={15} />
+            <span>¡Doble Vida Activada!</span>
+          </div>
+          <ul className="challenge-card__double-life-list">
+            {challenge.doubleLifeEvents.map((evt, idx) => (
+              <li key={idx}>{evt}</li>
+            ))}
+          </ul>
         </div>
       )}
 
-      {/* Participantes aún pendientes de responder */}
-      {pendingParticipants.length > 0 && (
-        <div className="challenge-card__pending-list">
-          <Clock size={13} className="challenge-card__pending-icon" />
-          <span className="challenge-card__pending-label">Esperando respuesta:</span>
-          <span className="challenge-card__pending-names">
-            {pendingParticipants.map((p) => p.alias).join(', ')}
+      {/* 4. Participantes Involucrados (TODOS con foto de perfil) */}
+      <div className="challenge-card__participants-section">
+        <div className="challenge-card__section-header">
+          <span className="challenge-card__section-title">
+            Participantes involucrados
+          </span>
+          <span className="challenge-card__section-meta">
+            {acceptedCount} de {totalCount} listos
           </span>
         </div>
-      )}
 
-      {/* Banner cuando nadie ganó */}
+        <div className="challenge-card__participants-list">
+          {sortedParticipants.map((p) => {
+            const isWinner = p.outcome === 'WINNER';
+            const isLoser = p.outcome === 'LOSER';
+            const isPending = p.status === 'PENDING';
+            const isDeclined = p.status === 'DECLINED' || p.status === 'EXPIRED';
+            const isBusted =
+              p.isBusted ||
+              (challenge.challengeType === 'TOTAL_GOALS' &&
+                p.predictedTotalGoals !== null &&
+                p.predictedTotalGoals !== undefined &&
+                currentGoals > p.predictedTotalGoals);
+
+            return (
+              <div
+                key={p.id}
+                className={`challenge-card__participant-row ${
+                  isWinner ? 'challenge-card__participant-row--winner' : ''
+                } ${isPending ? 'challenge-card__participant-row--pending' : ''} ${
+                  isDeclined ? 'challenge-card__participant-row--declined' : ''
+                }`}
+              >
+                {/* Lado izquierdo: Avatar + Nombre + Estado */}
+                <div className="challenge-card__participant-main">
+                  <div className="challenge-card__avatar-wrap">
+                    <UserAvatar src={p.avatarUrl} alt={p.alias} size="sm" />
+                    {isWinner && (
+                      <span className="challenge-card__winner-crown" title="Ganador del reto">
+                        <Crown size={12} color="#000" />
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="challenge-card__participant-details">
+                    <div className="challenge-card__name-line">
+                      <span className="challenge-card__alias">{p.alias}</span>
+                      {p.isCreator && (
+                        <span className="challenge-card__creator-badge">Creador</span>
+                      )}
+                    </div>
+
+                    <div className="challenge-card__status-line">
+                      {isPending && (
+                        <span className="challenge-card__pending-text">
+                          <Clock size={11} />
+                          <span>Invitado · Esperando respuesta</span>
+                        </span>
+                      )}
+
+                      {isDeclined && (
+                        <span className="challenge-card__declined-text">
+                          <X size={11} />
+                          <span>{p.status === 'DECLINED' ? 'Rechazó la invitación' : 'Expiró sin responder'}</span>
+                        </span>
+                      )}
+
+                      {!isPending && !isDeclined && (
+                        <>
+                          {/* Pronósticos específicos */}
+                          {p.predictedWinnerAbbr && (
+                            <span className="challenge-card__pick-pill">
+                              Elige: <strong>{p.predictedWinnerAbbr}</strong>
+                            </span>
+                          )}
+                          {p.predictedHomeScore !== null &&
+                            p.predictedHomeScore !== undefined &&
+                            p.predictedAwayScore !== null &&
+                            p.predictedAwayScore !== undefined && (
+                              <span className="challenge-card__pick-pill">
+                                Marcador: <strong>{p.predictedHomeScore} - {p.predictedAwayScore}</strong>
+                              </span>
+                            )}
+                          {p.predictedTotalGoals !== null &&
+                            p.predictedTotalGoals !== undefined && (
+                              <span className="challenge-card__pick-pill">
+                                Predijo: <strong>{p.predictedTotalGoals} goles</strong>
+                              </span>
+                            )}
+
+                          {/* Estado en vivo o posición */}
+                          {p.currentLiveValue && (
+                            <span className="challenge-card__live-pill">
+                              {p.currentLiveValue}
+                            </span>
+                          )}
+
+                          {/* Si aún no arranca la jornada y no hay live value */}
+                          {!p.currentLiveValue &&
+                            !p.predictedWinnerAbbr &&
+                            p.predictedHomeScore === null &&
+                            p.predictedTotalGoals === null && (
+                              <span className="challenge-card__ready-pill">
+                                <Check size={11} />
+                                <span>Aceptado · Listo</span>
+                              </span>
+                            )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lado derecho: Badges de resultado o pago */}
+                <div className="challenge-card__participant-right">
+                  {isBusted && (
+                    <span className="challenge-card__busted-tag">
+                      <AlertTriangle size={11} />
+                      <span>¡Se pasó!</span>
+                    </span>
+                  )}
+
+                  {isWinner && (
+                    <span className="challenge-card__winner-tag">
+                      <Trophy size={12} />
+                      <span>Ganador</span>
+                    </span>
+                  )}
+
+                  {challenge.status === 'RESOLVED_WITH_WINNER' && isLoser && (
+                    <>
+                      {p.isDebtSettled ? (
+                        <span className="challenge-card__settled-tag">
+                          <Check size={12} />
+                          <span>Apuesta Cumplida</span>
+                        </span>
+                      ) : (
+                        <div className="challenge-card__debt-group">
+                          <span className="challenge-card__debt-tag">
+                            <Clock size={11} />
+                            <span>Debe cumplir</span>
+                          </span>
+                          {canConfirmPayment && (
+                            <button
+                              type="button"
+                              className="challenge-card__confirm-btn"
+                              disabled={isSettling}
+                              onClick={() => handleSettle(p.memberId)}
+                              title="Confirmar que este participante ya cumplió su apuesta"
+                            >
+                              <Check size={13} />
+                              <span>Confirmar</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Banner de Nadie le atinó */}
       {challenge.status === 'RESOLVED_NO_WINNER' && (
         <div className="challenge-card__no-winner">
-          <AlertCircle size={22} color="#f59e0b" style={{ flexShrink: 0 }} />
+          <AlertCircle size={20} color="#f59e0b" style={{ flexShrink: 0 }} />
           <div>
             <strong>¡Nadie le atinó!</strong>
             <p>
@@ -393,14 +497,14 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
         </div>
       )}
 
-      {/* Feedback Toast */}
+      {/* Toast Feedback */}
       {feedback && (
         <div className="challenge-card__feedback" role="status">
           {feedback}
         </div>
       )}
 
-      {/* Acciones del usuario */}
+      {/* Acciones principales: Responder o Cancelar */}
       {((isPendingForCurrentUser && onRespond) || (isCreator && challenge.status === 'PENDING_ACCEPTANCE')) && (
         <footer className="challenge-card__actions">
           {isPendingForCurrentUser && onRespond && (
@@ -409,7 +513,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
               className="challenge-btn challenge-btn--primary"
               onClick={() => onRespond(challenge)}
             >
-              <Swords size={15} />
+              <Swords size={16} />
               <span>Responder Invitación</span>
             </button>
           )}
