@@ -335,12 +335,13 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
             const isLoser = p.outcome === 'LOSER';
             const isPending = p.status === 'PENDING';
             const isDeclined = p.status === 'DECLINED' || p.status === 'EXPIRED';
-            const isBusted =
-              p.isBusted ||
-              (challenge.challengeType === 'TOTAL_GOALS' &&
-                p.predictedTotalGoals !== null &&
-                p.predictedTotalGoals !== undefined &&
-                currentGoals > p.predictedTotalGoals);
+            const isResolved =
+              challenge.status === 'RESOLVED_WITH_WINNER' ||
+              challenge.status === 'RESOLVED_NO_WINNER' ||
+              challenge.status === 'CANCELLED' ||
+              challenge.status === 'UNACCEPTED_EXPIRED';
+            // SSOT: La lógica de descalificación es exclusiva del Backend (DTO p.isBusted)
+            const isBusted = !isWinner && Boolean(p.isBusted);
 
             return (
               <div
@@ -408,8 +409,8 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
                               </span>
                             )}
 
-                          {/* Estado en vivo o posición */}
-                          {p.currentLiveValue && (
+                          {/* Estado en vivo o posición (solo mientras el reto no esté resuelto) */}
+                          {!isResolved && p.currentLiveValue && (
                             <span className="challenge-card__live-pill">
                               {p.currentLiveValue}
                             </span>
@@ -433,7 +434,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
 
                 {/* Lado derecho: Badges de resultado o pago */}
                 <div className="challenge-card__participant-right">
-                  {isBusted && (
+                  {!isWinner && isBusted && (
                     <span className="challenge-card__busted-tag">
                       <AlertTriangle size={11} />
                       <span>¡Se pasó!</span>

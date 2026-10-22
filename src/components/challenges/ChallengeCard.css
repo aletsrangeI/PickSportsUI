@@ -327,12 +327,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px 12px;
   padding: 10px 14px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid transparent;
   transition: background 0.15s ease, border-color 0.15s ease;
+  flex-wrap: wrap;
 }
 
 .challenge-card__participant-row:hover {
@@ -357,7 +358,7 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 1 1 180px;
 }
 
 .challenge-card__avatar-wrap {
@@ -448,6 +449,7 @@
 .challenge-card__pick-pill {
   font-size: 0.78rem;
   color: #cbd5e1;
+  white-space: nowrap;
 }
 
 .challenge-card__pick-pill strong {
@@ -469,8 +471,10 @@
 .challenge-card__participant-right {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .challenge-card__winner-tag {
@@ -668,6 +672,23 @@
 
   .challenge-card__participant-row {
     padding: 8px 10px;
+    gap: 8px;
+  }
+
+  @media (max-width: 480px) {
+    .challenge-card {
+      padding: 14px 12px;
+    }
+
+    .challenge-card__participant-main {
+      flex: 1 1 100%;
+    }
+
+    .challenge-card__participant-right {
+      width: 100%;
+      justify-content: flex-end;
+      padding-left: 44px;
+    }
   }
 
   .challenge-card__actions {
