@@ -16,6 +16,7 @@ import { SettingsPage } from './pages/Settings/SettingsPage';
 import { ActivatePage } from './pages/Auth/ActivatePage';
 import { LiguillaPage } from './components/liguilla/LiguillaPage';
 import { LiguillaRouteGuard } from './components/liguilla/LiguillaRouteGuard';
+import { ServiceWorkerNavigationListener } from './components/common/ServiceWorkerNavigationListener';
 
 import { useGetQuinielasQuery } from './services/api';
 
@@ -63,6 +64,7 @@ const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
+      <ServiceWorkerNavigationListener />
       <Routes>
         {/* Rutas Públicas */}
         <Route
