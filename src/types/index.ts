@@ -907,3 +907,56 @@ export interface SettleChallengeDebtRequest {
   memberId: number;
 }
 
+
+// ===== SPEC-014: PickSports Wrapped (contrato; espejo de DTO/Wrapped/WrappedDtos.cs) =====
+export interface WrappedSlideDto {
+  storyId: string;
+  slideType: string;
+  fallbackLevel: number;
+  headline: string;
+  subtitle: string;
+  matchTitle?: string | null;
+  scoreDisplay?: string | null;
+  bodyText: string;
+  highlightMetric?: string | null;
+  mentionedUserName?: string | null;
+  mentionedUserAvatarUrl?: string | null;
+  backgroundGradient: string;
+}
+
+export interface WrappedCardStatDto {
+  label: string;
+  value: string;
+}
+
+export interface WrappedFinalCardDto {
+  displayName: string;
+  avatarUrl?: string | null;
+  seasonName: string;
+  finalPosition: number;
+  totalMembers: number;
+  archetypeEmoji: string;
+  archetypeTitle: string;
+  themeColor: string;
+  stats: WrappedCardStatDto[];
+}
+
+export interface SeasonWrappedDto {
+  seasonId: number;
+  seasonName: string;
+  finalPosition: number;
+  totalMembers: number;
+  archetypeCode: string;
+  archetypeEmoji: string;
+  archetypeTitle: string;
+  archetypeDescription: string;
+  themeColor: string;
+  slides: WrappedSlideDto[];
+  finalCard: WrappedFinalCardDto;
+}
+
+export interface WrappedAvailabilityDto {
+  isAvailable: boolean;
+  seasonId?: number | null;
+  seasonName?: string | null;
+}

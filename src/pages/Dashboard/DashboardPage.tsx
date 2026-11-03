@@ -38,6 +38,7 @@ import { MatchPicker } from '../../components/picks/MatchPicker';
 import { PicksMatrix } from '../../components/picks/PicksMatrix';
 import { CustomEventsArena } from '../../components/events/CustomEventsArena';
 import { PendingChallengesBanner } from '../../components/challenges/PendingChallengesBanner';
+import { WrappedBanner } from '../Wrapped/WrappedBanner';
 import './DashboardPage.css';
 
 interface OutletContextType {
@@ -358,6 +359,9 @@ export const DashboardPage: React.FC = () => {
           <CustomEventsArena quiniela={quiniela} activeMode="picks" />
         ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          {/* SPEC-014: Banner de PickSports Wrapped */}
+          {quiniela?.id && <WrappedBanner quinielaId={quiniela.id} />}
+
           {/* Banner Efímero de Retos Pendientes (SPEC-022) */}
           {quiniela?.id && (
             <PendingChallengesBanner

@@ -40,6 +40,8 @@ import type {
   UnclaimedMemberItem,
   UnclaimedQuinielaMembersData,
   WeeklyBulletinData,
+  SeasonWrappedDto,
+  WrappedAvailabilityDto,
   EventRoundSummaryDto,
   EventOptionDto,
   EventQuestionDto,
@@ -144,7 +146,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents', 'Liguilla', 'Challenges'],
+  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents', 'Liguilla', 'Challenges', 'Wrapped'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
     getLeagues: builder.query<ApiResponse<League[]>, void>({
@@ -443,6 +445,46 @@ export const api = createApi({
         { type: 'Weeks', id: quinielaId },
         { type: 'QuinielaDetail', id: quinielaId },
       ],
+    }),
+
+    // SPEC-014 PickSports Wrapped
+    getSeasonWrapped: builder.query<
+      ApiResponse<SeasonWrappedDto>,
+      { quinielaId: number; seasonId: number }
+    >({
+      query: ({ quinielaId, seasonId }) =>
+        `/quinielas/${quinielaId}/seasons/${seasonId}/wrapped`,
+      providesTags: (_result, _error, { quinielaId, seasonId }) => [
+        { type: 'Wrapped', id: `${quinielaId}-${seasonId}` },
+      ],
+    }),
+
+    getWrappedAvailability: builder.query<ApiResponse<WrappedAvailabilityDto>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/wrapped/availability`,
+      providesTags: (_result, _error, quinielaId) => [{ type: 'Wrapped', id: `availability-${quinielaId}` }],
+    }),
+
+    generateAllWrapped: builder.mutation<
+      ApiResponse<unknown>,
+      { quinielaId: number; seasonId: number }
+    >({
+      query: ({ quinielaId, seasonId }) => ({
+        url: `/quinielas/${quinielaId}/seasons/${seasonId}/wrapped/generate-all`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Wrapped'],
+    }),
+
+    setSeasonFinished: builder.mutation<
+      ApiResponse<unknown>,
+      { seasonId: number; isFinished: boolean }
+    >({
+      query: ({ seasonId, isFinished }) => ({
+        url: `/seasons/${seasonId}/finish`,
+        method: 'PUT',
+        body: { isFinished },
+      }),
+      invalidatesTags: ['Wrapped', 'Seasons'],
     }),
 
     getAwards: builder.query<
@@ -772,6 +814,11 @@ export const {
   useGetAwardsQuery,
   // SPEC-012 & SPEC-021 Boletín Semanal
   useGetBulletinQuery,
+  // SPEC-014 Wrapped
+  useGetSeasonWrappedQuery,
+  useGetWrappedAvailabilityQuery,
+  useGenerateAllWrappedMutation,
+  useSetSeasonFinishedMutation,
   useUpdateBulletinAnnouncementMutation,
   useRegenerateBulletinChronicleMutation,
   useUpdateBulletinChronicleMutation,

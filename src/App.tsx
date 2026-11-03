@@ -11,6 +11,7 @@ import { StandingsPage } from './pages/Standings/StandingsPage';
 import { AwardsPage } from './pages/Awards/AwardsPage';
 import { WhatsAppPage } from './pages/WhatsApp/WhatsAppPage';
 import { BulletinPage } from './pages/Bulletin/BulletinPage';
+import { WrappedPage } from './pages/Wrapped/WrappedPage';
 import { MigrationPage } from './pages/Admin/MigrationPage';
 import { SettingsPage } from './pages/Settings/SettingsPage';
 import { ActivatePage } from './pages/Auth/ActivatePage';
@@ -124,6 +125,16 @@ export const App: React.FC = () => {
             }
           />
         </Route>
+
+        {/* SPEC-014 Wrapped: pantalla completa, sin AppLayout (sin BottomNav) */}
+        <Route
+          path="/wrapped/:quinielaId/:seasonId"
+          element={
+            <ProtectedRoute>
+              <WrappedPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

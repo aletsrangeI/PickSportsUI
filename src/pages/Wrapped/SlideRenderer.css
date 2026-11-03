@@ -1,0 +1,190 @@
+.wrapped-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  color: #fff;
+  font-family: var(--font-family-sans);
+  padding:
+    calc(var(--safe-area-top) + 84px) 28px
+    calc(var(--safe-area-bottom) + 48px);
+}
+
+.wrapped-slide__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.45;
+  pointer-events: none;
+  animation: wrapped-float 9s ease-in-out infinite alternate;
+}
+
+.wrapped-slide__orb--a {
+  width: 70vmin;
+  height: 70vmin;
+  top: -18vmin;
+  right: -22vmin;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.wrapped-slide__orb--b {
+  width: 60vmin;
+  height: 60vmin;
+  bottom: -20vmin;
+  left: -20vmin;
+  background: rgba(0, 0, 0, 0.5);
+  animation-delay: -4s;
+}
+
+.wrapped-slide__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 4px 4px;
+  mix-blend-mode: overlay;
+}
+
+.wrapped-slide__content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.wrapped-slide__content > * {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: wrapped-rise 0.6s var(--transition-normal) forwards;
+  animation-delay: calc(var(--i, 0) * 110ms + 80ms);
+}
+
+.wrapped-slide__badge {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.wrapped-slide__eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.wrapped-slide__headline {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: clamp(2.1rem, 9vw, 3.4rem);
+  line-height: 1.04;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  text-shadow: 0 6px 30px rgba(0, 0, 0, 0.35);
+}
+
+.wrapped-slide__match {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-lg);
+}
+
+.wrapped-slide__match-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.wrapped-slide__score {
+  font-family: var(--font-family-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.wrapped-slide__score--solo {
+  margin: 0;
+  font-size: 2.6rem;
+}
+
+.wrapped-slide__metric {
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.92);
+  color: #0d1117;
+  font-weight: 800;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+
+.wrapped-slide__body {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  text-wrap: pretty;
+}
+
+.wrapped-slide__mention {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md) var(--space-xs) var(--space-xs);
+  border-radius: var(--radius-full);
+}
+
+.wrapped-slide__mention-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.wrapped-slide__glass {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes wrapped-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wrapped-float {
+  to {
+    transform: translate3d(4vmin, 5vmin, 0) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrapped-slide__content > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .wrapped-slide__orb {
+    animation: none;
+  }
+}
