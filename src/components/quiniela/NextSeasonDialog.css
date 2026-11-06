@@ -1,0 +1,25 @@
+/* Diálogo "Nueva temporada" - reutiliza .modal, .btn y .form-group globales */
+.next-season-dialog__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.next-season-dialog__form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.next-season-dialog__text {
+  margin: 0 0 var(--space-md, 16px);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.next-season-dialog__text strong {
+  color: var(--text-main);
+}

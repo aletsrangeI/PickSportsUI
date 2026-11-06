@@ -11,6 +11,7 @@ import type {
   QuinielaMember,
   CreateQuinielaRequest,
   JoinQuinielaRequest,
+  StartNextSeasonRequest,
   RegisterRequest,
   LoginRequest,
   League,
@@ -255,6 +256,18 @@ export const api = createApi({
         body,
       }),
       invalidatesTags: ['Quinielas'],
+    }),
+
+    startNextSeason: builder.mutation<
+      ApiResponse<Quiniela>,
+      { quinielaId: number; request: StartNextSeasonRequest }
+    >({
+      query: ({ quinielaId, request }) => ({
+        url: `/quinielas/${quinielaId}/next-season`,
+        method: 'POST',
+        body: request,
+      }),
+      invalidatesTags: ['Quinielas', 'QuinielaDetail'],
     }),
 
     updateMemberPayment: builder.mutation<
@@ -791,6 +804,7 @@ export const {
   useLazyGetClaimLinksQuery,
   useCreateQuinielaMutation,
   useJoinQuinielaMutation,
+  useStartNextSeasonMutation,
   useUpdateMemberPaymentMutation,
   // ESPN
   useGetSeasonsQuery,

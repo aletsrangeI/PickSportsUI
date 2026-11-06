@@ -40,6 +40,13 @@ export interface Quiniela {
   userRole?: 'OWNER' | 'ADMIN' | 'MEMBER';
   membersCount: number;
   created: string;
+  seasonId: number | null;
+  seasonName: string | null;
+  isArchived: boolean;
+}
+
+export interface StartNextSeasonRequest {
+  name?: string;
 }
 
 export interface QuinielaMember {
