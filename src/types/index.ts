@@ -43,6 +43,52 @@ export interface Quiniela {
   seasonId: number | null;
   seasonName: string | null;
   isArchived: boolean;
+  /** SPEC-013: interruptor de gamificación (trofeos, rachas). */
+  gamificationEnabled?: boolean;
+}
+
+// ─── SPEC-013 Gamificación: trofeos y rachas ───────────────────────────────
+export type AchievementTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
+export type HeatStatus = 'FIRE' | 'ICE';
+
+export interface AchievementDto {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  tier: AchievementTier;
+  gamerscore: number;
+  titleName: string | null;
+  seasonId: number;
+  unlockedAt: string;
+  isSeen: boolean;
+}
+
+export interface LockedAchievementDto {
+  code: string;
+  name: string;
+  description: string;
+  tier: AchievementTier;
+  gamerscore: number;
+}
+
+export interface SeasonScoreDto {
+  seasonId: number;
+  seasonName: string;
+  gamerscore: number;
+}
+
+export interface AchievementShowcaseDto {
+  seasonId: number | null;
+  seasonName: string | null;
+  gamerscore: number;
+  level: string;
+  nextLevelAt: number | null;
+  equippedTitleCode: string | null;
+  equippedTitle: string | null;
+  availableSeasons: SeasonScoreDto[];
+  unlocked: AchievementDto[];
+  locked: LockedAchievementDto[];
 }
 
 export interface StartNextSeasonRequest {
@@ -326,6 +372,10 @@ export interface MemberStanding {
   empatesFallidos: number;
   currentStreak: number;
   bestStreak: number;
+  /** SPEC-013: racha vigente en la jornada (solo tabla semanal con gamificación). */
+  heat?: HeatStatus | null;
+  /** SPEC-013: título honorífico equipado (solo tabla semanal con gamificación). */
+  equippedTitle?: string | null;
 }
 
 export interface QuinielaStandingsData {

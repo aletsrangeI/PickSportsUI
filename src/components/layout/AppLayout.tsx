@@ -7,6 +7,7 @@ import { JoinQuinielaModal } from '../quiniela/JoinQuinielaModal';
 import { PushNotificationPrompt } from '../notifications/PushNotificationPrompt';
 import { UpdateNotificationBanner } from '../common/UpdateNotificationBanner';
 import { ForceUpdateModal } from '../common/ForceUpdateModal';
+import { AchievementToastHost } from '../achievements/AchievementToastHost';
 import { useAppVersionMonitor } from '../../hooks/useAppVersionMonitor';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState } from '../../store';
@@ -91,6 +92,7 @@ export const AppLayout: React.FC = () => {
       />
 
       {isAuthenticated && <PushNotificationPrompt />}
+      {isAuthenticated && <AchievementToastHost />}
 
       <main className="app-main">
         <Outlet context={{ openCreateModal: handleOpenCreate, openJoinModal: handleOpenJoin }} />

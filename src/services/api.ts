@@ -63,6 +63,8 @@ import type {
   CreateChallengeRequest,
   RespondChallengeRequest,
   SettleChallengeDebtRequest,
+  AchievementDto,
+  AchievementShowcaseDto,
 } from '../types';
 
 const baseQuery = fetchBaseQuery({
@@ -147,7 +149,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents', 'Liguilla', 'Challenges', 'Wrapped'],
+  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents', 'Liguilla', 'Challenges', 'Wrapped', 'Achievements'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
     getLeagues: builder.query<ApiResponse<League[]>, void>({
@@ -783,6 +785,46 @@ export const api = createApi({
       }),
       invalidatesTags: ['Challenges'],
     }),
+    // ─── SPEC-013 Gamificación: trofeos y rachas ──────────────────────────────
+    getUnseenAchievements: builder.query<ApiResponse<AchievementDto[]>, void>({
+      query: () => '/achievements/unseen',
+      providesTags: [{ type: 'Achievements', id: 'UNSEEN' }],
+    }),
+    acknowledgeAchievement: builder.mutation<ApiResponse<AchievementDto>, number>({
+      query: (id) => ({
+        url: `/achievements/${id}/acknowledge`,
+        method: 'POST',
+      }),
+      // No invalida UNSEEN: el host de toasts lleva su propia cola local y evita recargas en cadena.
+      invalidatesTags: [{ type: 'Achievements', id: 'SHOWCASE' }],
+    }),
+    getMyAchievements: builder.query<ApiResponse<AchievementShowcaseDto>, number | void>({
+      query: (seasonId) => (seasonId ? `/achievements/me?seasonId=${seasonId}` : '/achievements/me'),
+      providesTags: [{ type: 'Achievements', id: 'SHOWCASE' }],
+    }),
+    equipTitle: builder.mutation<ApiResponse<AchievementShowcaseDto>, { code: string | null }>({
+      query: (body) => ({
+        url: '/achievements/me/title',
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Achievements', id: 'SHOWCASE' }],
+    }),
+    setQuinielaGamification: builder.mutation<
+      ApiResponse<Quiniela>,
+      { quinielaId: number; enabled: boolean }
+    >({
+      query: ({ quinielaId, enabled }) => ({
+        url: `/quinielas/${quinielaId}/gamification`,
+        method: 'PUT',
+        body: { enabled },
+      }),
+      invalidatesTags: (_result, _error, { quinielaId }) => [
+        'Quinielas',
+        { type: 'QuinielaDetail', id: quinielaId },
+        'Standings',
+      ],
+    }),
   }),
 });
 
@@ -878,6 +920,13 @@ export const {
   useRespondChallengeMutation,
   useSettleChallengeDebtMutation,
   useCancelChallengeMutation,
+  // SPEC-013 Gamificación
+  useGetUnseenAchievementsQuery,
+  useLazyGetUnseenAchievementsQuery,
+  useAcknowledgeAchievementMutation,
+  useGetMyAchievementsQuery,
+  useEquipTitleMutation,
+  useSetQuinielaGamificationMutation,
 } = api;
 
 

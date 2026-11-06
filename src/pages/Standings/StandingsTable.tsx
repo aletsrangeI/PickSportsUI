@@ -101,11 +101,15 @@ export const StandingsTable: React.FC<StandingsTableProps> = ({ data, isWeeklyVi
                 src={member.avatarUrl}
                 alt={member.alias}
                 size="sm"
+                heat={member.heat}
               />
               <div className="standings-table__name-col">
                 <span className="standings-table__alias">{member.alias}</span>
                 {member.displayName && member.displayName !== member.alias && (
                   <span className="standings-table__display-name">{member.displayName}</span>
+                )}
+                {member.equippedTitle && (
+                  <span className="standings-table__title">{member.equippedTitle}</span>
                 )}
               </div>
             </div>

@@ -34,6 +34,10 @@ import {
 import { ClaimLinksModal } from '../../components/admin/ClaimLinksModal';
 import { PushNotificationPrompt } from '../../components/notifications/PushNotificationPrompt';
 import { UserAvatar } from '../../components/common/UserAvatar';
+import { TrophyShowcase } from '../../components/achievements/TrophyShowcase';
+import { TitlePicker } from '../../components/achievements/TitlePicker';
+import { useTrophyShowcase } from '../../components/achievements/useTrophyShowcase';
+import { GamificationToggle } from '../../components/quiniela/GamificationToggle';
 import './SettingsPage.css';
 
 const processImageToSquareBlob = (file: File, size = 512, quality = 0.88): Promise<Blob> => {
@@ -108,6 +112,7 @@ export const SettingsPage: React.FC = () => {
   const [pushActionError, setPushActionError] = useState<string | null>(null);
 
   const isProcessing = isUploading || isDeleting || isSubmitting;
+  const trophies = useTrophyShowcase();
 
   const handleSendQuinielaBroadcast = async () => {
     const targetId = activeQuinielaId || activeQuiniela?.id || allQuinielas[0]?.id;
@@ -340,6 +345,9 @@ export const SettingsPage: React.FC = () => {
                 </span>
               )}
             </div>
+            {trophies.showcase?.equippedTitle && (
+              <p className="settings-profile__username">{trophies.showcase.equippedTitle}</p>
+            )}
             <p className="settings-profile__username">@{user?.username}</p>
             <p className="settings-profile__email">{user?.email}</p>
 
@@ -515,6 +523,48 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* SPEC-013: Trofeos, Gamerscore y títulos */}
+      <div className="settings-section">
+        <div className="settings-section__header">
+          <div className="settings-section__title-row">
+            <Trophy size={18} className="text-primary" />
+            <h3 className="settings-section__title">Trofeos</h3>
+          </div>
+        </div>
+
+        {activeQuiniela && <GamificationToggle quiniela={activeQuiniela} />}
+
+        <div className="settings-card">
+          {trophies.isLoading ? (
+            <p className="trophy-showcase-state">
+              <Loader2 size={16} className="spin" aria-hidden="true" /> Cargando trofeos...
+            </p>
+          ) : trophies.showcase ? (
+            <>
+              <TrophyShowcase
+                showcase={trophies.showcase}
+                isFetching={trophies.isFetching}
+                onSeasonChange={trophies.setSeasonId}
+              />
+              <TitlePicker
+                unlocked={trophies.showcase.unlocked}
+                equippedTitleCode={trophies.showcase.equippedTitleCode}
+                equippedTitle={trophies.showcase.equippedTitle}
+                isBusy={trophies.isEquipping}
+                error={trophies.equipError}
+                onEquip={trophies.equip}
+              />
+            </>
+          ) : (
+            <p className="trophy-showcase-state">
+              {trophies.isError
+                ? trophies.errorMessage || 'No se pudieron cargar tus trofeos.'
+                : 'Aún no hay trofeos. Se activan cuando una quiniela con gamificación califica su primera jornada.'}
+            </p>
+          )}
+        </div>
+      </div>
 
       {/* Sección de Estado de Notificaciones en este Dispositivo */}
       <div className="settings-section">

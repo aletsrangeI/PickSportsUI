@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Flame, Snowflake } from 'lucide-react';
 import './UserAvatar.css';
 
 interface UserAvatarProps {
@@ -7,6 +8,8 @@ interface UserAvatarProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   fallbackText?: string;
+  /** SPEC-013: racha vigente. FIRE = On-Fire, ICE = En la Nevera. */
+  heat?: 'FIRE' | 'ICE' | null;
 }
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({
@@ -15,6 +18,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   size = 'sm',
   className = '',
   fallbackText,
+  heat = null,
 }) => {
   const [hasError, setHasError] = useState(false);
 
@@ -28,7 +32,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 
   const showImage = Boolean(src && !hasError);
 
-  return (
+  const avatar = (
     <div className={`user-avatar user-avatar--${size} ${className}`} title={alt}>
       {showImage ? (
         <img
@@ -44,5 +48,21 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
         </span>
       )}
     </div>
+  );
+
+  if (!heat) return avatar;
+
+  const isFire = heat === 'FIRE';
+  return (
+    <span
+      className={`user-avatar-heat user-avatar-heat--${isFire ? 'fire' : 'ice'} user-avatar-heat--${size}`}
+      title={isFire ? `${alt}: On-Fire` : `${alt}: En la Nevera`}
+    >
+      {avatar}
+      <span className="user-avatar-heat__badge" aria-hidden="true">
+        {isFire ? <Flame size="100%" strokeWidth={2.4} /> : <Snowflake size="100%" strokeWidth={2.4} />}
+      </span>
+      <span className="visually-hidden-heat">{isFire ? 'En racha de aciertos' : 'En racha de fallos'}</span>
+    </span>
   );
 };
