@@ -65,6 +65,12 @@ import type {
   SettleChallengeDebtRequest,
   AchievementDto,
   AchievementShowcaseDto,
+  DuelScheduleDto,
+  DuelFixtureDto,
+  DuelStandingDto,
+  DuelMatchupDto,
+  HallOfFameEntryDto,
+  UpdateDuelCupRequest,
 } from '../types';
 
 const baseQuery = fetchBaseQuery({
@@ -149,7 +155,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents', 'Liguilla', 'Challenges', 'Wrapped', 'Achievements'],
+  tagTypes: ['Quinielas', 'QuinielaDetail', 'Auth', 'Seasons', 'Weeks', 'Matches', 'EspnHealth', 'Leagues', 'Picks', 'Standings', 'Awards', 'Bulletin', 'CustomEvents', 'Liguilla', 'Challenges', 'Wrapped', 'Achievements', 'Duels'],
   endpoints: (builder) => ({
     // ─── Leagues ─────────────────────────────────────────────────────────────
     getLeagues: builder.query<ApiResponse<League[]>, void>({
@@ -825,6 +831,43 @@ export const api = createApi({
         'Standings',
       ],
     }),
+    // ─── SPEC-013 Etapa 2: Duelos y Salón de la Fama ──────────────────────────
+    getDuelSchedule: builder.query<ApiResponse<DuelScheduleDto>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/duels/schedule`,
+      providesTags: (_r, _e, quinielaId) => [{ type: 'Duels', id: `SCHEDULE-${quinielaId}` }],
+    }),
+    generateDuelSchedule: builder.mutation<ApiResponse<DuelScheduleDto>, number>({
+      query: (quinielaId) => ({
+        url: `/quinielas/${quinielaId}/duels/schedule`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Duels'],
+    }),
+    getDuels: builder.query<ApiResponse<DuelFixtureDto[]>, { quinielaId: number; weekNumber?: number }>({
+      query: ({ quinielaId, weekNumber }) =>
+        weekNumber ? `/quinielas/${quinielaId}/duels?weekNumber=${weekNumber}` : `/quinielas/${quinielaId}/duels`,
+      providesTags: (_r, _e, { quinielaId }) => [{ type: 'Duels', id: `FIXTURES-${quinielaId}` }],
+    }),
+    getDuelStandings: builder.query<ApiResponse<DuelStandingDto[]>, number>({
+      query: (quinielaId) => `/quinielas/${quinielaId}/duels/standings`,
+      providesTags: (_r, _e, quinielaId) => [{ type: 'Duels', id: `STANDINGS-${quinielaId}` }],
+    }),
+    getDuelMatchup: builder.query<ApiResponse<DuelMatchupDto>, { quinielaId: number; fixtureId: number }>({
+      query: ({ quinielaId, fixtureId }) => `/quinielas/${quinielaId}/duels/${fixtureId}/matchup`,
+      providesTags: (_r, _e, { fixtureId }) => [{ type: 'Duels', id: `MATCHUP-${fixtureId}` }],
+    }),
+    updateDuelCup: builder.mutation<ApiResponse<HallOfFameEntryDto>, UpdateDuelCupRequest>({
+      query: ({ quinielaId, cupName, punishmentText }) => ({
+        url: `/quinielas/${quinielaId}/duels/cup`,
+        method: 'PUT',
+        body: { cupName, punishmentText },
+      }),
+      invalidatesTags: ['Duels'],
+    }),
+    getHallOfFame: builder.query<ApiResponse<HallOfFameEntryDto[]>, void>({
+      query: () => '/duels/hall-of-fame',
+      providesTags: [{ type: 'Duels', id: 'HOF' }],
+    }),
   }),
 });
 
@@ -927,6 +970,14 @@ export const {
   useGetMyAchievementsQuery,
   useEquipTitleMutation,
   useSetQuinielaGamificationMutation,
+  // SPEC-013 Etapa 2 Duelos
+  useGetDuelScheduleQuery,
+  useGenerateDuelScheduleMutation,
+  useGetDuelsQuery,
+  useGetDuelStandingsQuery,
+  useGetDuelMatchupQuery,
+  useUpdateDuelCupMutation,
+  useGetHallOfFameQuery,
 } = api;
 
 

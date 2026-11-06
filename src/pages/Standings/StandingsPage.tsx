@@ -18,7 +18,7 @@ import {
   useGetPendingChallengesQuery,
 } from '../../services/api';
 import { StandingsTable } from './StandingsTable';
-import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw, Flame, Swords, Plus, Mail } from 'lucide-react';
+import { Trophy, Award, Info, CheckCircle2, AlertCircle, RefreshCw, Flame, Swords, Plus, Mail, Shield } from 'lucide-react';
 import { AWARD_META } from '../Awards/AwardsPage';
 import { UserAvatar } from '../../components/common/UserAvatar';
 import {
@@ -30,6 +30,7 @@ import { LiquidGlass } from '@sohumsuthar/liquid-glass';
 import { ChallengeCard } from '../../components/challenges/ChallengeCard';
 import { CreateChallengeModal } from '../../components/challenges/CreateChallengeModal';
 import { RespondChallengeModal } from '../../components/challenges/RespondChallengeModal';
+import { DuelsTab } from '../../components/duels/DuelsTab';
 import type { Challenge } from '../../types';
 import '../Awards/AwardsPage.css';
 import './StandingsPage.css';
@@ -37,7 +38,7 @@ import './StandingsPage.css';
 export const StandingsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') === 'challenges' ? 'challenges' : 'standings';
-  const [mainTab, setMainTab] = useState<'standings' | 'challenges' | 'awards'>(initialTab);
+  const [mainTab, setMainTab] = useState<'standings' | 'challenges' | 'awards' | 'duels'>(initialTab);
   const [standingsTab, setStandingsTab] = useState<'weekly' | 'general'>('weekly');
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null);
   const [selectedWeekId, setSelectedWeekId] = useState<number | null>(null);
@@ -78,6 +79,14 @@ export const StandingsPage: React.FC = () => {
       setMainTab('standings');
     }
   }, [isCustomEvents, mainTab]);
+
+  // Duelos solo existe con gamificación activa: si cambia la quiniela o se apaga, volver a Posiciones.
+  const duelsAvailable = !!activeQuiniela?.gamificationEnabled;
+  useEffect(() => {
+    if (activeQuiniela && !duelsAvailable && mainTab === 'duels') {
+      setMainTab('standings');
+    }
+  }, [activeQuiniela, duelsAvailable, mainTab]);
 
   const {
     data: eventStandingsResponse,
@@ -235,7 +244,7 @@ export const StandingsPage: React.FC = () => {
     }
   }, [searchParams, weekChallenges, pendingChallenges, selectedWeekId]);
 
-  const handleTabChange = (tab: 'standings' | 'challenges' | 'awards') => {
+  const handleTabChange = (tab: 'standings' | 'challenges' | 'awards' | 'duels') => {
     setMainTab(tab);
     const weekPool = displayWeeks.length > 0 ? displayWeeks : weeks;
     if (weekPool.length === 0) return;
@@ -324,6 +333,8 @@ export const StandingsPage: React.FC = () => {
               ? 'Tabla de Posiciones'
               : mainTab === 'challenges'
               ? 'Retos y Apuestas Sociales'
+              : mainTab === 'duels'
+              ? 'Duelos del Coliseo'
               : 'Premios y Galardones'}
           </h1>
           <p className="standings-page__subtitle">
@@ -334,6 +345,8 @@ export const StandingsPage: React.FC = () => {
               ? 'Criterio de desempate en cascada estricto'
               : mainTab === 'challenges'
               ? 'Duelos y apuestas paralelas entre compañeros'
+              : mainTab === 'duels'
+              ? 'Uno contra uno: gana quien acierte más cada fecha'
               : 'Reconocimientos y distinciones por jornada'}
           </p>
         </div>
@@ -438,11 +451,24 @@ export const StandingsPage: React.FC = () => {
             <Award size={16} />
             <span>Premios</span>
           </button>
+          {activeQuiniela?.gamificationEnabled && (
+            <button
+              role="tab"
+              aria-selected={mainTab === 'duels'}
+              className={`standings-page__main-tab ${
+                mainTab === 'duels' ? 'standings-page__main-tab--active' : ''
+              }`}
+              onClick={() => handleTabChange('duels')}
+            >
+              <Shield size={16} />
+              <span>Duelos</span>
+            </button>
+          )}
         </LiquidGlass>
       )}
 
       {/* Controles de Selección */}
-      {isCustomEvents ? (
+      {mainTab === 'duels' ? null : isCustomEvents ? (
         <div className="standings-page__controls">
           <div className="standings-page__selector-group">
             <label className="standings-page__label">Ronda / Evento</label>
@@ -730,6 +756,11 @@ export const StandingsPage: React.FC = () => {
             )}
           </>
         )
+      )}
+
+      {/* VISTA: DUELOS (SPEC-013 Etapa 2) */}
+      {mainTab === 'duels' && activeQuiniela?.gamificationEnabled && (
+        <DuelsTab quinielaId={quinielaId} isOwnerOrAdmin={isOwnerOrAdmin} currentUserId={currentUser?.id} />
       )}
 
       {/* VISTA 2: PREMIOS Y GALARDONES */}

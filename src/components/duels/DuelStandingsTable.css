@@ -1,0 +1,140 @@
+.duel-standings {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.duel-standings__scroll {
+  overflow-x: auto;
+}
+
+.duel-standings__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.duel-standings__caption {
+  text-align: left;
+  padding: var(--space-md) var(--space-md) var(--space-xs);
+  font-family: var(--font-family-heading);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.duel-standings__th {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.duel-standings__th--player {
+  text-align: left;
+}
+
+.duel-standings__th--rank {
+  width: 44px;
+}
+
+.duel-standings__th--points {
+  color: var(--color-accent);
+}
+
+.duel-standings__row {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color var(--transition-fast);
+}
+
+.duel-standings__row:last-child {
+  border-bottom: none;
+}
+
+.duel-standings__row:hover {
+  background: var(--bg-card-hover);
+}
+
+.duel-standings__row--me {
+  background: rgba(var(--color-primary-rgb), 0.08);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+.duel-standings__row--leader .duel-standings__cell--rank {
+  color: var(--color-accent);
+}
+
+.duel-standings__cell {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.duel-standings__cell--rank {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.duel-standings__cell--player {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  text-align: left;
+  min-width: 170px;
+}
+
+.duel-standings__name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.duel-standings__alias {
+  font-weight: 600;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.duel-standings__title {
+  font-size: 0.7rem;
+  color: var(--color-accent);
+  letter-spacing: 0.03em;
+}
+
+.duel-standings__cell--points {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.duel-standings__legend {
+  margin: 0;
+  padding: var(--space-xs) var(--space-md) var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.duel-standings__empty {
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 520px) {
+  .duel-standings__th--hits,
+  .duel-standings__cell--hits {
+    display: none;
+  }
+}

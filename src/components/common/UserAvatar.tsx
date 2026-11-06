@@ -53,8 +53,9 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   if (!heat) return avatar;
 
   const isFire = heat === 'FIRE';
+  // El envoltorio es un <div> (inline-flex por CSS) porque contiene el <div> del avatar: un <span> con <div> dentro es HTML invalido.
   return (
-    <span
+    <div
       className={`user-avatar-heat user-avatar-heat--${isFire ? 'fire' : 'ice'} user-avatar-heat--${size}`}
       title={isFire ? `${alt}: On-Fire` : `${alt}: En la Nevera`}
     >
@@ -63,6 +64,6 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
         {isFire ? <Flame size="100%" strokeWidth={2.4} /> : <Snowflake size="100%" strokeWidth={2.4} />}
       </span>
       <span className="visually-hidden-heat">{isFire ? 'En racha de aciertos' : 'En racha de fallos'}</span>
-    </span>
+    </div>
   );
 };

@@ -1,0 +1,119 @@
+.cup-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid rgba(232, 192, 102, 0.35);
+  border-radius: var(--radius-md);
+}
+
+.cup-editor__heading {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: 0.95rem;
+  color: var(--color-accent);
+}
+
+.cup-editor__field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cup-editor__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.cup-editor__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  background: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.cup-editor__input--area {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.cup-editor__input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.cup-editor__counter {
+  align-self: flex-end;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.cup-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.cup-editor__submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--color-accent);
+  color: #1a1204;
+  border: none;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cup-editor__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cup-editor__spin {
+  animation: cup-editor-spin 1s linear infinite;
+}
+
+@keyframes cup-editor-spin {
+  to { transform: rotate(360deg); }
+}
+
+.cup-editor__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+}
+
+.cup-editor__status--ok {
+  color: var(--color-primary);
+}
+
+.cup-editor__status--error {
+  color: var(--color-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cup-editor__spin {
+    animation: none;
+  }
+}

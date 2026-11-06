@@ -1012,6 +1012,99 @@ export interface SeasonWrappedDto {
   finalCard: WrappedFinalCardDto;
 }
 
+// ─── SPEC-013 Etapa 2: Duelos y Salón de la Fama ─────────────────────────────
+export type DuelSide = 'HOME' | 'AWAY';
+export type DuelResult = 'HOME' | 'AWAY' | 'DRAW' | 'BYE';
+
+export interface DuelParticipantDto {
+  memberId: number;
+  userId: number;
+  alias: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  equippedTitle?: string | null;
+}
+
+export interface DuelFixtureDto {
+  id: number;
+  weekNumber: number;
+  round: number;
+  leg: number;
+  home: DuelParticipantDto;
+  /** null = Bye (Home descansa). */
+  away: DuelParticipantDto | null;
+  homeHits: number;
+  awayHits: number;
+  result: DuelResult | null;
+  isResolved: boolean;
+  wonByAdvantage: boolean;
+  homeRankBefore?: number | null;
+  awayRankBefore?: number | null;
+}
+
+export interface DuelScheduleDto {
+  quinielaId: number;
+  totalWeeks: number;
+  roundsPerLeg: number;
+  legs: number;
+  duelWeeks: number[];
+  restWeeks: number[];
+  generatedAt?: string | null;
+  isClosed: boolean;
+  championMemberId?: number | null;
+  cupName?: string | null;
+  punishmentText?: string | null;
+}
+
+export interface DuelStandingDto {
+  rank: number;
+  participant: DuelParticipantDto;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  points: number;
+  seasonHits: number;
+}
+
+export interface DuelMatchupMatchDto {
+  matchId: number;
+  homeTeam: string;
+  awayTeam: string;
+  homePick?: string | null;
+  awayPick?: string | null;
+  differential: boolean;
+  isFinished: boolean;
+  winner: DuelSide | null;
+}
+
+export interface DuelMatchupDto {
+  fixture: DuelFixtureDto;
+  matches: DuelMatchupMatchDto[];
+  challengerAdvantage: DuelSide | null;
+}
+
+export interface HallOfFameEntryDto {
+  quinielaId: number;
+  quinielaName: string;
+  seasonId?: number | null;
+  seasonName?: string | null;
+  champion: DuelParticipantDto;
+  /** Récord G-E-P, p. ej. "12-3-2". */
+  record: string;
+  points: number;
+  cupName?: string | null;
+  punishmentText?: string | null;
+  title: string;
+  canEditCup: boolean;
+}
+
+export interface UpdateDuelCupRequest {
+  quinielaId: number;
+  cupName: string;
+  punishmentText: string;
+}
+
 export interface WrappedAvailabilityDto {
   isAvailable: boolean;
   seasonId?: number | null;

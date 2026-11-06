@@ -10,6 +10,7 @@ import {
 import type { WeeklyAward } from '../../types';
 import { Trophy, Sparkles, Skull, Moon, HelpCircle, Flame, AlertCircle } from 'lucide-react';
 import { UserAvatar } from '../../components/common/UserAvatar';
+import { HallOfFame } from '../../components/duels/HallOfFame';
 import { getMostRelevantWeekForAwards } from '../../utils/weekSelection';
 import './AwardsPage.css';
 
@@ -251,6 +252,9 @@ export const AwardsPage: React.FC = () => {
           })}
         </div>
       )}
+
+      {/* Salón de la Fama (SPEC-013 Etapa 2) */}
+      <HallOfFame />
     </div>
   );
 };
