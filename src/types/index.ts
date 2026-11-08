@@ -1023,6 +1023,7 @@ export interface DuelParticipantDto {
   displayName?: string | null;
   avatarUrl?: string | null;
   equippedTitle?: string | null;
+  heat?: HeatStatus | null;
 }
 
 export interface DuelFixtureDto {

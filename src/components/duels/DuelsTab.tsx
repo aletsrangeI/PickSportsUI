@@ -173,7 +173,7 @@ export const DuelsTab: React.FC<DuelsTabProps> = ({ quinielaId, isOwnerOrAdmin, 
             return (
               <li key={f.id} className={`duel-card ${mine ? 'duel-card--mine' : ''}`}>
                 <div className={`duel-card__side ${f.result === 'HOME' ? 'duel-card__side--won' : ''}`}>
-                  <UserAvatar src={f.home.avatarUrl} alt={f.home.alias} size="sm" />
+                  <UserAvatar src={f.home.avatarUrl} alt={f.home.alias} size="sm" heat={f.home.heat} />
                   <span className="duel-card__alias">{f.home.alias}</span>
                 </div>
 
@@ -204,7 +204,7 @@ export const DuelsTab: React.FC<DuelsTabProps> = ({ quinielaId, isOwnerOrAdmin, 
                 ) : (
                   <div className={`duel-card__side duel-card__side--away ${f.result === 'AWAY' ? 'duel-card__side--won' : ''}`}>
                     <span className="duel-card__alias">{f.away!.alias}</span>
-                    <UserAvatar src={f.away!.avatarUrl} alt={f.away!.alias} size="sm" />
+                    <UserAvatar src={f.away!.avatarUrl} alt={f.away!.alias} size="sm" heat={f.away!.heat} />
                   </div>
                 )}
 

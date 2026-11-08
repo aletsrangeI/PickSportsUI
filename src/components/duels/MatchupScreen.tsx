@@ -18,7 +18,7 @@ const Fighter: React.FC<{ participant: DuelParticipantDto | null; hits: number; 
   won,
 }) => (
   <div className={`matchup__fighter matchup__fighter--${side.toLowerCase()} ${won ? 'matchup__fighter--won' : ''}`}>
-    <UserAvatar src={participant?.avatarUrl} alt={participant?.alias ?? 'Descanso'} size="xl" />
+    <UserAvatar src={participant?.avatarUrl} alt={participant?.alias ?? 'Descanso'} size="xl" heat={participant?.heat} />
     <span className="matchup__alias">{participant?.alias ?? 'Descanso'}</span>
     {participant?.equippedTitle && <span className="matchup__fighter-title">{participant.equippedTitle}</span>}
     <span className="matchup__hits" aria-label={`${hits} aciertos`}>
