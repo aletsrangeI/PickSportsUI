@@ -88,6 +88,31 @@ const baseQuery = fetchBaseQuery({
 // Create a new mutex
 const mutex = new Mutex();
 
+// localStorage es compartido por todas las ventanas de la app (PWA abierta + ventana de una notificacion),
+// asi que es la fuente de verdad de la sesion; el estado de Redux de cada ventana puede estar desfasado.
+const readStoredSession = () => {
+  let user: UserProfile | null = null;
+  try {
+    const userJson = localStorage.getItem('picksports_user');
+    if (userJson) user = JSON.parse(userJson) as UserProfile;
+  } catch {
+    user = null;
+  }
+  return {
+    token: localStorage.getItem('picksports_token'),
+    refreshToken: localStorage.getItem('picksports_refresh_token'),
+    user,
+  };
+};
+
+// Un fallo de red, un timeout o un 5xx del refresh no significa que la sesion sea invalida.
+const isTransientRefreshFailure = (error: FetchBaseQueryError | undefined) =>
+  !!error &&
+  (error.status === 'FETCH_ERROR' ||
+    error.status === 'TIMEOUT_ERROR' ||
+    error.status === 'PARSING_ERROR' ||
+    (typeof error.status === 'number' && error.status >= 500));
+
 const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   api,
@@ -96,30 +121,49 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   // wait until the mutex is available without locking it
   await mutex.waitForUnlock();
   let result = await baseQuery(args, api, extraOptions);
-  
+
   if (result.error && result.error.status === 401) {
     // checking whether the mutex is locked
     if (!mutex.isLocked()) {
       const release = await mutex.acquire();
       try {
         const state = api.getState() as RootState;
-        const refreshToken = state.auth?.refreshToken || localStorage.getItem('picksports_refresh_token');
-        const token = state.auth?.token || localStorage.getItem('picksports_token');
-        
-        if (refreshToken && token) {
-          const refreshResult = await baseQuery(
-            {
-              url: '/auth/refresh',
-              method: 'POST',
-              body: { AccessToken: token, RefreshToken: refreshToken },
-            },
-            api,
-            extraOptions
-          );
-          
-          if (refreshResult.data) {
-            const data = refreshResult.data as ApiResponse<AuthResponse>;
-            if (data.isSuccess && data.data) {
+        // Token con el que se envio la peticion que acaba de fallar.
+        const sentToken = state.auth?.token || localStorage.getItem('picksports_token');
+
+        // Otra ventana ya pudo renovar la sesion: adoptarla en lugar de gastar el refresh token otra vez.
+        const adoptSessionFromOtherWindow = () => {
+          const stored = readStoredSession();
+          if (stored.token && stored.refreshToken && stored.token !== sentToken) {
+            const user = stored.user ?? state.auth?.user;
+            if (user) {
+              api.dispatch(setCredentials({ token: stored.token, refreshToken: stored.refreshToken, user }));
+              return true;
+            }
+          }
+          return false;
+        };
+
+        if (adoptSessionFromOtherWindow()) {
+          result = await baseQuery(args, api, extraOptions);
+        } else {
+          const stored = readStoredSession();
+          const refreshToken = stored.refreshToken || state.auth?.refreshToken;
+          const token = stored.token || state.auth?.token;
+
+          if (refreshToken && token) {
+            const refreshResult = await baseQuery(
+              {
+                url: '/auth/refresh',
+                method: 'POST',
+                body: { AccessToken: token, RefreshToken: refreshToken },
+              },
+              api,
+              extraOptions
+            );
+
+            const data = refreshResult.data as ApiResponse<AuthResponse> | undefined;
+            if (data?.isSuccess && data.data) {
               api.dispatch(
                 setCredentials({
                   token: data.data.token,
@@ -129,14 +173,17 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
               );
               // retry the initial query
               result = await baseQuery(args, api, extraOptions);
+            } else if (isTransientRefreshFailure(refreshResult.error)) {
+              // Sin red o servidor caido: conservar la sesion y devolver el 401 original.
+            } else if (adoptSessionFromOtherWindow()) {
+              // El refresh fue rechazado porque otra ventana lo rotó primero: usar su sesion.
+              result = await baseQuery(args, api, extraOptions);
             } else {
               api.dispatch(logout());
             }
           } else {
             api.dispatch(logout());
           }
-        } else {
-          api.dispatch(logout());
         }
       } finally {
         // release must be called once the mutex should be released again.
@@ -148,7 +195,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
       result = await baseQuery(args, api, extraOptions);
     }
   }
-  
+
   return result;
 };
 
