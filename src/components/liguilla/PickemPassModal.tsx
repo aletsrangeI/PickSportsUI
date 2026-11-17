@@ -1,11 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { X, Trophy, Sparkles, Shield, Lock, Share2, Download, Loader2, Check } from 'lucide-react';
-import type { LiguillaBracketDetail, LiguillaTeam } from '../../types';
+import type { LiguillaBracketDetail, LiguillaRound, LiguillaTeam } from '../../types';
+import { roundTitleOf } from './GenericBracketRounds';
 import { shareElementAsImage, downloadElementAsImage } from '../../utils/shareImageUtils';
 
 interface PickemPassModalProps {
   bracket: LiguillaBracketDetail;
   teams: Record<number, LiguillaTeam>;
+  /** Rondas del formato genérico (NHL/NFL/Champions); si se omite, se usa el bracket Liga MX. */
+  rounds?: LiguillaRound[];
   quinielaName?: string;
   onClose: () => void;
 }
@@ -13,6 +16,7 @@ interface PickemPassModalProps {
 export const PickemPassModal: React.FC<PickemPassModalProps> = ({
   bracket,
   teams,
+  rounds,
   quinielaName = 'Quiniela Liga MX',
   onClose,
 }) => {
@@ -21,13 +25,28 @@ export const PickemPassModal: React.FC<PickemPassModalProps> = ({
   const [isDownloading, setIsDownloading] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
 
-  const championTeam = teams[bracket.championTeamId];
-  const sf1Team = teams[bracket.sfWinner1TeamId];
-  const sf2Team = teams[bracket.sfWinner2TeamId];
-  const qf1Team = teams[bracket.qfWinner1TeamId];
-  const qf2Team = teams[bracket.qfWinner2TeamId];
-  const qf3Team = teams[bracket.qfWinner3TeamId];
-  const qf4Team = teams[bracket.qfWinner4TeamId];
+  // Bracket genérico: campeón = último pick, finalistas = penúltima ronda, y la ronda anterior como tercer nivel.
+  const sortedRounds = rounds ? [...rounds].sort((a, b) => a.order - b.order) : undefined;
+  const picksOf = (roundIndex: number): (LiguillaTeam | undefined)[] => {
+    const round = sortedRounds?.[roundIndex];
+    return round ? (bracket.picksByRound?.[round.code] ?? []).map((id) => teams[id]) : [];
+  };
+  const lastIndex = (sortedRounds?.length ?? 0) - 1;
+
+  const championTeam = sortedRounds ? picksOf(lastIndex)[0] : teams[bracket.championTeamId];
+  const finalists: (LiguillaTeam | undefined)[] = sortedRounds
+    ? picksOf(lastIndex - 1)
+    : [teams[bracket.sfWinner1TeamId], teams[bracket.sfWinner2TeamId]];
+  const thirdTier: (LiguillaTeam | undefined)[] = sortedRounds
+    ? picksOf(lastIndex - 2)
+    : [
+        teams[bracket.qfWinner1TeamId],
+        teams[bracket.qfWinner2TeamId],
+        teams[bracket.qfWinner3TeamId],
+        teams[bracket.qfWinner4TeamId],
+      ];
+  const thirdTierTitle = sortedRounds && lastIndex >= 2 ? roundTitleOf(sortedRounds[lastIndex - 2].code).toUpperCase() : 'SEMIFINALISTAS';
+  const passTitle = sortedRounds ? "PICK'EM PLAYOFFS · BRACKET PASS" : "PICK'EM LIGUILLA · BRACKET PASS";
 
   const handleShare = async () => {
     if (!passCardRef.current || isSharing) return;
@@ -85,7 +104,7 @@ export const PickemPassModal: React.FC<PickemPassModalProps> = ({
           <div className="pickem-pass__header">
             <div className="pickem-pass__logo-group">
               <Sparkles size={16} className="pickem-pass__sparkle" />
-              <span className="pickem-pass__badge-text">PICK'EM LIGUILLA · BRACKET PASS</span>
+              <span className="pickem-pass__badge-text">{passTitle}</span>
             </div>
             <span className="pickem-pass__secure-tag">
               <Lock size={12} /> CONFIRMADO
@@ -135,39 +154,31 @@ export const PickemPassModal: React.FC<PickemPassModalProps> = ({
             <div>
               <span className="pickem-pass__stage-title">FINALISTAS</span>
               <div className="pickem-pass__chips">
-                <span className="pickem-pass__chip" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  {sf1Team?.logoUrl ? (
-                    <img
-                      src={sf1Team.logoUrl}
-                      alt={sf1Team.name}
-                      style={{ width: '18px', height: '18px', objectFit: 'contain' }}
-                    />
-                  ) : (
-                    <Shield size={14} />
-                  )}
-                  <span>{sf1Team?.shortName || sf1Team?.name || 'TBD'}</span>
-                </span>
-                <span className="pickem-pass__chip-vs">vs</span>
-                <span className="pickem-pass__chip" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  {sf2Team?.logoUrl ? (
-                    <img
-                      src={sf2Team.logoUrl}
-                      alt={sf2Team.name}
-                      style={{ width: '18px', height: '18px', objectFit: 'contain' }}
-                    />
-                  ) : (
-                    <Shield size={14} />
-                  )}
-                  <span>{sf2Team?.shortName || sf2Team?.name || 'TBD'}</span>
-                </span>
+                {[finalists[0], finalists[1]].map((team, idx) => (
+                  <React.Fragment key={idx}>
+                    {idx === 1 && <span className="pickem-pass__chip-vs">vs</span>}
+                    <span className="pickem-pass__chip" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      {team?.logoUrl ? (
+                        <img
+                          src={team.logoUrl}
+                          alt={team.name}
+                          style={{ width: '18px', height: '18px', objectFit: 'contain' }}
+                        />
+                      ) : (
+                        <Shield size={14} />
+                      )}
+                      <span>{team?.shortName || team?.name || 'TBD'}</span>
+                    </span>
+                  </React.Fragment>
+                ))}
               </div>
             </div>
 
-            {/* Semifinalistas */}
+            {/* Semifinalistas (o la ronda previa a los finalistas en formatos genéricos) */}
             <div>
-              <span className="pickem-pass__stage-title">SEMIFINALISTAS</span>
+              <span className="pickem-pass__stage-title">{thirdTierTitle}</span>
               <div className="pickem-pass__qf-grid">
-                {[qf1Team, qf2Team, qf3Team, qf4Team].map((team, idx) => (
+                {thirdTier.map((team, idx) => (
                   <span
                     key={idx}
                     className="pickem-pass__qf-chip"

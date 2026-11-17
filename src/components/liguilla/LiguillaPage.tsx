@@ -15,8 +15,12 @@ import { FmfReSeedTransition } from './FmfReSeedTransition';
 import { FinalAltar } from './FinalAltar';
 import { PickemPassModal } from './PickemPassModal';
 import { BracketReadOnlyTree } from './BracketReadOnlyTree';
+import { GenericBracketRounds, GenericPicksSummary, roundTitleOf } from './GenericBracketRounds';
+import { useLiguillaGenericBracket } from './useLiguillaGenericBracket';
 import { UserAvatar } from '../common/UserAvatar';
 import './LiguillaPage.css';
+
+const FMF_FORMAT_CODE = 'FMF_LIGUILLA';
 
 export const LiguillaPage: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -61,6 +65,15 @@ export const LiguillaPage: React.FC = () => {
 
   const overview = overviewResponse?.data;
   const userBracket = overview?.userBracket;
+  const isGeneric = Boolean(overview?.formatCode) && overview?.formatCode !== FMF_FORMAT_CODE;
+  const generic = useLiguillaGenericBracket(activeQuinielaId ?? undefined, overview);
+
+  const handleSubmitGeneric = async () => {
+    if (await generic.submit()) {
+      refetchOverview();
+      setShowPassModal(true);
+    }
+  };
   const isBracketLocked = Boolean(userBracket?.isLocked || userBracket);
 
   // Mapa rápido de ID -> Equipo
@@ -180,7 +193,9 @@ export const LiguillaPage: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Eye size={18} />
             <span>
-              <strong>Panel Admin:</strong> {isAdminPreview ? 'El torneo va en torneo regular.' : 'Modo de prueba activo.'} Puedes sembrar los primeros 8 lugares de la tabla de Liga MX para QA.
+              <strong>Panel Admin:</strong> {isAdminPreview ? 'El torneo va en torneo regular.' : 'Modo de prueba activo.'} {isGeneric
+                ? 'Puedes sembrar el campo con la tabla de posiciones de hoy para QA.'
+                : 'Puedes sembrar los primeros 8 lugares de la tabla de Liga MX para QA.'}
             </span>
           </div>
           <button
@@ -198,7 +213,11 @@ export const LiguillaPage: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            {seeding ? 'Sembrando...' : '⚡ Sembrar Top 8 de Liga MX (Simulación)'}
+            {seeding
+              ? 'Sembrando...'
+              : isGeneric
+              ? 'Sembrar campo de hoy (Simulación)'
+              : '⚡ Sembrar Top 8 de Liga MX (Simulación)'}
           </button>
         </div>
       )}
@@ -271,11 +290,15 @@ export const LiguillaPage: React.FC = () => {
           {/* Si ya está bloqueado / en progreso, mostrar el árbol de lectura */}
           {overview?.status === 'LOCKED_IN_PROGRESS' || overview?.status === 'FINISHED' ? (
             userBracket ? (
-              <BracketReadOnlyTree
-                bracket={userBracket}
-                teams={teamMap}
-                nodes={overview.nodes}
-              />
+              isGeneric ? (
+                <GenericPicksSummary bracket={generic} />
+              ) : (
+                <BracketReadOnlyTree
+                  bracket={userBracket}
+                  teams={teamMap}
+                  nodes={overview.nodes}
+                />
+              )
             ) : (
               <div className="liguilla-status-card">
                 <Lock size={36} className="text-slate-500 mb-2" />
@@ -285,6 +308,36 @@ export const LiguillaPage: React.FC = () => {
                 </p>
               </div>
             )
+          ) : isGeneric ? (
+            /* Modo interactivo genérico (NHL / NFL / Champions) */
+            <>
+              <GenericBracketRounds formatCode={overview?.formatCode} nodes={overview?.nodes ?? []} bracket={generic} />
+
+              {generic.errorMessage && (
+                <div className="p-3 bg-red-900/30 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-2 mb-4">
+                  <AlertCircle size={16} />
+                  <span>{generic.errorMessage}</span>
+                </div>
+              )}
+
+              {!generic.isLocked && (
+                <div className="liguilla-submit-bar">
+                  <button
+                    type="button"
+                    disabled={!generic.isComplete || generic.submitting}
+                    onClick={handleSubmitGeneric}
+                    className="liguilla-submit-btn"
+                  >
+                    <Lock size={18} />
+                    {generic.submitting
+                      ? 'Confirmando Pronóstico...'
+                      : generic.isComplete
+                      ? 'Confirmar Mi Pronóstico'
+                      : 'Completa tu Árbol para Confirmar'}
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             /* Modo Interactivo Arena Clash */
             <>
@@ -356,9 +409,17 @@ export const LiguillaPage: React.FC = () => {
               <tr>
                 <th style={{ width: '40px' }}>#</th>
                 <th>Participante</th>
-                <th style={{ textAlign: 'center' }}>QF</th>
-                <th style={{ textAlign: 'center' }}>SF</th>
-                <th style={{ textAlign: 'center' }}>Final</th>
+                {isGeneric ? (
+                  generic.rounds.map((round) => (
+                    <th key={round.code} style={{ textAlign: 'center' }}>{roundTitleOf(round.code)}</th>
+                  ))
+                ) : (
+                  <>
+                    <th style={{ textAlign: 'center' }}>QF</th>
+                    <th style={{ textAlign: 'center' }}>SF</th>
+                    <th style={{ textAlign: 'center' }}>Final</th>
+                  </>
+                )}
                 <th>Total</th>
               </tr>
             </thead>
@@ -388,11 +449,21 @@ export const LiguillaPage: React.FC = () => {
                         <span className="liguilla-user-alias">{item.alias}</span>
                       </div>
                     </td>
-                    <td style={{ textAlign: 'center', color: '#94a3b8' }}>{item.qfPoints}</td>
-                    <td style={{ textAlign: 'center', color: '#94a3b8' }}>{item.sfPoints}</td>
-                    <td style={{ textAlign: 'center', color: '#94a3b8' }}>
-                      {item.championPoints + item.bonusPoints}
-                    </td>
+                    {isGeneric ? (
+                      generic.rounds.map((round) => (
+                        <td key={round.code} style={{ textAlign: 'center', color: '#94a3b8' }}>
+                          {item.pointsByRound?.[round.code] ?? 0}
+                        </td>
+                      ))
+                    ) : (
+                      <>
+                        <td style={{ textAlign: 'center', color: '#94a3b8' }}>{item.qfPoints}</td>
+                        <td style={{ textAlign: 'center', color: '#94a3b8' }}>{item.sfPoints}</td>
+                        <td style={{ textAlign: 'center', color: '#94a3b8' }}>
+                          {item.championPoints + item.bonusPoints}
+                        </td>
+                      </>
+                    )}
                     <td>
                       <span className="liguilla-pts-total">{item.totalPoints} pts</span>
                     </td>
@@ -408,7 +479,8 @@ export const LiguillaPage: React.FC = () => {
       {showPassModal && userBracket && (
         <PickemPassModal
           bracket={userBracket}
-          teams={teamMap}
+          teams={isGeneric ? generic.teamMap : teamMap}
+          rounds={isGeneric ? generic.rounds : undefined}
           quinielaName={activeQuiniela?.name}
           onClose={() => setShowPassModal(false)}
         />

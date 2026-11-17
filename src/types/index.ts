@@ -782,9 +782,17 @@ export interface LiguillaTeam {
   seed: number;
 }
 
+export interface LiguillaRound {
+  code: string;
+  order: number;
+  winnersToPick: number;
+  pointsPerHit: number;
+  nodeCount: number;
+}
+
 export interface LiguillaNode {
   id: number;
-  round: 'QF' | 'SF' | 'FINAL';
+  round: string;
   nodeNumber: number;
   teamA?: LiguillaTeam;
   teamB?: LiguillaTeam;
@@ -802,6 +810,10 @@ export interface SubmitLiguillaBracketRequest {
   sfWinner1TeamId: number;
   sfWinner2TeamId: number;
   championTeamId: number;
+}
+
+export interface SubmitLiguillaPicksRequest {
+  picksByRound: Record<string, number[]>;
 }
 
 export interface LiguillaBracketDetail {
@@ -825,10 +837,14 @@ export interface LiguillaBracketDetail {
   championPoints: number;
   bonusPoints: number;
   shatteredTeamIds: number[];
+  picksByRound: Record<string, number[]>;
+  pointsByRound: Record<string, number>;
 }
 
 export interface LiguillaOverview {
   isAvailable: boolean;
+  formatCode?: string | null;
+  rounds: LiguillaRound[];
   status: 'HIDDEN' | 'ADMIN_PREVIEW_HIDDEN' | 'WAITING_PLAY_IN' | 'OPEN_FOR_PICKS' | 'LOCKED_IN_PROGRESS' | 'FINISHED';
   lockDeadlineUtc?: string;
   qualifiedTeams: LiguillaTeam[];
@@ -848,6 +864,7 @@ export interface LiguillaStandingItem {
   bonusPoints: number;
   championPickedCorrectly: boolean;
   submittedAtUtc?: string;
+  pointsByRound: Record<string, number>;
 }
 
 export interface LiguillaStandings {

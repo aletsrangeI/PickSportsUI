@@ -57,6 +57,7 @@ import type {
   LiguillaOverview,
   LiguillaBracketDetail,
   SubmitLiguillaBracketRequest,
+  SubmitLiguillaPicksRequest,
   LiguillaStandings,
   Challenge,
   ChallengeParticipant,
@@ -784,6 +785,18 @@ export const api = createApi({
         { type: 'Liguilla', id: `STANDINGS_${quinielaId}` },
       ],
     }),
+    submitLiguillaPicks: builder.mutation<ApiResponse<LiguillaBracketDetail>, { quinielaId: number; data: SubmitLiguillaPicksRequest }>({
+      query: ({ quinielaId, data }) => ({
+        url: `/quinielas/${quinielaId}/liguilla/picks`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { quinielaId }) => [
+        { type: 'Liguilla', id: `OVERVIEW_${quinielaId}` },
+        { type: 'Liguilla', id: `BRACKET_${quinielaId}` },
+        { type: 'Liguilla', id: `STANDINGS_${quinielaId}` },
+      ],
+    }),
     getLiguillaStandings: builder.query<ApiResponse<LiguillaStandings>, number>({
       query: (quinielaId) => `/quinielas/${quinielaId}/liguilla/standings`,
       providesTags: (_result, _error, quinielaId) => [{ type: 'Liguilla', id: `STANDINGS_${quinielaId}` }],
@@ -1001,6 +1014,7 @@ export const {
   useGetLiguillaOverviewQuery,
   useGetMyLiguillaBracketQuery,
   useSubmitLiguillaBracketMutation,
+  useSubmitLiguillaPicksMutation,
   useGetLiguillaStandingsQuery,
   useSeedSimulationLiguillaMutation,
   // SPEC-022 Retos y Apuestas Sociales
