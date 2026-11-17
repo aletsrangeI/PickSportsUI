@@ -1094,6 +1094,17 @@ export interface HallOfFameEntryDto {
   /** Récord G-E-P, p. ej. "12-3-2". */
   record: string;
   points: number;
+  /** Aciertos totales de la temporada (tabla general). */
+  totalHits: number;
+  /** Aciertos en partidos sorpresa de la temporada. */
+  totalUpsets: number;
+  /** Duelos ganados por Ventaja del Retador. */
+  advantageWins: number;
+  /** Racha más larga de duelos ganados consecutivos. */
+  bestWinStreak: number;
+  /** Mayor número de aciertos en una fecha de duelo (0 si no hubo). */
+  bestDuelHits: number;
+  bestDuelWeekNumber?: number | null;
   cupName?: string | null;
   punishmentText?: string | null;
   title: string;

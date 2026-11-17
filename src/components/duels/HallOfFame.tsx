@@ -6,9 +6,12 @@ import { CupEditor } from './CupEditor';
 import './HallOfFame.css';
 
 /** Salón de la Fama: una carta TOTY por campeón de duelos. */
-export const HallOfFame: React.FC = () => {
+export const HallOfFame: React.FC<{ hideWhenEmpty?: boolean }> = ({ hideWhenEmpty = false }) => {
   const { data, isLoading, isError } = useGetHallOfFameQuery();
   const entries = data?.data ?? [];
+
+  // En Premios solo se muestra cuando ya hay campeón (no estorba con el mensaje vacío).
+  if (hideWhenEmpty && (isLoading || isError || entries.length === 0)) return null;
 
   return (
     <section className="hall-of-fame" aria-labelledby="hall-of-fame-heading">

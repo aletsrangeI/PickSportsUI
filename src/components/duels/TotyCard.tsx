@@ -50,6 +50,34 @@ export const TotyCard: React.FC<TotyCardProps> = ({ entry }) => {
           </div>
         </dl>
 
+        <dl className="toty-card__extras">
+          <div className="toty-card__extra">
+            <dt>Aciertos</dt>
+            <dd>{entry.totalHits}</dd>
+          </div>
+          <div className="toty-card__extra">
+            <dt>Sorpresas</dt>
+            <dd>{entry.totalUpsets}</dd>
+          </div>
+          <div className="toty-card__extra">
+            <dt>Racha</dt>
+            <dd>{entry.bestWinStreak}</dd>
+          </div>
+          <div className="toty-card__extra">
+            <dt>Ventajas</dt>
+            <dd>{entry.advantageWins}</dd>
+          </div>
+          {entry.bestDuelHits > 0 && (
+            <div className="toty-card__extra toty-card__extra--wide">
+              <dt>Mejor fecha</dt>
+              <dd>
+                {entry.bestDuelHits} aciertos
+                {entry.bestDuelWeekNumber ? ` · F${entry.bestDuelWeekNumber}` : ''}
+              </dd>
+            </div>
+          )}
+        </dl>
+
         <footer className="toty-card__footer">
           <span className="toty-card__quiniela">{entry.quinielaName}</span>
           {entry.seasonName && <span className="toty-card__season">{entry.seasonName}</span>}

@@ -31,6 +31,7 @@ import { ChallengeCard } from '../../components/challenges/ChallengeCard';
 import { CreateChallengeModal } from '../../components/challenges/CreateChallengeModal';
 import { RespondChallengeModal } from '../../components/challenges/RespondChallengeModal';
 import { DuelsTab } from '../../components/duels/DuelsTab';
+import { HallOfFame } from '../../components/duels/HallOfFame';
 import type { Challenge } from '../../types';
 import '../Awards/AwardsPage.css';
 import './StandingsPage.css';
@@ -766,6 +767,9 @@ export const StandingsPage: React.FC = () => {
       {/* VISTA 2: PREMIOS Y GALARDONES */}
       {mainTab === 'awards' && (
         <div className="standings-page__awards-container">
+          {/* Salón de la Fama (SPEC-013 Etapa 2): arriba, y solo cuando ya hay campeón */}
+          {activeQuiniela?.gamificationEnabled && <HallOfFame hideWhenEmpty />}
+
           {loadingAwards ? (
             <div className="awards-page__loading">
               <RefreshCw size={28} className="standings-page__spin" />

@@ -175,6 +175,46 @@
   color: var(--toty-gold-light);
 }
 
+.toty-card__extras {
+  width: 100%;
+  margin: 0;
+  padding: 8px 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px 4px;
+  border-bottom: 1px solid rgba(232, 192, 102, 0.35);
+}
+
+.toty-card__extra {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.toty-card__extra--wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8px;
+}
+
+.toty-card__extra dt {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--toty-gold-deep);
+}
+
+.toty-card__extra dd {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--toty-gold-light);
+}
+
 .toty-card__footer {
   margin-top: auto;
   display: flex;
