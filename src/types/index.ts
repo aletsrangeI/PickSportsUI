@@ -794,6 +794,7 @@ export interface LiguillaNode {
   id: number;
   round: string;
   nodeNumber: number;
+  conference?: string | null;
   teamA?: LiguillaTeam;
   teamB?: LiguillaTeam;
   winnerTeam?: LiguillaTeam;

@@ -250,7 +250,7 @@ interface GenericBracketRoundsProps {
 }
 
 export const GenericBracketRounds: React.FC<GenericBracketRoundsProps> = ({ formatCode, nodes, bracket }) => {
-  const { rounds, picksByRound, eligibleByRound, isLocked, selectWinner } = bracket;
+  const { rounds, picksByRound, groupsByRound, replacesOnFull, isLocked, selectWinner } = bracket;
   const formatSubtitle = formatSubtitleOf(formatCode);
   const lastIndex = rounds.length - 1;
 
@@ -260,16 +260,14 @@ export const GenericBracketRounds: React.FC<GenericBracketRoundsProps> = ({ form
 
       {rounds.map((round, index) => {
         const selectedIds = picksByRound[round.code] ?? [];
-        const eligible = eligibleByRound[round.code] ?? [];
+        const groups = groupsByRound[round.code] ?? [];
         const isFirst = index === 0;
         const isAltar = index === lastIndex && !isFirst;
-        const isFull = selectedIds.length >= round.winnersToPick;
         const byeIds = new Set(
           nodes
             .filter((n) => n.round === round.code && n.teamA && !n.teamB)
             .map((n) => (n.teamA as LiguillaTeam).teamId)
         );
-        const roundNodes = nodes.filter((n) => n.round === round.code);
         const title = isAltar ? 'El Altar del Campeón' : roundTitleOf(round.code);
 
         return (
@@ -292,30 +290,42 @@ export const GenericBracketRounds: React.FC<GenericBracketRoundsProps> = ({ form
               </p>
             </header>
 
-            {isFirst ? (
-              <div className="generic-bracket__grid">
-                {roundNodes.map((node) => (
-                  <FirstRoundCard
-                    key={node.id}
-                    node={node}
-                    round={round}
+            {groups.map((group) => (
+              <div key={group.key} className="generic-bracket__group">
+                {group.label && (
+                  <div className="generic-bracket__group-header">
+                    <span className="generic-bracket__group-label">{group.label}</span>
+                    <span className="generic-bracket__group-counter">
+                      {group.selectedIds.length}/{group.quota}
+                    </span>
+                  </div>
+                )}
+                {isFirst ? (
+                  <div className="generic-bracket__grid">
+                    {group.nodes.map((node) => (
+                      <FirstRoundCard
+                        key={node.id}
+                        node={node}
+                        round={round}
+                        selectedIds={selectedIds}
+                        isReadOnly={isLocked}
+                        onSelect={selectWinner}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <CandidateGrid
+                    roundCode={round.code}
+                    teams={group.teams}
                     selectedIds={selectedIds}
+                    isFull={!replacesOnFull && group.selectedIds.length >= group.quota}
                     isReadOnly={isLocked}
+                    byeIds={byeIds}
                     onSelect={selectWinner}
                   />
-                ))}
+                )}
               </div>
-            ) : (
-              <CandidateGrid
-                roundCode={round.code}
-                teams={eligible}
-                selectedIds={selectedIds}
-                isFull={isFull}
-                isReadOnly={isLocked}
-                byeIds={byeIds}
-                onSelect={selectWinner}
-              />
-            )}
+            ))}
           </section>
         );
       })}

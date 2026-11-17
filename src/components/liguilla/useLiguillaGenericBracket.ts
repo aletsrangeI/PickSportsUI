@@ -27,9 +27,37 @@ const uniqueById = (teams: LiguillaTeam[]): LiguillaTeam[] => {
   return teams.filter((t) => (seen.has(t.teamId) ? false : (seen.add(t.teamId), true)));
 };
 
+const NHL_FORMAT = 'NHL_BEST_OF_7';
+const NFL_FORMAT = 'NFL_RESEEDED_SINGLE_GAME';
+const ALL_GROUP = 'ALL';
+
+/** Grupo de una ronda (conferencia o llave) con su cupo de ganadores. */
+export interface BracketGroup {
+  key: string;
+  label: string;
+  quota: number;
+  teams: LiguillaTeam[];
+  selectedIds: number[];
+  /** Cruces del grupo (solo en la primera ronda). */
+  nodes: LiguillaNode[];
+}
+
+interface GroupDef {
+  key: string;
+  label: string;
+  quota: number;
+}
+
+const conferenceLabel = (raw: string): string => {
+  const value = raw.trim();
+  if (/^(east|este)/i.test(value)) return 'Este';
+  if (/^(west|oeste)/i.test(value)) return 'Oeste';
+  return value.toUpperCase();
+};
+
 /**
  * Hook del bracket genérico (NHL / NFL / Champions): estado de picks por ronda,
- * equipos elegibles, validación de completitud y envío.
+ * equipos elegibles, cupos por conferencia/llave, validación de completitud y envío.
  */
 export function useLiguillaGenericBracket(quinielaId: number | undefined, overview: LiguillaOverview | undefined) {
   const [submitPicks, { isLoading: submitting }] = useSubmitLiguillaPicksMutation();
@@ -47,6 +75,76 @@ export function useLiguillaGenericBracket(quinielaId: number | undefined, overvi
     if (n.teamA) teamMap[n.teamA.teamId] = n.teamA;
     if (n.teamB) teamMap[n.teamB.teamId] = n.teamB;
   }
+
+  const isNhl = overview?.formatCode === NHL_FORMAT;
+  const hasGroupRules = isNhl || overview?.formatCode === NFL_FORMAT;
+  const lastIndex = rounds.length - 1;
+  const firstCode = rounds[0]?.code;
+  const firstRoundNodes = nodes.filter((n) => n.round === firstCode);
+
+  const nodeConference = (n: LiguillaNode): string => {
+    if (n.conference) return conferenceLabel(n.conference);
+    if (isNhl) return n.nodeNumber <= firstRoundNodes.length / 2 ? 'Este' : 'Oeste';
+    return '';
+  };
+
+  // Nodo de R1 (NHL) y conferencia de cada equipo, según donde aparece.
+  const r1NodeOf: Record<number, number> = {};
+  const conferenceOf: Record<number, string> = {};
+  if (hasGroupRules) {
+    for (const n of nodes) {
+      if (isNhl && n.round !== firstCode) continue;
+      for (const t of [n.teamA, n.teamB]) {
+        if (!t) continue;
+        r1NodeOf[t.teamId] = n.nodeNumber;
+        conferenceOf[t.teamId] = nodeConference(n);
+      }
+    }
+  }
+
+  const groupKeyOf = (roundIndex: number, teamId: number): string => {
+    if (!hasGroupRules) return ALL_GROUP;
+    if (isNhl) {
+      if (roundIndex === 0) return conferenceOf[teamId] ?? '';
+      return String(Math.ceil((r1NodeOf[teamId] ?? 0) / 2 ** roundIndex));
+    }
+    return roundIndex === lastIndex && roundIndex > 0 ? ALL_GROUP : (conferenceOf[teamId] ?? '');
+  };
+
+  const groupDefs = (roundIndex: number): GroupDef[] => {
+    const round = rounds[roundIndex];
+    if (!hasGroupRules) return [{ key: ALL_GROUP, label: '', quota: round.winnersToPick }];
+
+    const conferences: GroupDef[] = [];
+    for (const n of firstRoundNodes) {
+      const c = nodeConference(n);
+      const found = conferences.find((d) => d.key === c);
+      if (found) found.quota += 1;
+      else conferences.push({ key: c, label: c, quota: 1 });
+    }
+    if (roundIndex === 0) return conferences;
+
+    if (isNhl) {
+      const count = Math.max(1, Math.floor(firstRoundNodes.length / 2 ** roundIndex));
+      const half = count / 2;
+      return Array.from({ length: count }, (_, k) => {
+        const g = k + 1;
+        let label = '';
+        if (count === 2) label = g === 1 ? 'Este' : 'Oeste';
+        else if (count > 2) label = `${g <= half ? 'Este' : 'Oeste'} · Llave ${((g - 1) % half) + 1}`;
+        return { key: String(g), label, quota: Math.max(1, Math.round(round.winnersToPick / count)) };
+      });
+    }
+
+    if (roundIndex === lastIndex || conferences.length === 0) {
+      return [{ key: ALL_GROUP, label: '', quota: round.winnersToPick }];
+    }
+    return conferences.map((c) => ({
+      key: c.key,
+      label: c.label,
+      quota: Math.max(1, Math.round(round.winnersToPick / conferences.length)),
+    }));
+  };
 
   const eligibleFor = (roundIndex: number, picks: PicksByRound): LiguillaTeam[] => {
     const round = rounds[roundIndex];
@@ -98,6 +196,14 @@ export function useLiguillaGenericBracket(quinielaId: number | undefined, overvi
         .filter((n) => n.round === roundCode && (n.teamA?.teamId === teamId || n.teamB?.teamId === teamId))
         .flatMap((n) => [n.teamA?.teamId, n.teamB?.teamId]);
       next = [...current.filter((id) => !rivalIds.includes(id)), teamId];
+    } else if (hasGroupRules) {
+      // Cupo por conferencia/llave: al exceder el cupo se desplaza al pick más antiguo del grupo.
+      const key = groupKeyOf(roundIndex, teamId);
+      const quota = groupDefs(roundIndex).find((d) => d.key === key)?.quota ?? 0;
+      if (quota === 0) return;
+      const inGroup = current.filter((id) => groupKeyOf(roundIndex, id) === key);
+      const oldest = inGroup.length >= quota ? inGroup[0] : undefined;
+      next = [...current.filter((id) => id !== oldest), teamId];
     } else if (current.length >= round.winnersToPick) {
       return;
     } else {
@@ -107,8 +213,27 @@ export function useLiguillaGenericBracket(quinielaId: number | undefined, overvi
     setLocalPicks(prune({ ...picksByRound, [roundCode]: next }));
   };
 
+  const groupsByRound: Record<string, BracketGroup[]> = {};
+  rounds.forEach((round, index) => {
+    const picks = picksByRound[round.code] ?? [];
+    groupsByRound[round.code] = groupDefs(index).map((def) => ({
+      ...def,
+      teams: (eligibleByRound[round.code] ?? []).filter((t) => groupKeyOf(index, t.teamId) === def.key),
+      selectedIds: picks.filter((id) => groupKeyOf(index, id) === def.key),
+      nodes:
+        index === 0
+          ? firstRoundNodes.filter((n) => !hasGroupRules || nodeConference(n) === def.key)
+          : [],
+    }));
+  });
+
   const isComplete =
-    rounds.length > 0 && rounds.every((r) => (picksByRound[r.code] ?? []).length === r.winnersToPick);
+    rounds.length > 0 &&
+    rounds.every(
+      (r) =>
+        (picksByRound[r.code] ?? []).length === r.winnersToPick &&
+        (groupsByRound[r.code] ?? []).every((g) => g.selectedIds.length === g.quota)
+    );
 
   const submit = async (): Promise<boolean> => {
     if (isLocked || !isComplete || !quinielaId) return false;
@@ -131,6 +256,8 @@ export function useLiguillaGenericBracket(quinielaId: number | undefined, overvi
     teamMap,
     picksByRound,
     eligibleByRound,
+    groupsByRound,
+    replacesOnFull: hasGroupRules,
     isLocked,
     isComplete,
     submitting,

@@ -188,7 +188,8 @@ export const LiguillaPage: React.FC = () => {
   return (
     <div className="liguilla-page">
       {/* Banner de Admin Preview / Simulación */}
-      {isAdmin && (
+      {/* El botón de simulación solo existe en desarrollo; no se incluye en el build de producción. */}
+      {import.meta.env.DEV && isAdmin && (
         <div className="liguilla-admin-banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Eye size={18} />
@@ -217,7 +218,7 @@ export const LiguillaPage: React.FC = () => {
               ? 'Sembrando...'
               : isGeneric
               ? 'Sembrar campo de hoy (Simulación)'
-              : '⚡ Sembrar Top 8 de Liga MX (Simulación)'}
+              : 'Sembrar Top 8 de Liga MX (Simulación)'}
           </button>
         </div>
       )}
