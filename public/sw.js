@@ -75,11 +75,13 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Si la app ya está abierta en una pestaña, enfocarla y navegar
+      // Si la app ya está abierta, enfocarla y pedirle que navegue con su router.
+      // No usar client.navigate(): recarga la página y puede matar un POST /auth/refresh
+      // en vuelo (el servidor ya rotó el token, el cliente nunca lo guarda → logout).
       for (const client of clientList) {
         if ('focus' in client) {
           if (client.url.includes(self.location.origin)) {
-            client.navigate(targetUrl);
+            client.postMessage({ type: 'NOTIFICATION_NAVIGATE', url: targetUrl });
             return client.focus();
           }
         }
