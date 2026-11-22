@@ -249,19 +249,19 @@ export const LiguillaPage: React.FC = () => {
         </button>
       </div>
 
-      {/* Vista de Espera Play-In */}
-      {overview?.status === 'WAITING_PLAY_IN' && activeTab === 'bracket' && (
+      {/* Vista de espera de los 8 clasificados */}
+      {overview?.status === 'WAITING_FIELD' && activeTab === 'bracket' && (
         <div className="liguilla-status-card">
           <Clock size={40} className="liguilla-status-card__icon" />
-          <h3 className="liguilla-status-card__title">Play-In en Juego</h3>
+          <h3 className="liguilla-status-card__title">Esperando a los 8 clasificados</h3>
           <p className="liguilla-status-card__desc">
-            Los 8 calificados a Cuartos de Final se están definiendo en este momento. En cuanto termine el último partido de Play-In el domingo por la noche, se abrirá el Arena Clash para armar y confirmar tu pronóstico.
+            La fase regular terminó. En cuanto ESPN publique los cruces de Cuartos de Final, se abrirá el Arena Clash para armar y confirmar tu pronóstico.
           </p>
         </div>
       )}
 
       {/* TAB 1: MI BRACKET */}
-      {activeTab === 'bracket' && overview?.status !== 'WAITING_PLAY_IN' && (
+      {activeTab === 'bracket' && overview?.status !== 'WAITING_FIELD' && (
         <>
           {/* Banner de Pronóstico Confirmado (si ya existe) */}
           {userBracket && (

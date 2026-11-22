@@ -846,7 +846,7 @@ export interface LiguillaOverview {
   isAvailable: boolean;
   formatCode?: string | null;
   rounds: LiguillaRound[];
-  status: 'HIDDEN' | 'ADMIN_PREVIEW_HIDDEN' | 'WAITING_PLAY_IN' | 'OPEN_FOR_PICKS' | 'LOCKED_IN_PROGRESS' | 'FINISHED';
+  status: 'HIDDEN' | 'ADMIN_PREVIEW_HIDDEN' | 'WAITING_FIELD' | 'OPEN_FOR_PICKS' | 'LOCKED_IN_PROGRESS' | 'FINISHED';
   lockDeadlineUtc?: string;
   qualifiedTeams: LiguillaTeam[];
   nodes: LiguillaNode[];
